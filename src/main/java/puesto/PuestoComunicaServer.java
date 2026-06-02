@@ -36,13 +36,16 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable{
         return null;
     }
 
-    public void reNotifica(){
+    public boolean reNotifica(){
+        boolean notifica = false;
         try {
             out.writeUTF(RENOTIFICA);
+            notifica = Boolean.parseBoolean(in.readUTF());
         } catch (IOException e) {
             // TODO : INFORMAR AL ADMIN (Server-side)
             e.printStackTrace();
         }
+        return notifica;
     
     }
 

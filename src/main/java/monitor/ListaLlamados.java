@@ -25,4 +25,7 @@ public class ListaLlamados {
         }
     }
 
+    public boolean contieneA(Turno turno){
+        return llamados.contains(turno);
+    }
 }

@@ -35,8 +35,14 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     }
 
     @Override
-    public void eventoRecibeLlamado(Turno turno) {
-
+    public void eventoRecibeLlamado(Turno turno) { // Implementa la logica del monitor para persistirlo, con la salvedad que la vista es la misma que la ultima vez
+        if (monitor.listaContieneA(turno)){       // deberiamos adaptar la vista a la logica persistible, pero consume mucho tiempo.
+            monitor.renotificaTurno(turno);
+        }
+        else{
+            monitor.agregaTurno(turno);
+        }
+        vistaMonitor.registrarLlamado( String.valueOf(turno.getCliente().getDni()) , turno.getIdPuesto());
     }
 
     @Override

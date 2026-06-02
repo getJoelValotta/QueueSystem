@@ -40,17 +40,33 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
                 vistaPuesto.habilitaRenotificar();
                 break;
-            case PuestoGUI.RENOTIFICAR:
-                Turno turnoActual = puesto.getTurno();
+            case PuestoGUI.RENOTIFICAR: // Tomo el turno y consulto si su estado esta en atencion para poder hacer otro llamado, de ser asi mando al sv la peticion y si me da el ok llamo
+                Turno turnoActual = puesto.getTurno();                  // En caso de que la comunicacion falle (devuelva false por algun motivo) se informa a la vista con un mensaje de error que no se envio su peticion.
                 int auxCantLlamados = turnoActual.getCantLlamados();
                 if (turnoActual.estaEnAtencion() & auxCantLlamados < 3)
-                    turnoActual.llamar();
-                    if (auxCantLlamados + 1 == 3)
-                        vistaPuesto.cambiaTextRenotificarAabandonado();
-                else{
-                    turnoActual.llamar();
-                    vistaPuesto.cambiaTextAbandonadoARenotificar();
-                    vistaPuesto.inhabilitaRenotificar();
+                    VistasUtils.ejecutarNoBloqueante(() -> {
+                        if (comunicaServer.reNotifica()){
+                            turnoActual.llamar();
+                            vistaPuesto.setMensajeExito();
+                            if (auxCantLlamados + 1 == 3)
+                                vistaPuesto.cambiaTextRenotificarAabandonado();
+                        }
+                        else{
+                            vistaPuesto.setMensajeError();
+                        }
+                    });
+                else{ // En el caso de que este en el ultimo llamado (3), se cambia el boton de renotificar para marcarlo como abandono.
+                    VistasUtils.ejecutarNoBloqueante(() -> {
+                        if (comunicaServer.reNotifica()){
+                            turnoActual.llamar();
+                            vistaPuesto.setMensajeExito();
+                            vistaPuesto.cambiaTextAbandonadoARenotificar();
+                            vistaPuesto.inhabilitaRenotificar();
+                        }
+                        else{
+                            vistaPuesto.setMensajeError();
+                        }
+                    });
                 }
                 break;
             }

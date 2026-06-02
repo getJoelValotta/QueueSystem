@@ -1,5 +1,7 @@
 package monitor;
 
+import shared.turno.Turno;
+
 public class Monitor{
     private String id;
     private int size;
@@ -14,6 +16,18 @@ public class Monitor{
         this.size = -1;
         this.llamados = null;
     }
+
+    public void agregaTurno(Turno turno){
+        llamados.agregaTurno(turno);
+    }
+
+     public void renotificaTurno(Turno turno){
+        llamados.renotificaTurno(turno);
+     }
+
+    public boolean listaContieneA(Turno turno){
+     return llamados.contieneA(turno);
+    }    
 
     public String getId() {
         return id;
