@@ -3,8 +3,6 @@ package puesto;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-
 import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
@@ -66,7 +64,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void iniciaPuesto(){
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al server la id por primera vez: pue_001
         puesto = new Puesto();
-        puesto.notifyAll(); //ahre me molestaba el warning y puse algo random xdxd
+        vistaConexion.mostrar(); //temporal
         // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el boton renotificar a "Marcar como abandonado"
     }
 

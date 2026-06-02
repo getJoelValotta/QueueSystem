@@ -57,7 +57,7 @@ public class ControllerTotem implements ActionListener, ConexionListener{
         this.totem = new Totem(String.valueOf(idx), null);
         idx = idx+1;
         // si id es null o no hay archivo persistido para el totem, invocar ComunicaServer.solicitaID();
-        vistaConexion.setVisible(true);
+        vistaConexion.mostrar(); //temporal
     }
 
     @Override
