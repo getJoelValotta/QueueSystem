@@ -19,6 +19,7 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     public ControllerMonitor(ConexionGUI vistaConexion, MonitorGUI vistaMonitor, MonitorEscuchaServer escuchaServer) {
         this.vistaConexion = vistaConexion;
         this.vistaMonitor = vistaMonitor;
+        this.vistaConexion.setActionListener(this);
         this.escuchaServer = escuchaServer;
     }
 
@@ -31,7 +32,7 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
 
     public void iniciaMonitor(){
         monitor = new Monitor();
-        vistaMonitor.mostrar();
+        vistaConexion.mostrar();
     }
 
     @Override
