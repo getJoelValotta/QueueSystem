@@ -16,6 +16,7 @@ public class TotemApp {
         TotemComunicaServer comunicaServer = new TotemComunicaServer();
         ControllerTotem controladorTotem = new ControllerTotem(vistaConexion, vistaTotem, comunicaServer);
         comunicaServer.setEscuchadorDeNodoFisico(controladorTotem);
+        comunicaServer.setEscuchadorDeEventos(controladorTotem);
         controladorTotem.iniciaTotem();
     }
 }

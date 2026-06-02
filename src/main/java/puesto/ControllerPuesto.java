@@ -80,10 +80,4 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         new Thread(comunicaServer).start();
     }
 
-    // No hay Validacion de datos, por lo que no hago nada con este metodo.
-    @Override
-    public void mensajeError(String mensaje) {
-    }
-
-
 }

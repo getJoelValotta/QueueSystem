@@ -11,7 +11,7 @@ import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 
-public class ControllerTotem implements ActionListener, ConexionListener{
+public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener{
     private ConexionGUI vistaConexion;
     private TotemGUI vistaTotem;
     private Totem totem;
