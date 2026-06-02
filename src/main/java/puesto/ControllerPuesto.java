@@ -9,7 +9,7 @@ import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 
 
-public class ControllerPuesto implements ActionListener, ConexionListener{
+public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener{
     private ConexionGUI vistaConexion;
     private PuestoGUI vistaPuesto;
     private Puesto puesto;
@@ -28,7 +28,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener{
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() ->
-                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM)
+                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO)
                 );
                 break;
             case PuestoGUI.LLAMAR:
@@ -38,8 +38,13 @@ public class ControllerPuesto implements ActionListener, ConexionListener{
             case PuestoGUI.RENOTIFICAR:
                 // Puesto envia el llamado correspondiente
                 break;
+            }
         }
-    }
+        
+        @Override
+        public void eventoCantidadEnEspera(int cantEspera) {
+            vistaPuesto.setCantClientes(cantEspera);
+        }
 
     public void iniciaPuesto(){
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al server la id por primera vez: pue_001
@@ -49,20 +54,20 @@ public class ControllerPuesto implements ActionListener, ConexionListener{
 
     @Override
     public void conexionErronea(String mensaje) {
-        VistasUtils.enEDT(() -> vistaConexion.appendLogError(mensaje));
+        vistaConexion.appendLogError(mensaje);
     }
 
     @Override
     public void conexionExitosa() {
-        VistasUtils.enEDT(() -> {
-            vistaPuesto.setVisible(true);
-            vistaConexion.dispose();
-        });
+        vistaPuesto.mostrar();
+        vistaConexion.cerrar();
+        new Thread(comunicaServer).start();
     }
 
     // No hay Validacion de datos, por lo que no hago nada con este metodo.
     @Override
     public void mensajeError(String mensaje) {
     }
+
 
 }

@@ -2,6 +2,9 @@ package shared.conexion_server;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import shared.VistasUtils;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
  
@@ -62,6 +65,14 @@ public class ConexionGUI extends JFrame {
         panelPrincipal.add(panelBoton, BorderLayout.SOUTH);
     }
  
+    public void mostrar(){
+        VistasUtils.enEDT(() -> this.setVisible(true));
+    }
+
+    public void cerrar(){
+        VistasUtils.enEDT(() -> this.dispose());
+    }
+
     // ── Getters para el controlador ──
  
     public String getIP() {
@@ -75,14 +86,14 @@ public class ConexionGUI extends JFrame {
     // ── Métodos para actualizar el log ──
  
     public void appendLog(String mensaje) {
-        SwingUtilities.invokeLater(() -> {
+        VistasUtils.enEDT(() -> {
             areaLog.append(mensaje + "\n");
             areaLog.setCaretPosition(areaLog.getDocument().getLength());
         });
     }
  
     public void appendLogError(String mensaje) {
-        SwingUtilities.invokeLater(() -> {
+        VistasUtils.enEDT(() -> {
             areaLog.append("[ERROR] " + mensaje + "\n");
             areaLog.setCaretPosition(areaLog.getDocument().getLength());
         });

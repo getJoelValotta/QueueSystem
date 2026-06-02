@@ -11,6 +11,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import shared.VistasUtils;
+
 
 public class PuestoGUI extends JFrame {
 
@@ -74,10 +76,17 @@ public class PuestoGUI extends JFrame {
 
 
 	}
+
+    public void mostrar(){
+        VistasUtils.enEDT(() -> this.setVisible(true));
+    }
+
+    public void cerrar(){
+        VistasUtils.enEDT(() -> this.dispose());
+    }
 	
 	public void setCantClientes(int clientes) {
-		this.lblCantClientesEspera.setText("Hay "+ clientes +" en cola");
-
+        VistasUtils.enEDT(() -> this.lblCantClientesEspera.setText("Hay "+ clientes +" en cola"));
 	}
 	
 	public void inhabilitarBtn() { //para cuando no haya clientes en cola

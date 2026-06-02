@@ -60,21 +60,18 @@ public class ControllerTotem implements ActionListener, ConexionListener{
 
     @Override
     public void conexionErronea(String mensaje) {
-        VistasUtils.enEDT(() -> vistaConexion.appendLogError(mensaje));
+        vistaConexion.appendLogError(mensaje);
     }
 
     @Override
     public void conexionExitosa() {
-        VistasUtils.enEDT(() -> {
-            vistaTotem.setVisible(true);
-            vistaConexion.dispose();
-        });
+        vistaTotem.mostrar();
+        vistaConexion.cerrar();
     }
 
     @Override
     public void mensajeError(String mensaje) {
         VistasUtils.enEDT(() -> vistaTotem.setGuiaError(mensaje));
     }
-
 
 }

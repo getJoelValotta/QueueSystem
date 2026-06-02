@@ -18,6 +18,8 @@ import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
+
+import shared.VistasUtils;
  
 public class TotemGUI extends JFrame {
  
@@ -87,6 +89,8 @@ public class TotemGUI extends JFrame {
             }
         });
  
+
+        
         // ── Habilitar / deshabilitar botón según longitud (7 u 8 dígitos) ──
         this.campoDNI.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e)  { actualizarBoton(); }
@@ -109,6 +113,14 @@ public class TotemGUI extends JFrame {
         this.panelAuxBtnRegistrar.add(this.btnRegistrar);
     }
  
+    public void mostrar(){
+        VistasUtils.enEDT(() -> this.setVisible(true));
+    }
+
+    public void cerrar(){
+        VistasUtils.enEDT(() -> this.dispose());
+    }
+
     // ── Métodos de estado del label guía ──
  
     public void setGuiaInvis() {
@@ -123,17 +135,21 @@ public class TotemGUI extends JFrame {
     }
  
     public void setGuiaError(String guia) {
-        this.labelGuia.setVisible(true);
-        this.labelGuia.setText(guia);
-        this.labelGuia.setForeground(Color.RED);
-        setGuiaInvis();
+        VistasUtils.enEDT(() -> {
+            this.labelGuia.setVisible(true);
+            this.labelGuia.setText(guia);
+            this.labelGuia.setForeground(Color.RED);
+            setGuiaInvis();
+        });
     }
  
     public void setGuiaExito(String guia) {
-        this.labelGuia.setVisible(true);
-        this.labelGuia.setText(guia);
-        this.labelGuia.setForeground(new Color(0, 150, 80));
-        setGuiaInvis();
+        VistasUtils.enEDT(() -> {
+            this.labelGuia.setVisible(true);
+            this.labelGuia.setText(guia);
+            this.labelGuia.setForeground(new Color(0, 150, 80));
+            setGuiaInvis();
+        });
     }
  
     // ── Listener del botón ──

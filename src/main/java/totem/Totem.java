@@ -11,6 +11,11 @@ public class Totem{
         this.cliente = cliente;
     }
 
+    public Totem(){
+        this.id = null;
+        this.cliente = null;
+    }
+    
     public String getId() {
         return id;
     }
@@ -23,5 +28,8 @@ public class Totem{
         this.cliente = cliente;
     }
 
-    
+    public void setId(String id) {
+        this.id = id;
+    }
+ 
 }
