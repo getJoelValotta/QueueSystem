@@ -10,7 +10,7 @@ import java.net.UnknownHostException;
 public abstract class ComunicaServer{
     private Socket socket;
     private ConexionListener escuchadorDeNodoFisico;
-    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#";
+    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#", ID = "#IDX#";
     protected DataOutputStream out;
     protected DataInputStream in;
 
@@ -35,6 +35,18 @@ public abstract class ComunicaServer{
             escuchadorDeNodoFisico.conexionErronea("Error de protocolo de conexion");
             e.printStackTrace();
         }
+    }
+
+    public String solicitaID(String nodo){
+        String nuevaID = null;
+        try {
+            out.writeUTF(ID);
+            nuevaID = in.readUTF();
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+        return nuevaID;
     }
 
     public Socket getSocket() {

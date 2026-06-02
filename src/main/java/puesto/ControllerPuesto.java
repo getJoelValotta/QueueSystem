@@ -3,10 +3,13 @@ package puesto;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
+
 import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.turno.Turno;
 
 
 public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener{
@@ -31,12 +34,26 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                     comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO)
                 );
                 break;
-            case PuestoGUI.LLAMAR:
+            case PuestoGUI.LLAMAR: //Aca comienza a atender a un cliente y es llamado por primera vez.
                 vistaPuesto.limpiarClienteActual();
-                // Puesto envia el llamado correspondiente
+                VistasUtils.ejecutarNoBloqueante(() ->
+                    puesto.setTurno(comunicaServer.atiendeSiguiente(puesto.getId())
+                ));
+                vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
+                vistaPuesto.habilitaRenotificar();
                 break;
             case PuestoGUI.RENOTIFICAR:
-                // Puesto envia el llamado correspondiente
+                Turno turnoActual = puesto.getTurno();
+                int auxCantLlamados = turnoActual.getCantLlamados();
+                if (turnoActual.estaEnAtencion() & auxCantLlamados < 3)
+                    turnoActual.llamar();
+                    if (auxCantLlamados + 1 == 3)
+                        vistaPuesto.cambiaTextRenotificarAabandonado();
+                else{
+                    turnoActual.llamar();
+                    vistaPuesto.cambiaTextAbandonadoARenotificar();
+                    vistaPuesto.inhabilitaRenotificar();
+                }
                 break;
             }
         }
@@ -50,6 +67,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al server la id por primera vez: pue_001
         puesto = new Puesto();
         puesto.notifyAll(); //ahre me molestaba el warning y puse algo random xdxd
+        // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el boton renotificar a "Marcar como abandonado"
     }
 
     @Override

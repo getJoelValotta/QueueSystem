@@ -11,8 +11,16 @@ public class Turno {
         this.estado = new TurnoEspera(this);
     }
 
+    public Turno(TurnoState estado){
+        this.estado = estado;
+    }
+
     public void llamar(){
         this.estado.llamar();
+    }
+
+    public void atender(String idPuesto){
+        this.estado.atender(idPuesto);
     }
 
     public String getIdPuesto() {

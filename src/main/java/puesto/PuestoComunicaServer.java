@@ -2,22 +2,48 @@ package puesto;
 
 import java.io.IOException;
 
+import shared.cliente.Cliente;
+import shared.cliente.ClienteDniInvalidoException;
+import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
+import shared.turno.Turno;
 
 
 public class PuestoComunicaServer extends ComunicaServer implements Runnable{
+    public static final String ATIENDE = "#SIGUIENTE#", RENOTIFICA = "#ACTUAL#";
     private PuestoEventListener escuchadorDeEventos;
 
     public void setEscuchadorDeEventos(PuestoEventListener escuchadorDeEventos) {
         this.escuchadorDeEventos = escuchadorDeEventos;
     }
 
-    public void atiendeSiguiente(){
-
+    public Turno atiendeSiguiente(String idPuesto){
+        Turno turnoEnAtencion;
+        Cliente cliente;
+        try {
+            out.writeUTF(ATIENDE);
+            cliente = new Cliente(in.readUTF()); // TODO : desencriptar
+            turnoEnAtencion = new Turno();
+            turnoEnAtencion.setCliente(cliente);
+            turnoEnAtencion.atender(idPuesto);
+            return turnoEnAtencion;
+        } catch (IOException e) {
+            // TODO : INFORMAR AL ADMIN (Server-side)
+            e.printStackTrace();
+        } catch (ClienteDniVacioException e) {
+        } catch (ClienteDniInvalidoException e) {
+        }
+        return null;
     }
 
     public void reNotifica(){
-
+        try {
+            out.writeUTF(RENOTIFICA);
+        } catch (IOException e) {
+            // TODO : INFORMAR AL ADMIN (Server-side)
+            e.printStackTrace();
+        }
+    
     }
 
     @Override

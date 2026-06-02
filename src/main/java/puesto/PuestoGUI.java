@@ -94,6 +94,22 @@ public class PuestoGUI extends JFrame {
 		this.btnRenotificar.setEnabled(false);
 	}
 
+	public void cambiaTextRenotificarAabandonado(){
+		this.btnRenotificar.setText("Abandonado");
+	}
+
+	public void cambiaTextAbandonadoARenotificar(){
+		this.btnRenotificar.setText("Re-notificar");
+	}
+
+	public void inhabilitaRenotificar(){
+		this.btnRenotificar.setEnabled(false);
+	}
+
+	public void habilitaRenotificar(){
+		this.btnRenotificar.setEnabled(true);
+	}
+
 	public void setActionListener(ActionListener controlador) {
         btnLlamar.addActionListener(controlador);
 		btnRenotificar.addActionListener(controlador);

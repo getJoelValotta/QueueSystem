@@ -9,11 +9,11 @@ public class TotemComunicaServer extends ComunicaServer{
     public boolean enviarDNI(long dni) {
         boolean validacion = false;
         try {
-            out.writeUTF(String.valueOf(dni));
+            out.writeUTF(String.valueOf(dni)); // TODO : encriptar
             // TODO : Informar al ADMIN (server-side)
             validacion = Boolean.parseBoolean(in.readUTF());
         } catch (IOException e) {
-            getEscuchadorDeNodoFisico().mensajeError("Error de protocolo de conexion");
+            getEscuchadorDeNodoFisico().mensajeError("Error de protocolo de conexion"); // TODO : Manejar retry???
             e.printStackTrace();
         }
     return validacion;
