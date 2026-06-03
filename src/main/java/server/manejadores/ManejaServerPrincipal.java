@@ -28,7 +28,7 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     totem = in.readUTF();
                     puesto = in.readUTF();
                     monitor = in.readUTF();
-                    controllerServer.recibeYPersiste(totem, puesto, monitor);
+                    controllerServer.recibeYPersisteGestor(totem, puesto, monitor);
                     break;
                 case IManejaServidores.TURNO_ESPERA:
                     dni = in.readUTF();

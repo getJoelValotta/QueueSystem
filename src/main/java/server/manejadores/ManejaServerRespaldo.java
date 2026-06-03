@@ -7,7 +7,7 @@ import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
 public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores{
-    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas con los sockets.
+    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
     
     // Los metodos delegan acciones a los servidores debido a que depende si son de Estado Principal o Respaldo.
 
@@ -30,10 +30,10 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
     }
 
     public void comunicaGestor(GestorID gestorID){
+        String bufferContTotem = String.valueOf(gestorID.getContadorTotem());
+        String bufferContPuesto = String.valueOf(gestorID.getContadorPuesto());
+        String bufferContMonitor = String.valueOf(gestorID.getContadorMonitor());
         synchronized (mutex){
-            String bufferContTotem = String.valueOf(gestorID.getContadorTotem());
-            String bufferContPuesto = String.valueOf(gestorID.getContadorPuesto());
-            String bufferContMonitor = String.valueOf(gestorID.getContadorMonitor());
             try {
                 out.writeUTF(IManejaServidores.GESTOR);
                 out.writeUTF(bufferContTotem);
@@ -48,8 +48,8 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
 
     @Override
     public void comunicaTurno(Turno turno, String tipoTurno) {
+        String dni = String.valueOf(turno.getCliente().getDni());
         synchronized (mutex){
-            String dni = String.valueOf(turno.getCliente().getDni());
             try {
                 out.writeUTF(tipoTurno);
                 out.writeUTF(dni);

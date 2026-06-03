@@ -123,7 +123,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     //@Override
-    public void recibeYPersiste(String totem, String puesto, String monitor){
+    public void recibeYPersisteGestor(String totem, String puesto, String monitor){
         int cantTotem = Integer.valueOf(totem);
         int cantPuesto = Integer.valueOf(puesto);
         int cantMonitor = Integer.valueOf(monitor);

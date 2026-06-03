@@ -16,7 +16,6 @@ public class Server implements Runnable{
     private GestorID gestorID;
     private String IP = "localhost";
     private int puerto1 = 1337, puerto2 = 1338;
-    private DataOutputStream out;
     private SocketListener escuchadorDeSockets;
 
     public Server(){
@@ -73,13 +72,13 @@ public class Server implements Runnable{
         try {
             socketEntreServers = new Socket(DNS,puerto1);
             outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream()); // Le notifica al otro servidor que se conecto otro server a él
-            out.writeUTF(SERVER);
+            outConexionInicial.writeUTF(SERVER);
             return socketEntreServers;
         } catch (java.net.ConnectException e) {
             try {
                 socketEntreServers = new Socket(DNS,puerto2);
                 outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream());
-                out.writeUTF(SERVER);
+                outConexionInicial.writeUTF(SERVER);
                 return socketEntreServers;
             } catch (java.net.ConnectException e1) {
                 e1.printStackTrace();
