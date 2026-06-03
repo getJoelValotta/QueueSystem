@@ -25,11 +25,13 @@ public class GestorID {
 
     public synchronized String generarIdPuesto() {
         contadorPuesto++;
+        controllerServer.persisteYEnvia(this);
         return generarId("pue", contadorPuesto);
     }
 
     public synchronized String generarIdMonitor() {
         contadorMonitor++;
+        controllerServer.persisteYEnvia(this);
         return generarId("mon", contadorMonitor);
     }
 

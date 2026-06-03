@@ -1,16 +1,14 @@
 package server;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import server.id.GestorID;
-import shared.conexion_server.ComunicaServer;
 
 public class Server implements Runnable{
-    private static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv principal
+    public static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv principal
     private ListaTurnos enEspera, enAtencion;
     private ServerState estado;
     private ServerSocket socketServer;
@@ -18,7 +16,7 @@ public class Server implements Runnable{
     private String IP = "localhost";
     private int puerto1 = 1337, puerto2 = 1338;
     private DataOutputStream out;
-    private DataInputStream in;
+    private SocketListener escuchadorDeSockets;
 
     public Server(){
         socketServer = null;
@@ -55,11 +53,12 @@ public class Server implements Runnable{
             if (socketEntreServers == null){
                 this.socketServer = new ServerSocket(puerto1);
                 this.setEstado(new ServerPrincipal());
+                new Thread(this).start(); // Si es principal, acepta conexiones a nodos.
             }
             else{
                 this.setEstado(new ServerRespaldo(this, socketEntreServers));
+                // Si es de respaldo, no va a aceptar conexiones de nodos.
             }
-            new Thread(this).start();
         } catch (IOException e) {
             //Error interno de TCP
             e.printStackTrace();
@@ -101,31 +100,7 @@ public class Server implements Runnable{
         try {
             while (!socketServer.isClosed()){
                 socket = socketServer.accept();
-                this.out = new DataOutputStream(socket.getOutputStream());
-                this.in = new DataInputStream(socket.getInputStream());
-                conectado = in.readUTF();
-                solicitud = in.readUTF();
-                switch (conectado){
-                    case ComunicaServer.TOTEM:
-                        if (solicitud.equals(ComunicaServer.ID)){
-
-                        }
-                        break;
-                    case ComunicaServer.PUESTO:
-                        if (solicitud.equals(ComunicaServer.ID)){
-                            
-                        }
-                        break;
-                    case ComunicaServer.MONITOR:
-
-                        break;
-                    case ComunicaServer.ADMIN:
-
-                        break;
-                    case SERVER:
-                        
-                        break;
-                }
+                escuchadorDeSockets.atiendeSockets(socket);
             }
         } catch (IOException e) {
             // Error de protocolo de TCP (extremadamente improbable) o se cayo el server.
