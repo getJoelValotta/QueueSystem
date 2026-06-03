@@ -18,6 +18,7 @@ public abstract class ComunicaServer{
         this.escuchadorDeNodoFisico = escuchadorDeNodoFisico;      // Similar a un observer, aunque de instancia unica y mas particular.
     }
 
+    //Asumimos que la infra de la conexion de las ips es con ayuda de un DNS con un TTL tendiente a 0, por ello nosotros usamos localhost para las pruebas de conexion.
     public void conectaServidor(String IP, int puerto, String nodo){
         try {
             this.socket = new Socket(IP, puerto);
