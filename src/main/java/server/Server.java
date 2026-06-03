@@ -100,7 +100,7 @@ public class Server implements Runnable{
         try {
             while (!socketServer.isClosed()){
                 socket = socketServer.accept();
-                escuchadorDeSockets.atiendeSockets(socket);
+                escuchadorDeSockets.atiendeSockets(socket); // ESTO ES NULL???
             }
         } catch (IOException e) {
             // Error de protocolo de TCP (extremadamente improbable) o se cayo el server.
@@ -142,6 +142,10 @@ public class Server implements Runnable{
 
     public GestorID getGestorID() {
         return gestorID;
+    }
+
+    public void setSocketListener(SocketListener controller){
+        this.escuchadorDeSockets = controller;
     }
 
 }

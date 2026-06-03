@@ -93,6 +93,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void conexionExitosa() {
         vistaPuesto.mostrar();
         vistaConexion.cerrar();
+        comunicaServer.solicitaID(); //TODO : Cambiar esto ya que necesita guardarla.
         new Thread(comunicaServer).start();
     }
 

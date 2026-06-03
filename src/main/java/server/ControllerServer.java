@@ -49,21 +49,28 @@ public class ControllerServer implements GestorIDListener, SocketListener {
                     if (solicitud.equals(ComunicaServer.ID)) {  
                         out.writeUTF(gestorID.generarIdTotem()); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
                     }
+                    nodoTotem.setSocket(socket);
                     new Thread(nodoTotem).start();
                     break;
                 case ComunicaServer.PUESTO:
                     if (solicitud.equals(ComunicaServer.ID)) {
-                        out.writeUTF(gestorID.generarIdPuesto());
+                        String id = gestorID.generarIdPuesto();
+                        System.out.println("imprimi");
+                        out.writeUTF(id);
                     }
+                    nodoPuesto.setSocket(socket);
                     new Thread(nodoPuesto).start();
                     break;
                 case ComunicaServer.MONITOR:
+                    nodoMonitor.setSocket(socket);
                     new Thread(nodoMonitor).start();
                     break;
                 case ComunicaServer.ADMIN:
+                    nodoAdmin.setSocket(socket);
                     new Thread(nodoAdmin).start();
                     break;
                 case Server.SERVER:
+                    nodoRespaldo.setSocket(socket);
                     new Thread(nodoRespaldo).start();
                     break;
             }
@@ -79,7 +86,7 @@ public class ControllerServer implements GestorIDListener, SocketListener {
         if (server.esRespaldo()) {
             new Thread(nodoRespaldo).start();
         }
-        gestorID = new GestorID(0, 0, 0, null);
+        gestorID = new GestorID(0, 0, 0, this);
         // TODO : leer (persistir) GESTORID
         server.setGestorID(gestorID);
     }
@@ -91,7 +98,7 @@ public class ControllerServer implements GestorIDListener, SocketListener {
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el hilo Server que esta aceptando terminales.
         // TODO : escribir (persistir) GESTORID
-        nodoRespaldo.enviaGestor(gestorID);
+        //nodoRespaldo.enviaGestor(gestorID);
     }
 
 }

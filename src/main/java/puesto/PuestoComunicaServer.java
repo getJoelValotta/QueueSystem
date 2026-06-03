@@ -58,6 +58,12 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable{
                 escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(cantidadEnEspera));
             } catch (IOException e) {
                 // TODO : INFORMAR AL ADMIN (Server-side)
+                try {
+                    getSocket().close();
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
                 e.printStackTrace();
             }
         }
@@ -66,6 +72,5 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable{
     public PuestoEventListener getEscuchadorDeEventos() {
         return escuchadorDeEventos;
     }
-
 
 }

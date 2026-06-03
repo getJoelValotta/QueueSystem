@@ -18,6 +18,7 @@ public class ServerApp {
         ManejaPuesto manejaPuesto = new ManejaPuesto();
         ManejaTotem manejaTotem = new ManejaTotem();
         ControllerServer controllerServer = new ControllerServer(server, manejaServerRespaldo, manejaAdmin, manejaTotem, manejaPuesto, manejaMonitor);
+        server.setSocketListener(controllerServer);
         controllerServer.iniciaServer();
     }
 }

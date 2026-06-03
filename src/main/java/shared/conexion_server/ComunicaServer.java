@@ -38,7 +38,7 @@ public abstract class ComunicaServer{
         }
     }
 
-    public String solicitaID(String nodo){
+    public String solicitaID(){
         String nuevaID = null;
         try {
             out.writeUTF(ID);

@@ -9,6 +9,10 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
     protected DataOutputStream out;
     protected DataInputStream in;
 
+    public void setSocket(Socket socket){
+        this.socket = socket;
+    }
+    
     @Override
     public void run() {
         while (!socket.isClosed()){
@@ -17,5 +21,4 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
     }
     
     public abstract void comunicacion();
-
 }
