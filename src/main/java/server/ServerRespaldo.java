@@ -12,6 +12,7 @@ public class ServerRespaldo extends ServerState{
     
     @Override
     public void switchServer() {
+        server.abreConexion();
     }
 
     @Override

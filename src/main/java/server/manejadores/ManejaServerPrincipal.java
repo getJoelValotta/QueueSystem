@@ -45,11 +45,11 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
         } catch (SocketException e) {
             this.cantErrores += 1;
             if (cantErrores == 2){
-                //TODO : Informar a ControllerServer que debe ejecutar server.switchServer();
+                controllerServer.cambiaEstadoServer();
             }
             e.printStackTrace();
         } catch (IOException e) {
-            //Informar a Controller que debe ejecutar server.switchServer();
+            controllerServer.cambiaEstadoServer();
             e.printStackTrace();
         }
     }

@@ -53,7 +53,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             conectado = in.readUTF();
             switch (conectado) { 
                 case ComunicaServer.TOTEM:
-                    solicitud = in.readUTF(); //Solo los que solicitan ID piden solicitud
+                    solicitud = in.readUTF(); //Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
                     if (solicitud.equals(ComunicaServer.ID)) {  
                         out.writeUTF(gestorID.generarIdTotem()); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
                     }
@@ -118,10 +118,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         nodoServer.comunicaGestor(gestorID);
     }
 
-    public void persisteYEnvia(Turno turno){
-        // 
-    }
-
     //@Override
     public void recibeYPersisteGestor(String totem, String puesto, String monitor){
         int cantTotem = Integer.valueOf(totem);
@@ -149,6 +145,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {}
         // TODO : Escribir turno en el archivo que corresponda.
+    }
+
+    @Override
+    public void cambiaEstadoServer() {
+        server.switchServer(); // Nombre no representativo la verdad, porque no cambia de server, porque el server en si es el mismo, solo transiciona de estado y crea un socket server
+        
     }
 
 

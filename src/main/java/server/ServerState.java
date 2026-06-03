@@ -2,7 +2,7 @@ package server;
 
 import java.net.Socket;
 public abstract class ServerState {
-    private Server server;
+    protected Server server;
 
     public ServerState(Server server) {
         this.server = server;

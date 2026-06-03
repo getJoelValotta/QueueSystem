@@ -149,6 +149,10 @@ public class Server implements Runnable{
         return gestorID;
     }
 
+    public ServerSocket getServerSocket(){
+        return socketServer;
+    }
+
     public void setSocketListener(SocketListener controller){
         this.escuchadorDeSockets = controller;
     }
