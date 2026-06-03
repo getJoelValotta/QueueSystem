@@ -49,4 +49,16 @@ public class GestorID {
         return controllerServer;
     }
 
+    public void setContadorTotem(int contadorTotem) {
+        this.contadorTotem = contadorTotem;
+    }
+
+    public void setContadorPuesto(int contadorPuesto) {
+        this.contadorPuesto = contadorPuesto;
+    }
+
+    public void setContadorMonitor(int contadorMonitor) {
+        this.contadorMonitor = contadorMonitor;
+    }
+
 }

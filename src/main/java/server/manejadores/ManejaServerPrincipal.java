@@ -1,48 +1,73 @@
 package server.manejadores;
 
+import java.io.IOException;
+import java.net.SocketException;
+
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
 
-public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores{
-    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas con los sockets.
+public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores {
+    private int cantErrores;
+    private ManejadorEventListener controllerServer;
+
+    public ManejaServerPrincipal(ManejadorEventListener controllerServer) {
+        this.controllerServer = controllerServer;
+        this.cantErrores = 0;
+    }
 
     @Override
     public void comunicacion() {
-        synchronized (mutex){
-            //server.hearthbeat(in, out);
+        String dni;
+        try {
+            socket.setSoTimeout(IManejaServidores.TIMEOUT_CAIDA_MS); // Es el tiempo que espera a que le llegue algo y determinar si se cayo o no (hearthbeat)                              
+            String respuesta = in.readUTF();
+            switch (respuesta) {
+                case IManejaServidores.GESTOR:
+                    String totem, puesto, monitor;
+                    totem = in.readUTF();
+                    puesto = in.readUTF();
+                    monitor = in.readUTF();
+                    controllerServer.recibeYPersiste(totem, puesto, monitor);
+                    break;
+                case IManejaServidores.TURNO_ESPERA:
+                    dni = in.readUTF();
+                    controllerServer.recibeYPersisteTurno(dni, IManejaServidores.TURNO_ESPERA);
+                    break;
+                case IManejaServidores.TURNO_ATENCION:
+                    dni = in.readUTF();
+                    controllerServer.recibeYPersisteTurno(dni, IManejaServidores.TURNO_ATENCION);
+                    break;
+                case IManejaServidores.HBOUT:
+                    // TODO : Informarle al admin 
+                    break;
+            }
+        } catch (SocketException e) {
+            this.cantErrores += 1;
+            if (cantErrores == 2){
+                //TODO : Informar a ControllerServer que debe ejecutar server.switchServer();
+            }
+            e.printStackTrace();
+        } catch (IOException e) {
+            //Informar a Controller que debe ejecutar server.switchServer();
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void comunicaGestor(GestorID gestorID){
-        synchronized (mutex){
-        //server.comunicaGestor(in, out); //Si algo no funciona, pasarle el gestorID por las dudas, aunque el server ya lo tiene
-        }
+    public void comunicaGestor(GestorID gestorID) {
     }
 
     @Override
-    public void comunicaTurnoEspera(Turno turno) {
-        synchronized (mutex){
-        // TODO
-        }
+    public void comunicaTurno(Turno turno, String tipo) {
     }
 
     @Override
-    public void comunicaListaTurnosEspera(ListaTurnos turnos) {
-        synchronized (mutex){
-        // TODO
-        }
+    public void comunicaListaTurnos(ListaTurnos turnos, String tipo) {
     }
 
-    // Aca tengo un problema: El controller inicia un hilo cuando se conecta el de respaldo a un principal en ambos servidores para que empiecen a mandarse hearthbeats, que es
-    // lo que debe correr constantmente el hilo que se comunica server a server.
-    // Por otro lado esta la comunicacion de redundancia pasiva: cuando un server envia un hearthbeat no puede tambien solicitar un envio de datos como por ejemplo la lista de espera
-    // o el gestor de IDS unicos.
-    // Se me ocurrio implementar un mutex, que no es nada mas que un synchronized (Objeto inutil){ manejo de out's e in's }. Ahora esto resuelve el problema de la comunicacion
-    // para que no se pisen los hilos, pero no trae problemas a los hearthbeats? cada HB se dispara cada tiempo fijo, si hay un synchronized ese tiempo deberia tener 
-    // un umbral de aceptacion para que uno no piense que se cayó cuando unicamente hubo delay, y deberia hacer retry's por si acaso.
-    // Esto esta bien asi debido a que lo que se transmite no es costoso (apenas unos pocos bytes), porque si lo fuera el delay que causaria al hearthbeat penalizaria demasiado y 
-    // deberia crearse un socket unico para el manejo de hearthbeat (Como servicios de streaming que envian megabytes o incluso mas).
+    public ManejadorEventListener getControllerServer() {
+        return controllerServer;
+    }
 
 }

@@ -1,5 +1,6 @@
 package server;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import shared.turno.Turno;
@@ -21,5 +22,9 @@ public class ListaTurnos {
 
     public boolean contieneA(Turno turno){
         return listaTurnos.contains(turno);
+    }
+
+    public Iterator<Turno> devuelveIterator(){
+        return listaTurnos.iterator();
     }
 }

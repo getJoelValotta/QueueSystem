@@ -1,5 +1,8 @@
 package server.manejadores;
 
+import java.io.IOException;
+import java.util.Iterator;
+
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
@@ -8,28 +11,61 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
     
     // Los metodos delegan acciones a los servidores debido a que depende si son de Estado Principal o Respaldo.
 
-    @Override
+    @Override //Corre en el RUN del hilo 
     public void comunicacion() {
-        synchronized (mutex){
-            //server.hearthbeat(in, out);
+        synchronized (mutex){ //Es el enviaHearthbeat
+            try {
+                out.writeUTF(IManejaServidores.HBOUT);
+            } catch (IOException e) {
+                // TODO : Informar al ADMIN
+                e.printStackTrace();
+            }
+        }
+        try {
+            Thread.sleep(INTERVALO_HB_MS); // Se va a dormir 8 segundos
+        } catch (InterruptedException e) {
+            // TODO : Informar al admin (se cayo)
+            e.printStackTrace();
         }
     }
 
     public void comunicaGestor(GestorID gestorID){
         synchronized (mutex){
-        //server.comunicaGestor(in, out); //Si algo no funciona, pasarle el gestorID por las dudas, aunque el server ya lo tiene
+            String bufferContTotem = String.valueOf(gestorID.getContadorTotem());
+            String bufferContPuesto = String.valueOf(gestorID.getContadorPuesto());
+            String bufferContMonitor = String.valueOf(gestorID.getContadorMonitor());
+            try {
+                out.writeUTF(IManejaServidores.GESTOR);
+                out.writeUTF(bufferContTotem);
+                out.writeUTF(bufferContPuesto);
+                out.writeUTF(bufferContMonitor);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
-    public void comunicaTurnoEspera(Turno turno) {
+    @Override
+    public void comunicaTurno(Turno turno, String tipoTurno) {
         synchronized (mutex){
-        // TODO
+            String dni = String.valueOf(turno.getCliente().getDni());
+            try {
+                out.writeUTF(tipoTurno);
+                out.writeUTF(dni);
+            } catch (IOException e) {
+                // TODO avisarle al admin
+                e.printStackTrace();
+            }
         }
     }
 
-    public void comunicaListaTurnosEspera(ListaTurnos turnos) {
-        synchronized (mutex){
-        // TODO
+    @Override
+    public void comunicaListaTurnos(ListaTurnos turnos, String tipoTurno) {
+        Iterator<Turno> it = turnos.devuelveIterator();
+        while (it.hasNext()) {
+            Turno turno = it.next();
+            comunicaTurno(turno, tipoTurno);
         }
     }
 

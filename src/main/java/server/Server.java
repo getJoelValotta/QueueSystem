@@ -109,6 +109,11 @@ public class Server implements Runnable{
         }
     }
     
+    public void inicializaListas(){
+        this.enEspera = new ListaTurnos();
+        this.enAtencion = new ListaTurnos();
+    }
+
     public ListaTurnos getEnEspera() {
         return enEspera;
     }
