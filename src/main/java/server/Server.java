@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import server.id.GestorID;
 import shared.conexion_server.ComunicaServer;
 
 public class Server implements Runnable{
@@ -13,6 +14,7 @@ public class Server implements Runnable{
     private ListaTurnos enEspera, enAtencion;
     private ServerState estado;
     private ServerSocket socketServer;
+    private GestorID gestorID;
     private String IP = "localhost";
     private int puerto1 = 1337, puerto2 = 1338;
     private DataOutputStream out;
@@ -23,6 +25,7 @@ public class Server implements Runnable{
         enEspera = null;
         enAtencion = null;
         this.estado = null;
+        gestorID = null;
     }
 
     public void setServerState(ServerState estado){
@@ -156,6 +159,14 @@ public class Server implements Runnable{
 
     public int getPuerto2() {
         return puerto2;
+    }
+
+    public void setGestorID(GestorID gestorID) {
+        this.gestorID = gestorID;
+    }
+
+    public GestorID getGestorID() {
+        return gestorID;
     }
 
 }
