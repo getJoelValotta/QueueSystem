@@ -7,16 +7,18 @@ import java.net.Socket;
 
 import server.id.GestorID;
 import server.id.GestorIDListener;
+import server.manejadores.IManejaServidores;
 import server.manejadores.ManejaAdmin;
 import server.manejadores.ManejaMonitor;
 import server.manejadores.ManejaPuesto;
+import server.manejadores.ManejaServerPrincipal;
 import server.manejadores.ManejaServerRespaldo;
 import server.manejadores.ManejaTotem;
 import shared.conexion_server.ComunicaServer;
 
 public class ControllerServer implements GestorIDListener, SocketListener {
     private Server server;
-    private ManejaServerRespaldo nodoRespaldo; // Gestor id dispara un metodo a traves de una interfaz al controller que hace que le envie la informacion necesaria a nodoRespaldo.
+    private IManejaServidores nodoServer; // Gestor id dispara un metodo a traves de una interfaz al controller que hace que le envie la informacion necesaria a nodoRespaldo.
     private ManejaAdmin nodoAdmin;
     private ManejaTotem nodoTotem;
     private ManejaPuesto nodoPuesto;
@@ -24,14 +26,14 @@ public class ControllerServer implements GestorIDListener, SocketListener {
     private GestorID gestorID; // gestor ID es parte del server, pero necesita persistirse y ademas pasarle info al server de Respaldo, justo como la informacion de la lista de espera del server
 
 
-    public ControllerServer(Server server, ManejaServerRespaldo nodoRespaldo, ManejaAdmin nodoAdmin,
+    public ControllerServer(Server server, ManejaAdmin nodoAdmin,
             ManejaTotem nodosTotem, ManejaPuesto nodosPuesto, ManejaMonitor nodoMonitor) {
         this.server = server;
-        this.nodoRespaldo = nodoRespaldo;
         this.nodoAdmin = nodoAdmin;
         this.nodoTotem = nodosTotem;
         this.nodoPuesto = nodosPuesto;
         this.nodoMonitor = nodoMonitor;
+        this.nodoServer = null;
         this.gestorID = null;
     }
 
@@ -39,9 +41,10 @@ public class ControllerServer implements GestorIDListener, SocketListener {
     public void atiendeSockets(Socket socket) {
         String conectado, solicitud;
         DataOutputStream out;
+        DataInputStream in;
         try {
             out = new DataOutputStream(socket.getOutputStream());
-            DataInputStream in = new DataInputStream(socket.getInputStream());
+            in = new DataInputStream(socket.getInputStream());
             conectado = in.readUTF();
             solicitud = in.readUTF();
             switch (conectado) {
@@ -70,21 +73,22 @@ public class ControllerServer implements GestorIDListener, SocketListener {
                     new Thread(nodoAdmin).start();
                     break;
                 case Server.SERVER:
-                    nodoRespaldo.setSocket(socket);
-                    new Thread(nodoRespaldo).start();
+                    nodoServer = new ManejaServerRespaldo();
+                    nodoServer.setSocket(socket);
+                    new Thread(nodoServer).start();
                     break;
             }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+        } catch (IOException e) {  
             e.printStackTrace();
         }
     }
 
     public void iniciaServer() {
-        nodoRespaldo.setServer(server); // Lo puse primero por posible condicion de carrera (condicion critica.) 
         server.abreConexion();       
-        if (server.esRespaldo()) {
-            new Thread(nodoRespaldo).start();
+        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
+            nodoServer = new ManejaServerPrincipal();
+            nodoServer.setSocket(server.getSocketEntreServers());
+            new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
         }
         gestorID = new GestorID(0, 0, 0, this);
         // TODO : leer (persistir) GESTORID
@@ -98,7 +102,7 @@ public class ControllerServer implements GestorIDListener, SocketListener {
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el hilo Server que esta aceptando terminales.
         // TODO : escribir (persistir) GESTORID
-        //nodoRespaldo.enviaGestor(gestorID);
+        nodoServer.comunicaGestor(gestorID);
     }
 
 }

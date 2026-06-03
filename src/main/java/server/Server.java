@@ -7,6 +7,7 @@ import java.net.Socket;
 
 import server.id.GestorID;
 
+
 public class Server implements Runnable{
     public static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv principal
     private ListaTurnos enEspera, enAtencion;
@@ -31,10 +32,6 @@ public class Server implements Runnable{
         estado.setServer(this);
     }
 
-    public void hearthbeat(){ //La logica del lado principal envia y del lado respaldo recibe
-        estado.hearthbeat();
-    }
-
     public void switchServer(){ //El estado principal se desconecta (cierra sus sockets por failover o switchback), cambia su estado a respaldo y el que estaba de respaldo
         estado.switchServer(); //deja de recibir hearthbeats por lo que cambia su estado a principal e instancia su serverSocket como corresponde?
     }
@@ -45,6 +42,10 @@ public class Server implements Runnable{
 
     public boolean esRespaldo(){
         return estado.esRespaldo();
+    }
+
+    public Socket getSocketEntreServers(){
+        return estado.getSocketEntreServers();
     }
 
     public void abreConexion(){ //Este metodo es el primero que se ejecuta desde el controlador de servers. La idea es que defina que tipo de server es, si es principal 
@@ -100,7 +101,7 @@ public class Server implements Runnable{
         try {
             while (!socketServer.isClosed()){
                 socket = socketServer.accept();
-                escuchadorDeSockets.atiendeSockets(socket); // ESTO ES NULL???
+                escuchadorDeSockets.atiendeSockets(socket);
             }
         } catch (IOException e) {
             // Error de protocolo de TCP (extremadamente improbable) o se cayo el server.

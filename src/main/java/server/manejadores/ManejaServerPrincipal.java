@@ -3,10 +3,9 @@ package server.manejadores;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
-public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores{
+
+public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores{
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas con los sockets.
-    
-    // Los metodos delegan acciones a los servidores debido a que depende si son de Estado Principal o Respaldo.
 
     @Override
     public void comunicacion() {
@@ -15,18 +14,21 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
         }
     }
 
+    @Override
     public void comunicaGestor(GestorID gestorID){
         synchronized (mutex){
         //server.comunicaGestor(in, out); //Si algo no funciona, pasarle el gestorID por las dudas, aunque el server ya lo tiene
         }
     }
 
+    @Override
     public void comunicaTurnoEspera(Turno turno) {
         synchronized (mutex){
         // TODO
         }
     }
 
+    @Override
     public void comunicaListaTurnosEspera(ListaTurnos turnos) {
         synchronized (mutex){
         // TODO
