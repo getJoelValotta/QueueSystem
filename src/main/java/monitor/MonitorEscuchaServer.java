@@ -11,9 +11,11 @@ import shared.turno.*;
 public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
     private MonitorEventListener escuchadorDeEventos;
 
+
     public void setEscuchadorDeEventos(MonitorEventListener escuchadorDeEventos) {
         this.escuchadorDeEventos = escuchadorDeEventos;
     }
+
     @Override
     public void run() {
         while (!getSocket().isClosed()) {

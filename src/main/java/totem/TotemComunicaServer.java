@@ -21,6 +21,6 @@ public class TotemComunicaServer extends ComunicaServer {
             escuchadorDeEventos.mensajeError("Error de protocolo de conexion"); // TODO : Manejar retry???
             e.printStackTrace();
         }
-    return validacion;
+        return validacion;
     }
 }

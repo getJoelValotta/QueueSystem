@@ -6,9 +6,16 @@ import java.io.IOException;
 import java.net.Socket;
 
 public abstract class ManejadorDeNodos implements Runnable{ //Aplica template method
+    protected ManejadorEventListener controllerServer;
     protected Socket socket;
     protected DataOutputStream out;
     protected DataInputStream in;
+    protected String id;
+
+    public ManejadorDeNodos(ManejadorEventListener controllerServer, String id) {
+        this.controllerServer = controllerServer;
+        this.id = id;
+    }
 
     public void setSocket(Socket socket){
         this.socket = socket;
@@ -20,7 +27,7 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
             e.printStackTrace();
         }
     }
-    
+
     @Override
     public void run() {
         while (!socket.isClosed()){

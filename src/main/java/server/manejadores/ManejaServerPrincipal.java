@@ -7,12 +7,12 @@ import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
 
-public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores {
+public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores, IControllerObserver {
     private int cantErrores;
     private ManejadorEventListener controllerServer;
 
-    public ManejaServerPrincipal(ManejadorEventListener controllerServer) {
-        this.controllerServer = controllerServer;
+    public ManejaServerPrincipal(ManejadorEventListener controllerServer, String id) {
+        super(controllerServer, id);
         this.cantErrores = 0;
     }
 
@@ -46,10 +46,12 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
             this.cantErrores += 1;
             if (cantErrores == 2){
                 controllerServer.cambiaEstadoServer();
+                controllerServer.serverDejaDeObservar(this);
             }
             e.printStackTrace();
         } catch (IOException e) {
             controllerServer.cambiaEstadoServer();
+            controllerServer.serverDejaDeObservar(this);
             e.printStackTrace();
         }
     }
@@ -68,6 +70,10 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
 
     public ManejadorEventListener getControllerServer() {
         return controllerServer;
+    }
+
+    @Override
+    public void actualizar() {
     }
 
 }

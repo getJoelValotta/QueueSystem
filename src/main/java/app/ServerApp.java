@@ -11,11 +11,7 @@ public class ServerApp {
     
     public static void main(String[] args) {
         Server server = new Server();
-        ManejaAdmin manejaAdmin = new ManejaAdmin();
-        ManejaMonitor manejaMonitor = new ManejaMonitor();
-        ManejaPuesto manejaPuesto = new ManejaPuesto();
-        ManejaTotem manejaTotem = new ManejaTotem();
-        ControllerServer controllerServer = new ControllerServer(server, manejaAdmin, manejaTotem, manejaPuesto, manejaMonitor);
+        ControllerServer controllerServer = new ControllerServer(server);
         server.setSocketListener(controllerServer);
         controllerServer.iniciaServer();
     }

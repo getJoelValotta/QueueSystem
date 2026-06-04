@@ -4,9 +4,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import server.id.GestorID;
 import server.id.GestorIDListener;
+import server.manejadores.IControllerObserver;
 import server.manejadores.IManejaServidores;
 import server.manejadores.ManejaAdmin;
 import server.manejadores.ManejaMonitor;
@@ -20,26 +22,19 @@ import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.turno.Turno;
+import server.manejadores.IManejaServidores;
 
 public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener{ //SocketListener es para escuchar al Server que delega atencion, ManejadorEventListener dispara eventos de interes desde los manejadores para ser atendido por el controller
     private Server server;
-    private IManejaServidores nodoServer; // Gestor id dispara un metodo a traves de una interfaz al controller que hace que le envie la informacion necesaria a nodoRespaldo.
-    private ManejaAdmin nodoAdmin;
-    private ManejaTotem nodoTotem;
-    private ManejaPuesto nodoPuesto;
-    private ManejaMonitor nodoMonitor;
     private GestorID gestorID; // gestor ID es parte del server, pero necesita persistirse y ademas pasarle info al server de Respaldo, justo como la informacion de la lista de espera del server
+    private CopyOnWriteArrayList<IControllerObserver> observadoresServers;
+    private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
 
-
-    public ControllerServer(Server server, ManejaAdmin nodoAdmin,
-            ManejaTotem nodosTotem, ManejaPuesto nodosPuesto, ManejaMonitor nodoMonitor) {
+    public ControllerServer(Server server) {
         this.server = server;
-        this.nodoAdmin = nodoAdmin;
-        this.nodoTotem = nodosTotem;
-        this.nodoPuesto = nodosPuesto;
-        this.nodoMonitor = nodoMonitor;
-        this.nodoServer = null;
         this.gestorID = null;
+        observadoresServers = new CopyOnWriteArrayList<>();
+        observadoresPuestos = new CopyOnWriteArrayList<>();
     }
 
     @Override
@@ -47,6 +42,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         String conectado, solicitud;
         DataOutputStream out;
         DataInputStream in;
+        String id;
         try {
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
@@ -54,33 +50,44 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             switch (conectado) { 
                 case ComunicaServer.TOTEM:
                     solicitud = in.readUTF(); //Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
-                    if (solicitud.equals(ComunicaServer.ID)) {  
-                        out.writeUTF(gestorID.generarIdTotem()); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
+                    if (solicitud.equals(ComunicaServer.ID)) { 
+                        id = gestorID.generarIdTotem();
+                        out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
                     }
+                    else 
+                        id = solicitud;
+                    ManejaTotem nodoTotem = new ManejaTotem(this, id);
                     nodoTotem.setSocket(socket);
                     new Thread(nodoTotem).start();
                     break;
                 case ComunicaServer.PUESTO:
                     solicitud = in.readUTF();
                     if (solicitud.equals(ComunicaServer.ID)) {
-                        out.writeUTF(gestorID.generarIdPuesto());
+                        id = gestorID.generarIdTotem();
+                        out.writeUTF(id);
                     }
+                    else 
+                        id = solicitud;
+                    ManejaPuesto nodoPuesto = new ManejaPuesto(this, id);
                     nodoPuesto.setSocket(socket);
                     new Thread(nodoPuesto).start();
                     break;
                 case ComunicaServer.MONITOR:
+                    ManejaMonitor nodoMonitor = new ManejaMonitor(this, "unico");
                     nodoMonitor.setSocket(socket);
                     new Thread(nodoMonitor).start();
                     break;
                 case ComunicaServer.ADMIN:
+                    ManejaAdmin nodoAdmin = new ManejaAdmin(this, "unico");
                     nodoAdmin.setSocket(socket);
                     new Thread(nodoAdmin).start();
                     break;
                 case Server.SERVER:
-                    nodoServer = new ManejaServerRespaldo();
+                    ManejaServerPrincipal nodoServer = new ManejaServerPrincipal(this, "unico");
                     nodoServer.setSocket(socket);
                     new Thread(nodoServer).start();
-                    sincronizacionDeEstado();
+                    serverObservaControlador(nodoServer);
+                    sincronizacionDeEstado(nodoServer);
                     break;
             }
         } catch (IOException e) {  
@@ -93,7 +100,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         server.inicializaListas();
         server.abreConexion();       
         if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
-            nodoServer = new ManejaServerPrincipal(this);
+            IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             nodoServer.setSocket(server.getSocketEntreServers());
             new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
         }
@@ -103,7 +110,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     // Transfiere todo lo que necesita el nuevo servidor cuando recien se conecta
-    public void sincronizacionDeEstado(){
+    public void sincronizacionDeEstado(IManejaServidores nodoServer){
         ListaTurnos enEspera, enAtencion;
         enEspera = server.getEnEspera();
         enAtencion = server.getEnAtencion();
@@ -115,7 +122,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el hilo Server que esta aceptando terminales.
         // TODO : escribir (persistir) GESTORID
-        nodoServer.comunicaGestor(gestorID);
+        ManejaServerPrincipal nodoServer;
+        for (IControllerObserver obs : observadoresServers){
+            nodoServer = (ManejaServerPrincipal) obs;
+            nodoServer.comunicaGestor(gestorID);
+        }
     }
 
     //@Override
@@ -130,21 +141,35 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     //@Override
-    public void recibeYPersisteTurno(String dni, String estado){
+    public boolean recibeYPersisteTurno(String dni, String estado){
+        boolean validacion = false;
         Cliente cliente;
         try {
             cliente = new Cliente(dni);
             Turno turno = new Turno();
             turno.setCliente(cliente);
             if (estado.equals(IManejaServidores.TURNO_ATENCION)){
-                turno.llamar();
+                turno.atender("1"); // TODO BORRAR
                 server.getEnAtencion().agregaTurno(turno);
             }
-            else{
-                server.getEnEspera().agregaTurno(turno);
+            else if (estado.equals(IManejaServidores.TURNO_ESPERA)){
+                validacion = server.getEnEspera().contieneA(turno);
+                if (validacion)
+                    server.getEnEspera().agregaTurno(turno);
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {}
         // TODO : Escribir turno en el archivo que corresponda.
+        return validacion;
+    }
+
+    public Turno llamaSiguienteTurno(String id) {
+        Turno turno = server.getEnEspera().llamaTurno();
+        if (turno != null) {
+            turno.atender(id);
+            server.getEnAtencion().agregaTurno(turno);
+            // TODO : Persistir cambios en ambas listas.
+        }
+        return turno;
     }
 
     @Override
@@ -153,5 +178,19 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         
     }
 
+    public void serverObservaControlador(IControllerObserver nodoServerRespaldo){
+        observadoresServers.add(nodoServerRespaldo);
+    }
 
+    public void puestoObservaControlador(IControllerObserver nodoPuesto){
+        observadoresPuestos.add(nodoPuesto);
+    }
+
+    public void serverDejaDeObservar(IControllerObserver suscriptor) {
+        observadoresServers.remove(suscriptor);
+    }
+
+    public void puestoDejaDeObservar(IControllerObserver suscriptor) {
+        observadoresPuestos.remove(suscriptor);
+    }
 }

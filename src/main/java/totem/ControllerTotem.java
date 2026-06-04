@@ -35,15 +35,19 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
                 VistasUtils.ejecutarNoBloqueante(() ->
                     comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM)
                 );
-                // iniciaTotem();
+                //iniciaTotem();
                 break;
             case TotemGUI.REGISTRAR:
                 try {
                     totem.setCliente(new Cliente(vistaTotem.getDNI()));
                     VistasUtils.ejecutarNoBloqueante(() -> {
+                        System.out.println("Registrando dni");
                         boolean validacion = comunicaServer.enviarDNI(totem.getCliente().getDni());
+                        System.out.println("Validacion del registro: " + validacion);
                         if (validacion == false){
-                            vistaTotem.setGuiaError("Usted se encuentra ya registrado.");
+                            VistasUtils.enEDT(() -> vistaTotem.setGuiaError("Usted ya se encuentra registrado."));
+                        } else {
+                            VistasUtils.enEDT(() -> vistaTotem.setGuiaExito("DNI Ingresado"));
                         }
                     });
                 } catch (ClienteDniVacioException e1) { //Nunca se lanzaran ya que la vista controla esto antes.

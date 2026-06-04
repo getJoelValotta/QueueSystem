@@ -19,5 +19,4 @@ public interface IManejaServidores extends Runnable {
 
     public void comunicaListaTurnos(ListaTurnos turnos, String idTipo);
 
-
 }

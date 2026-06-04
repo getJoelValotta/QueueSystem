@@ -34,9 +34,14 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 break;
             case PuestoGUI.LLAMAR: //Aca comienza a atender a un cliente y es llamado por primera vez.
                 vistaPuesto.limpiarClienteActual();
-                VistasUtils.ejecutarNoBloqueante(() ->
-                    puesto.setTurno(comunicaServer.atiendeSiguiente(puesto.getId())
-                ));
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    Turno turno = comunicaServer.atiendeSiguiente(puesto.getId());
+                    if (turno != null){
+                        puesto.setTurno(turno);
+                    } else {
+                        // TODO: mostrar en pantalla que hay 0 en la fila
+                    }
+                });
                 vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
                 vistaPuesto.habilitaRenotificar();
                 break;
@@ -72,13 +77,14 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             }
         }
         
-        @Override
-        public void eventoCantidadEnEspera(int cantEspera) {
-            vistaPuesto.setCantClientes(cantEspera);
-        }
+    @Override
+    public void eventoCantidadEnEspera(int cantEspera) {
+        vistaPuesto.setCantClientes(cantEspera);
+    }
 
     public void iniciaPuesto(){
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al server la id por primera vez: pue_001
+        
         puesto = new Puesto();
         vistaConexion.mostrar(); //temporal
         // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el boton renotificar a "Marcar como abandonado"

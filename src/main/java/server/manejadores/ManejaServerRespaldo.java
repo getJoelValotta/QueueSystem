@@ -7,6 +7,12 @@ import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
 public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores{
+
+    public ManejaServerRespaldo(ManejadorEventListener controllerServer, String id) {
+        super(controllerServer, id);
+        //TODO Auto-generated constructor stub
+    }
+
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
     
     // Los metodos delegan acciones a los servidores debido a que depende si son de Estado Principal o Respaldo.
@@ -22,7 +28,7 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
             }
         }
         try {
-            Thread.sleep(INTERVALO_HB_MS); // Se va a dormir 8 segundos
+            Thread.sleep(INTERVALO_HB_MS); // Se va a dormir 2 segundos
         } catch (InterruptedException e) {
             // TODO : Informar al admin (se cayo)
             e.printStackTrace();

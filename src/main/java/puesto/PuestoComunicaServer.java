@@ -22,11 +22,16 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable{
         Cliente cliente;
         try {
             out.writeUTF(ATIENDE);
-            cliente = new Cliente(in.readUTF()); // TODO : desencriptar
-            turnoEnAtencion = new Turno();
-            turnoEnAtencion.setCliente(cliente);
-            turnoEnAtencion.atender(idPuesto);
-            return turnoEnAtencion;
+            String respuesta = in.readUTF();
+            if(respuesta.equals("FILA_VACIA")){
+                return null;
+            } else {
+                cliente = new Cliente(in.readUTF()); // TODO : desencriptar
+                turnoEnAtencion = new Turno();
+                turnoEnAtencion.setCliente(cliente);
+                turnoEnAtencion.atender(idPuesto);
+                return turnoEnAtencion;
+            }
         } catch (IOException e) {
             // TODO : INFORMAR AL ADMIN (Server-side)
             e.printStackTrace();
@@ -46,7 +51,6 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable{
             e.printStackTrace();
         }
         return notifica;
-    
     }
 
     @Override

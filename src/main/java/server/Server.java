@@ -76,7 +76,7 @@ public class Server implements Runnable{
             return socketEntreServers;
         } catch (java.net.ConnectException e) {
             try {
-                socketEntreServers = new Socket(DNS,puerto2);
+                socketEntreServers = new Socket(DNS,puerto2); // TODO : Recordar eliminar esto, ya que solo se conectan a 1 puerto los nodos fisicos
                 outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream());
                 outConexionInicial.writeUTF(SERVER);
                 return socketEntreServers;
