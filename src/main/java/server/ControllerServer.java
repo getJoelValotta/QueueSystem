@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import server.id.GestorID;
@@ -70,6 +71,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         id = solicitud;
                     ManejaPuesto nodoPuesto = new ManejaPuesto(this, id);
                     nodoPuesto.setSocket(socket);
+                    nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                     new Thread(nodoPuesto).start();
                     break;
                 case ComunicaServer.MONITOR:
@@ -154,24 +156,51 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             }
             else if (estado.equals(IManejaServidores.TURNO_ESPERA)){
                 validacion = server.getEnEspera().contieneA(turno);
-                if (validacion)
+                if (!validacion){
                     server.getEnEspera().agregaTurno(turno);
+                    int cantTurnos = server.getEnEspera().getCantidadTurnos();
+                    Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+                    while (nodosPuesto.hasNext()){
+                        ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+                        puestoActual.enviaCantidadEnEspera(cantTurnos);
+                    }    
+                }
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {}
         // TODO : Escribir turno en el archivo que corresponda.
         return validacion;
     }
 
-    public Turno llamaSiguienteTurno(String id) {
+    public Turno llamaSiguienteTurno(String id) { //TODO: Tiene la id porque se la tiene que pasar al monitor...
         Turno turno = server.getEnEspera().llamaTurno();
         if (turno != null) {
             turno.atender(id);
             server.getEnAtencion().agregaTurno(turno);
             // TODO : Persistir cambios en ambas listas.
         }
+        Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
+        while (enAtencion.hasNext()){
+            Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
+            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)){
+                if (turnoEnAtencionEnPuestoActual.getCantLlamados() < 4){
+                    // TODO : Persistir turnos Atendidos por x puesto a x hora.
+                }
+            }
+        }
         return turno;
     }
 
+    @Override
+    public void actualizaTurnoRenotificado(String idPuesto) {
+        Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
+        while (enAtencion.hasNext()){
+            Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
+            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)){
+                turnoEnAtencionEnPuestoActual.llamar();
+            }
+        }
+    }
+    
     @Override
     public void cambiaEstadoServer() {
         server.switchServer(); // Nombre no representativo la verdad, porque no cambia de server, porque el server en si es el mismo, solo transiciona de estado y crea un socket server
@@ -193,4 +222,5 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void puestoDejaDeObservar(IControllerObserver suscriptor) {
         observadoresPuestos.remove(suscriptor);
     }
-}
+
+    }

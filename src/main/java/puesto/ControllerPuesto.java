@@ -28,9 +28,15 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
-                VistasUtils.ejecutarNoBloqueante(() ->
-                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO)
-                );
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
+                    if (puesto.getId().equals("null")){
+                        String id = comunicaServer.solicitaID();
+                    }
+                    else{
+                        comunicaServer.informaID(puesto.getId());
+                    }
+                });
                 break;
             case PuestoGUI.LLAMAR: //Aca comienza a atender a un cliente y es llamado por primera vez.
                 vistaPuesto.limpiarClienteActual();

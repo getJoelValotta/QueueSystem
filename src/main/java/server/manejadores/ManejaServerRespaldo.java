@@ -7,13 +7,13 @@ import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
 public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores{
+    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
 
     public ManejaServerRespaldo(ManejadorEventListener controllerServer, String id) {
         super(controllerServer, id);
         //TODO Auto-generated constructor stub
     }
 
-    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
     
     // Los metodos delegan acciones a los servidores debido a que depende si son de Estado Principal o Respaldo.
 

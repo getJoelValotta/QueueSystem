@@ -32,22 +32,26 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
-                VistasUtils.ejecutarNoBloqueante(() ->
-                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM)
-                );
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM);
+                    if (totem.getId().equals("null")){
+                        String id = comunicaServer.solicitaID();
+                    }
+                    else{
+                        comunicaServer.informaID(totem.getId());
+                    }
+                });
                 //iniciaTotem();
                 break;
             case TotemGUI.REGISTRAR:
                 try {
                     totem.setCliente(new Cliente(vistaTotem.getDNI()));
                     VistasUtils.ejecutarNoBloqueante(() -> {
-                        System.out.println("Registrando dni");
                         boolean validacion = comunicaServer.enviarDNI(totem.getCliente().getDni());
-                        System.out.println("Validacion del registro: " + validacion);
-                        if (validacion == false){
-                            VistasUtils.enEDT(() -> vistaTotem.setGuiaError("Usted ya se encuentra registrado."));
+                        if (validacion){
+                            vistaTotem.setGuiaError("Usted ya se encuentra registrado.");
                         } else {
-                            VistasUtils.enEDT(() -> vistaTotem.setGuiaExito("DNI Ingresado"));
+                            vistaTotem.setGuiaExito("DNI Ingresado");
                         }
                     });
                 } catch (ClienteDniVacioException e1) { //Nunca se lanzaran ya que la vista controla esto antes.

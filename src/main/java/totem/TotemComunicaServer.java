@@ -17,6 +17,7 @@ public class TotemComunicaServer extends ComunicaServer {
             out.writeUTF(String.valueOf(dni)); // TODO : encriptar
             // TODO : Informar al ADMIN (server-side)
             validacion = Boolean.parseBoolean(in.readUTF());
+            return validacion;
         } catch (IOException e) {
             escuchadorDeEventos.mensajeError("Error de protocolo de conexion"); // TODO : Manejar retry???
             e.printStackTrace();

@@ -50,6 +50,15 @@ public abstract class ComunicaServer{
         return nuevaID;
     }
 
+    public void informaID(String id){
+        try {
+            out.writeUTF(id);
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+    }
+
     public Socket getSocket() {
         return socket;
     }
