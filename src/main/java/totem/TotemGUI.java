@@ -35,82 +35,90 @@ public class TotemGUI extends JFrame {
     private JLabel labelGuia;
  
     public TotemGUI() {
-        setTitle("Tótem");
-        setLayout(new BorderLayout(0, 0));
-        setSize(400, 200);
+        setTitle("Tótem - Autogestión de Turnos");
+        setLayout(new BorderLayout());
+        setSize(450, 320);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
  
-        // padding general
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(8, 8, 8, 8));
+        // Padding general
+        ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 30, 20, 30));
  
-        // ── Norte: label guía ──
-        this.panelAuxTxtGuia = new JPanel();
+        // ── Norte: Label guía ──
+        this.panelAuxTxtGuia = new JPanel(new BorderLayout());
+        this.labelGuia = new JLabel("Ingrese su DNI para obtener un turno");
+        this.labelGuia.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
+        this.labelGuia.setHorizontalAlignment(JLabel.CENTER);
+        this.panelAuxTxtGuia.add(this.labelGuia, BorderLayout.CENTER);
         add(this.panelAuxTxtGuia, BorderLayout.NORTH);
  
-        this.labelGuia = new JLabel(" ");
-        this.panelAuxTxtGuia.add(this.labelGuia);
- 
-        // ── Centro: campo DNI ──
+        // ── Centro: Campo DNI (Distribución Vertical) ──
         this.panelAuxCampoDNI = new JPanel();
-        add(this.panelAuxCampoDNI, BorderLayout.CENTER);
+        this.panelAuxCampoDNI.setLayout(new javax.swing.BoxLayout(this.panelAuxCampoDNI, javax.swing.BoxLayout.Y_AXIS));
+        this.panelAuxCampoDNI.setBorder(new EmptyBorder(25, 0, 25, 0));
  
-        this.panelAuxTxtDNI = new JPanel();
-        this.panelAuxCampoDNI.add(this.panelAuxTxtDNI);
- 
+        this.panelAuxTxtDNI = new JPanel(); // Mantenemos el panel original por compatibilidad
         this.textDNI = new JTextPane();
         this.textDNI.setText("DNI");
+        this.textDNI.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
+        this.textDNI.setForeground(new java.awt.Color(80, 80, 80));
         this.textDNI.setEditable(false);
         this.textDNI.setBackground(null);
-        this.panelAuxTxtDNI.add(this.textDNI);
+        this.textDNI.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
  
         this.campoDNI = new JTextField();
-        this.campoDNI.setColumns(10);
+        this.campoDNI.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 40));
+        this.campoDNI.setHorizontalAlignment(JTextField.CENTER);
+        this.campoDNI.setMaximumSize(new java.awt.Dimension(300, 65));
+        this.campoDNI.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+        // Hint nativo de FlatLaf
+        this.campoDNI.putClientProperty("JTextField.placeholderText", "Ej: 12345678");
+
+        this.panelAuxCampoDNI.add(this.textDNI);
+        this.panelAuxCampoDNI.add(javax.swing.Box.createVerticalStrut(5));
         this.panelAuxCampoDNI.add(this.campoDNI);
+        add(this.panelAuxCampoDNI, BorderLayout.CENTER);
  
         // ── Validación de caracteres: solo dígitos, máximo 8 ──
         ((AbstractDocument) this.campoDNI.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
-            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr)
-                    throws BadLocationException {
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                 if (string == null) return;
                 if (string.matches("\\d+") && fb.getDocument().getLength() + string.length() <= 8) {
                     super.insertString(fb, offset, string, attr);
                 }
             }
- 
             @Override
-            public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr)
-                    throws BadLocationException {
+            public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr) throws BadLocationException {
                 if (string == null) return;
                 if (string.matches("\\d+") && fb.getDocument().getLength() - length + string.length() <= 8) {
                     super.replace(fb, offset, length, string, attr);
                 }
             }
         });
- 
-
         
-        // ── Habilitar / deshabilitar botón según longitud (7 u 8 dígitos) ──
+        // ── Habilitar / deshabilitar botón ──
         this.campoDNI.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e)  { actualizarBoton(); }
             @Override public void removeUpdate(DocumentEvent e)  { actualizarBoton(); }
             @Override public void changedUpdate(DocumentEvent e) { actualizarBoton(); }
- 
             private void actualizarBoton() {
                 int largo = campoDNI.getText().trim().length();
                 btnRegistrar.setEnabled(largo == 7 || largo == 8);
             }
         });
  
-        // ── Sur: botón Registrar (deshabilitado por defecto) ──
-        this.panelAuxBtnRegistrar = new JPanel();
-        add(this.panelAuxBtnRegistrar, BorderLayout.SOUTH);
- 
-        this.btnRegistrar = new JButton("Registrar");
+        // ── Sur: botón Registrar ──
+        this.panelAuxBtnRegistrar = new JPanel(new BorderLayout());
+        this.btnRegistrar = new JButton("Registrar Turno");
+        this.btnRegistrar.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
+        this.btnRegistrar.setPreferredSize(new java.awt.Dimension(0, 45));
         this.btnRegistrar.setActionCommand(REGISTRAR);
         this.btnRegistrar.setEnabled(false);
-        this.panelAuxBtnRegistrar.add(this.btnRegistrar);
+        this.btnRegistrar.putClientProperty("JButton.buttonType", "roundRect");
+        this.panelAuxBtnRegistrar.add(this.btnRegistrar, BorderLayout.CENTER);
+        
+        add(this.panelAuxBtnRegistrar, BorderLayout.SOUTH);
     }
  
     public void mostrar(){

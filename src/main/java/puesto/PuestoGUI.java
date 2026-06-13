@@ -34,57 +34,75 @@ public class PuestoGUI extends JFrame {
 
 
     public PuestoGUI() {
-        setLayout(new BorderLayout(0, 0));
-        this.setSize(400, 200);
+        setTitle("Gestión de Turnos - Puesto Operador");
+        setLayout(new BorderLayout());
+        this.setSize(450, 290);
         this.setLocationRelativeTo(null);
 
-        this.panelAuxBtn = new JPanel();
-        add(this.panelAuxBtn, BorderLayout.CENTER);
-        this.panelAuxBtn.setLayout(new GridLayout(0, 2, 0, 0));
+        // Margen perimetral interno para que los componentes respiren y no toquen los bordes
+        ((JPanel)getContentPane()).setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        this.panelAuxLlamar = new JPanel();
-        this.panelAuxBtn.add(this.panelAuxLlamar);
-        this.panelAuxLlamar.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        // 1. ZONA NORTE: Cantidad de clientes en espera (Alineado a la derecha)
+        this.panelAuxNorte = new JPanel(new BorderLayout());
+        this.lblCantClientesEspera = new JLabel("Hay 0 en cola");
+        this.lblCantClientesEspera.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        this.lblCantClientesEspera.setForeground(new Color(120, 120, 120));
+        this.panelAuxNorte.add(this.lblCantClientesEspera, BorderLayout.EAST);
+        add(this.panelAuxNorte, BorderLayout.NORTH);
 
-        this.btnLlamar = new JButton("Llamar siguiente");
-        this.panelAuxLlamar.add(this.btnLlamar);
+        // 2. ZONA CENTRAL: Apilamiento Vertical (Puesto ARRIBA del Cliente actual)
+        this.panelAuxLblLista = new JPanel();
+        this.panelAuxLblLista.setLayout(new javax.swing.BoxLayout(this.panelAuxLblLista, javax.swing.BoxLayout.Y_AXIS));
+        this.panelAuxLblLista.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 0, 15, 0));
+
+        // Número de puesto como encabezado secundario centrado
+        this.lblNumPuesto = new JLabel("Puesto: -");
+        this.lblNumPuesto.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        this.lblNumPuesto.setForeground(new Color(80, 80, 80));
+        this.lblNumPuesto.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+
+        // Identificador del Cliente (Dato principal destacado)
+        this.lblClienteActual = new JLabel("Esperando cliente...");
+        this.lblClienteActual.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        this.lblClienteActual.setForeground(new Color(0, 102, 204)); // Azul moderno e institucional
+        this.lblClienteActual.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
+
+        // Agregamos al contenedor central con un espaciador rígido en el medio
+        this.panelAuxLblLista.add(this.lblNumPuesto);
+        this.panelAuxLblLista.add(javax.swing.Box.createVerticalStrut(10)); // Separación de 10 píxeles
+        this.panelAuxLblLista.add(this.lblClienteActual);
+        add(this.panelAuxLblLista, BorderLayout.CENTER);
+
+        // 3. ZONA SUR: Distribución de Botones y Mensajes de Feedback
+        this.panelAuxBtn = new JPanel(new BorderLayout(0, 10));
+
+        // Sub-panel para igualar el tamaño de los dos botones en una sola fila
+        JPanel panelContenedorBotones = new JPanel(new GridLayout(1, 2, 15, 0));
+
+        this.btnLlamar = new JButton("Llamar Siguiente");
+        this.btnLlamar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         this.btnLlamar.setActionCommand(LLAMAR);
-
-        this.panelAuxReLlamar = new JPanel();
-        this.panelAuxBtn.add(this.panelAuxReLlamar);
+        this.btnLlamar.setPreferredSize(new java.awt.Dimension(150, 42));
+        this.btnLlamar.putClientProperty("JButton.buttonType", "roundRect"); // Bordes redondeados FlatLaf
 
         this.btnRenotificar = new JButton("Re-notificar");
-        this.panelAuxReLlamar.add(this.btnRenotificar);
+        this.btnRenotificar.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         this.btnRenotificar.setActionCommand(RENOTIFICAR);
+        this.btnRenotificar.putClientProperty("JButton.buttonType", "roundRect");
 
-        // --- label mensaje debajo de los botones ---
-        this.lblMensaje = new JLabel("");
-        this.lblMensaje.setFont(new Font("Segoe UI Variable", Font.PLAIN, 14));
+        panelContenedorBotones.add(this.btnLlamar);
+        panelContenedorBotones.add(this.btnRenotificar);
+
+        // Mensaje de éxito o error del sistema abajo de todo
+        this.lblMensaje = new JLabel(" "); // Lo inicializamos con un espacio en blanco
+        this.lblMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         this.lblMensaje.setHorizontalAlignment(JLabel.CENTER);
-        this.lblMensaje.setVisible(false);
-        this.panelAuxBtn.add(this.lblMensaje);  // se agrega al panel de botones
-        // -------------------------------------------
+        this.lblMensaje.setPreferredSize(new java.awt.Dimension(400, 20)); // Reservamos el alto fijo
 
-        this.panelAuxLblLista = new JPanel();
-        add(this.panelAuxLblLista, BorderLayout.SOUTH);
-
-        this.lblCantClientesEspera = new JLabel("");
-        this.lblCantClientesEspera.setFont(new Font("Segoe UI Variable", Font.PLAIN, 21));
-        this.panelAuxLblLista.add(this.lblCantClientesEspera);
-
-        this.panelAuxNorte = new JPanel();
-        add(this.panelAuxNorte, BorderLayout.NORTH);
-        this.panelAuxNorte.setLayout(new BorderLayout(0, 0));
-
-        this.lblClienteActual = new JLabel("");
-        this.lblClienteActual.setFont(new Font("Segoe UI Variable", Font.PLAIN, 21));
-        this.panelAuxNorte.add(this.lblClienteActual, BorderLayout.CENTER);
-
-        this.lblNumPuesto = new JLabel("");
-        this.lblNumPuesto.setFont(new Font("Tahoma", Font.BOLD, 20));
-        this.panelAuxNorte.add(this.lblNumPuesto, BorderLayout.WEST);
+        this.panelAuxBtn.add(panelContenedorBotones, BorderLayout.CENTER);
+        this.panelAuxBtn.add(this.lblMensaje, BorderLayout.SOUTH);
+        add(this.panelAuxBtn, BorderLayout.SOUTH);
     }
-
     public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
     }
@@ -143,18 +161,18 @@ public class PuestoGUI extends JFrame {
     private void setMensajeInvis() {
         new Thread(() -> {
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            SwingUtilities.invokeLater(() -> this.lblMensaje.setVisible(false));
+            // En lugar de ocultarlo, vaciamos el texto para que mantenga el espacio
+            SwingUtilities.invokeLater(() -> this.lblMensaje.setText(" "));
         }).start();
     }
 
     public void setMensajeError() {
         VistasUtils.enEDT(() -> {
-            this.lblMensaje.setVisible(true);
-            this.lblMensaje.setText("Error al realizar la peticion");
+            this.lblMensaje.setText("Error al realizar la petición");
             this.lblMensaje.setForeground(Color.RED);
             setMensajeInvis();
         });
@@ -162,13 +180,11 @@ public class PuestoGUI extends JFrame {
 
     public void setMensajeExito() {
         VistasUtils.enEDT(() -> {
-            this.lblMensaje.setVisible(true);
-            this.lblMensaje.setText("Peticion enviada correctamente");
+            this.lblMensaje.setText("Petición enviada correctamente");
             this.lblMensaje.setForeground(new Color(0, 150, 80));
             setMensajeInvis();
         });
     }
-
     // ─────────────────────────────────────────────────────────────
 
     public static void main(String[] args) {

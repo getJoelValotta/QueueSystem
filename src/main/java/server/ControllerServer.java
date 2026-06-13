@@ -191,18 +191,24 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         if (turno != null) {
             turno.atender(id);
             System.out.println("======Agregando turno a la Lista de Atencion======");
-            server.getEnAtencion().agregaTurno(turno);
             notificaPuestos();
             // TODO : Persistir cambios en ambas listas.
-        }
-        Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
-        while (enAtencion.hasNext()){
-            Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
-            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)){
-                if (turnoEnAtencionEnPuestoActual.getCantLlamados() < 4){
-                    // TODO : Persistir turnos Atendidos por x puesto a x hora.
+            Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
+            while (enAtencion.hasNext()){
+                Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
+                if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)){
+                    if (turnoEnAtencionEnPuestoActual.getCantLlamados() < 4){
+                        server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
+                        server.getAtendidos().agregaTurno(turnoEnAtencionEnPuestoActual);
+                        // TODO : Persistir turnos Atendidos por x puesto a x hora.
+                    }
+                    else{
+                        server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
+                        server.getAbandonados().agregaTurno(turnoEnAtencionEnPuestoActual);
+                    }
                 }
             }
+            server.getEnAtencion().agregaTurno(turno);
         }
         return turno;
     }

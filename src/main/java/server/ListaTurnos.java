@@ -15,6 +15,10 @@ public class ListaTurnos {
     public Turno llamaTurno(){
         return listaTurnos.poll();    
     }
+
+    public void eliminaTurno(Turno turno) {
+        listaTurnos.remove(turno);
+    }
     
     public int getCantidadTurnos(){
         return listaTurnos.size();
