@@ -1,5 +1,7 @@
 package puesto;
 
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
@@ -13,6 +15,9 @@ import shared.turno.Turno;
 public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     public static final String ATIENDE = "#SIGUIENTE#", RENOTIFICA = "#ACTUAL#";
     private PuestoEventListener escuchadorDeEventos;
+    private Socket socketSimple;
+    protected DataOutputStream outSimple;
+    protected DataInputStream inSimple;
 
     public void setEscuchadorDeEventos(PuestoEventListener escuchadorDeEventos) {
         this.escuchadorDeEventos = escuchadorDeEventos;
@@ -23,11 +28,9 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         Cliente cliente;
         synchronized (mutex) {
             try {
-                out.writeUTF(ATIENDE);
-                System.out.println("PASE POR ATIENDE");
-                String dniRecibido = in.readUTF();
+                outSimple.writeUTF(ATIENDE);
+                String dniRecibido = inSimple.readUTF();
                 cliente = new Cliente(dniRecibido); // TODO : desencriptar
-                System.out.println("\n\n\n EL CLIENTE ES = " + cliente.getDni() + "\n\n\n");
                 turnoEnAtencion = new Turno();
                 turnoEnAtencion.setCliente(cliente);
                 turnoEnAtencion.atender(idPuesto);
@@ -46,8 +49,8 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         boolean notifica = false;
         try {
             synchronized (mutex) {
-                out.writeUTF(RENOTIFICA);
-                notifica = Boolean.parseBoolean(in.readUTF());
+                outSimple.writeUTF(RENOTIFICA);
+                notifica = Boolean.parseBoolean(inSimple.readUTF());
             }
         } catch (IOException e) {
             // TODO : INFORMAR AL ADMIN (Server-side)
@@ -93,9 +96,48 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     @Override
     public void conectaServidor(String IP, int puerto, String nodo) {
         // TODO Auto-generated method stub
-        super.conectaServidor(IP, puerto, nodo);
+        try {
+            super.conectaServidor(IP, puerto, nodo);
+            out.writeUTF(PUESTO_COLA);
+            this.socketSimple = new Socket(IP, puerto);
+            this.outSimple = new DataOutputStream(socketSimple.getOutputStream());
+            this.inSimple = new DataInputStream(socketSimple.getInputStream());
+            outSimple.writeUTF(nodo);
+            outSimple.writeUTF(PUESTO_LLAMADOS);
+        } catch (java.net.ConnectException e) { // Excepcion que discierne si el puerto es incorrecto o el host esta indispuesto.
+            escuchadorDeNodoFisico.conexionErronea("Puerto incorrecto o host indispuesto");
+            e.printStackTrace();
+        } catch (IOException e) { 
+            escuchadorDeNodoFisico.conexionErronea("Error de protocolo de conexion");
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    public void informaID(String id) {
+        try {
+            synchronized (mutex){
+                outSimple.writeUTF(id);
+            }
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+    }
 
+    @Override
+    public String solicitaID() {
+        String nuevaID = null;
+        try {
+            synchronized (mutex) {
+                outSimple.writeUTF(ID);
+                nuevaID = inSimple.readUTF();
+            }
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+        return nuevaID;
+    }
 
 }

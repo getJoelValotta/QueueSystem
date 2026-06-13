@@ -99,7 +99,10 @@ public class PuestoGUI extends JFrame {
 
     public void inhabilitarBtn() {
         this.btnLlamar.setEnabled(false);
-        this.btnRenotificar.setEnabled(false);
+    }    
+
+    public void habilitarBtn() {
+        this.btnLlamar.setEnabled(true);
     }
 
     public void cambiaTextRenotificarAabandonado() {

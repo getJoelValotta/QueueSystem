@@ -30,6 +30,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private GestorID gestorID; // gestor ID es parte del server, pero necesita persistirse y ademas pasarle info al server de Respaldo, justo como la informacion de la lista de espera del server
     private CopyOnWriteArrayList<IControllerObserver> observadoresServers;
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
+    private ManejaPuesto nodoPuesto;
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -65,19 +66,25 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
                 case ComunicaServer.PUESTO:
                     solicitud = in.readUTF();
-                    if (true) {
+                    if (solicitud.equals(ComunicaServer.PUESTO_COLA)) {
+                        nodoPuesto = new ManejaPuesto(this, "-1");
+                        puestoObservaControlador(nodoPuesto);
+                        nodoPuesto.setSocket(socket);
+                    }
+                    else if (solicitud.equals(ComunicaServer.PUESTO_LLAMADOS)){
+                        solicitud = in.readUTF();
                         if (solicitud.equals(ComunicaServer.ID)) {
                             id = gestorID.generarIdPuesto();
                             out.writeUTF(id);
                         }
                         else 
                             id = solicitud;
-                        ManejaPuesto nodoPuesto = new ManejaPuesto(this, id);
-                        puestoObservaControlador(nodoPuesto);
-                        nodoPuesto.setSocket(socket);
+                        nodoPuesto.setId(id);
+                        nodoPuesto.setSocketSimple(socket);
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                         new Thread(nodoPuesto).start();
                     }
+                    
                     break;
 
 
@@ -166,9 +173,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 server.getEnAtencion().agregaTurno(turno);
             }
             else if (estado.equals(IManejaServidores.TURNO_ESPERA)){
-                validacion = server.getEnEspera().contieneA(turno);
+                validacion = server.getEnEspera().contieneA(turno) | server.getEnAtencion().contieneA(turno);
                 if (!validacion){
                     server.getEnEspera().agregaTurno(turno);
+                    System.out.println(server.getEnEspera());
+                    System.out.println(server.getEnAtencion());
                     notificaPuestos();
                 }
             }
@@ -181,6 +190,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         Turno turno = server.getEnEspera().llamaTurno();
         if (turno != null) {
             turno.atender(id);
+            System.out.println("======Agregando turno a la Lista de Atencion======");
             server.getEnAtencion().agregaTurno(turno);
             notificaPuestos();
             // TODO : Persistir cambios en ambas listas.
@@ -198,14 +208,17 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     @Override
-    public void actualizaTurnoRenotificado(String idPuesto) {
+    public boolean actualizaTurnoRenotificado(String idPuesto) {
+        boolean valido = false;
         Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
         while (enAtencion.hasNext()){
             Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
             if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)){
                 turnoEnAtencionEnPuestoActual.llamar();
+                valido = true;
             }
         }
+        return valido;
     }
     
     @Override

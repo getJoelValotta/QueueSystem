@@ -20,8 +20,6 @@ public class TurnoEnAtencion extends TurnoState{
         }
     }
 
-    
-
     @Override
     public void atender(String idPuesto) { // Si lo usa el server, atender significa que pasa de espera a en atencion, si lo usa el puesto pasa de en atencion a atendido.
 

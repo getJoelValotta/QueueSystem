@@ -10,7 +10,7 @@ import server.id.GestorID;
 
 public class Server implements Runnable{
     public static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv principal
-    private ListaTurnos enEspera, enAtencion;
+    private ListaTurnos enEspera, enAtencion, abandonados, atendidos;
     private ServerState estado;
     private ServerSocket socketServer;
     private GestorID gestorID;
@@ -22,6 +22,8 @@ public class Server implements Runnable{
         socketServer = null;
         enEspera = null;
         enAtencion = null;
+        abandonados = null;
+        atendidos = null;
         this.estado = null;
         gestorID = null;
     }
@@ -111,6 +113,8 @@ public class Server implements Runnable{
     public void inicializaListas(){
         this.enEspera = new ListaTurnos();
         this.enAtencion = new ListaTurnos();
+        this.abandonados = new ListaTurnos();
+        this.atendidos = new ListaTurnos();
     }
 
     public ListaTurnos getEnEspera() {
@@ -119,6 +123,14 @@ public class Server implements Runnable{
 
     public ListaTurnos getEnAtencion() {
         return enAtencion;
+    }
+
+    public ListaTurnos getAbandonados() {
+        return abandonados;
+    }
+
+    public ListaTurnos getAtendidos() {
+        return atendidos;
     }
 
     public ServerState getEstado() {
@@ -156,5 +168,7 @@ public class Server implements Runnable{
     public void setSocketListener(SocketListener controller){
         this.escuchadorDeSockets = controller;
     }
+
+
 
 }

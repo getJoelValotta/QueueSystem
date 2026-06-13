@@ -8,8 +8,8 @@ import java.net.UnknownHostException;
 
 public abstract class ComunicaServer {
     private Socket socket;
-    private ConexionListener escuchadorDeNodoFisico;
-    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#",
+    protected ConexionListener escuchadorDeNodoFisico;
+    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#", PUESTO_COLA = "#COLA#", PUESTO_LLAMADOS = "#LLAMADOS#",
             ID = "#IDX#";
     protected DataOutputStream out;
     protected DataInputStream in;

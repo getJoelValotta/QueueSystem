@@ -39,5 +39,9 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
         return this.id;
     }
 
+    public void setId(String id){
+        this.id = id;
+    }
+
     public abstract void comunicacion();
 }

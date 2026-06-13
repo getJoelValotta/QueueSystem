@@ -1,6 +1,9 @@
 package server.manejadores;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 import puesto.Puesto;
 import puesto.PuestoComunicaServer;
@@ -8,31 +11,41 @@ import shared.turno.Turno;
 
 public class ManejaPuesto extends ManejadorDeNodos implements IControllerObserver {
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
-
+    private Socket socketSimple;
+    protected DataOutputStream outSimple;
+    protected DataInputStream inSimple;
+    
     public ManejaPuesto(ManejadorEventListener controllerServer, String id) {
         super(controllerServer, id);
         // TODO Auto-generated constructor stub
+    }
+
+    public void setSocketSimple(Socket socket){
+        this.socketSimple = socket;
+        try {
+            outSimple = new DataOutputStream(socketSimple.getOutputStream());
+            inSimple = new DataInputStream(socketSimple.getInputStream());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void comunicacion() {
         try {
             // socket.setSoTimeout(500);
-            String respuesta = in.readUTF();
-
-            System.out.println("\n\n respuesta = " + respuesta + "\n\n");
+            String respuesta = inSimple.readUTF();
             switch (respuesta) {
                 case PuestoComunicaServer.ATIENDE:
                     Turno turno = controllerServer.llamaSiguienteTurno(this.id);
-                    System.out.println("EL TURNO ES " + (turno != null));
                     if (turno != null) {
-                        System.out.println("DNI CLIENTE = " + String.valueOf(turno.getCliente().getDni()));
-                        out.writeUTF(String.valueOf(turno.getCliente().getDni())); // turno nunca deberia ser nulo porque siempre llama cuando el boton no esata bloqueado.
+                        outSimple.writeUTF(String.valueOf(turno.getCliente().getDni())); // turno nunca deberia ser nulo porque siempre llama cuando el boton no esata bloqueado.
                     }
-                    System.out.println("LO MANDE WACHO!");
                     break;
                 case PuestoComunicaServer.RENOTIFICA:
-                    controllerServer.actualizaTurnoRenotificado(this.id);
+                    boolean valido = controllerServer.actualizaTurnoRenotificado(this.id);
+                    outSimple.writeUTF(String.valueOf(valido));
                     break;
             }
         } catch (IOException e) {

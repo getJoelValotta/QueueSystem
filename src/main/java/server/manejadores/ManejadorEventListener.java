@@ -9,6 +9,6 @@ public interface ManejadorEventListener {
     public Turno llamaSiguienteTurno(String id);
     public void cambiaEstadoServer();
     public void serverDejaDeObservar(IControllerObserver suscriptor);
-    public void actualizaTurnoRenotificado(String idPuesto);
+    public boolean actualizaTurnoRenotificado(String idPuesto);
 
 }

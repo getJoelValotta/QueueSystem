@@ -85,8 +85,16 @@ public class Turno {
         if (estado == null) {
             if (other.estado != null)
                 return false;
-        } else if (!estado.equals(other.estado))
-            return false;
+        } //else if (!estado.equals(other.estado)) //Como uso contains y quiero analizar solo por DNI esto me jode el programa.
+            //return false;
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Turno [cliente=" + cliente.getDni()+ "]";
+    }
+
+
+    
 }

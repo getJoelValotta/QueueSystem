@@ -44,7 +44,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             case PuestoGUI.LLAMAR: //Aca comienza a atender a un cliente y es llamado por primera vez.
                 vistaPuesto.limpiarClienteActual();
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    System.out.println("Puesto " + puesto.getId() + " atiende siguiente");
                     Turno turno = comunicaServer.atiendeSiguiente(puesto.getId());
                     if (turno != null){
                         puesto.setTurno(turno);
@@ -62,6 +61,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 if (turnoActual.estaEnAtencion() & auxCantLlamados < 3)
                     VistasUtils.ejecutarNoBloqueante(() -> {
                         if (comunicaServer.reNotifica()){
+                            System.out.println("====Renotificacion exitosa====");
                             turnoActual.llamar();
                             vistaPuesto.setMensajeExito();
                             if (auxCantLlamados + 1 == 3)
@@ -91,6 +91,12 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     @Override
     public void eventoCantidadEnEspera(int cantEspera) {
         vistaPuesto.setCantClientes(cantEspera);
+        if (cantEspera == 0){
+            vistaPuesto.inhabilitarBtn();
+        }
+        else{
+            vistaPuesto.habilitarBtn();
+        }
     }
 
     public void iniciaPuesto(){

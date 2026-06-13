@@ -27,4 +27,14 @@ public class ListaTurnos {
     public Iterator<Turno> devuelveIterator(){
         return listaTurnos.iterator();
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("ListaTurnos [\n");
+        for (Turno t : listaTurnos) {
+            sb.append("  ").append(t.toString()).append("\n");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }
