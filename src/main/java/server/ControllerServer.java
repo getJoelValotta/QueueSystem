@@ -61,29 +61,40 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoTotem.setSocket(socket);
                     new Thread(nodoTotem).start();
                     break;
+
+
                 case ComunicaServer.PUESTO:
                     solicitud = in.readUTF();
-                    if (solicitud.equals(ComunicaServer.ID)) {
-                        id = gestorID.generarIdTotem();
-                        out.writeUTF(id);
+                    if (true) {
+                        if (solicitud.equals(ComunicaServer.ID)) {
+                            id = gestorID.generarIdPuesto();
+                            out.writeUTF(id);
+                        }
+                        else 
+                            id = solicitud;
+                        ManejaPuesto nodoPuesto = new ManejaPuesto(this, id);
+                        puestoObservaControlador(nodoPuesto);
+                        nodoPuesto.setSocket(socket);
+                        nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
+                        new Thread(nodoPuesto).start();
                     }
-                    else 
-                        id = solicitud;
-                    ManejaPuesto nodoPuesto = new ManejaPuesto(this, id);
-                    nodoPuesto.setSocket(socket);
-                    nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
-                    new Thread(nodoPuesto).start();
                     break;
+
+
                 case ComunicaServer.MONITOR:
                     ManejaMonitor nodoMonitor = new ManejaMonitor(this, "unico");
                     nodoMonitor.setSocket(socket);
                     new Thread(nodoMonitor).start();
                     break;
+
+
                 case ComunicaServer.ADMIN:
                     ManejaAdmin nodoAdmin = new ManejaAdmin(this, "unico");
                     nodoAdmin.setSocket(socket);
                     new Thread(nodoAdmin).start();
                     break;
+
+                    
                 case Server.SERVER:
                     ManejaServerPrincipal nodoServer = new ManejaServerPrincipal(this, "unico");
                     nodoServer.setSocket(socket);
@@ -158,12 +169,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 validacion = server.getEnEspera().contieneA(turno);
                 if (!validacion){
                     server.getEnEspera().agregaTurno(turno);
-                    int cantTurnos = server.getEnEspera().getCantidadTurnos();
-                    Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
-                    while (nodosPuesto.hasNext()){
-                        ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
-                        puestoActual.enviaCantidadEnEspera(cantTurnos);
-                    }    
+                    notificaPuestos();
                 }
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {}
@@ -176,6 +182,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         if (turno != null) {
             turno.atender(id);
             server.getEnAtencion().agregaTurno(turno);
+            notificaPuestos();
             // TODO : Persistir cambios en ambas listas.
         }
         Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
@@ -223,4 +230,13 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         observadoresPuestos.remove(suscriptor);
     }
 
+    public void notificaPuestos(){
+        int cantTurnos = server.getEnEspera().getCantidadTurnos();
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext()){
+            ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+            puestoActual.enviaCantidadEnEspera(cantTurnos);
+        }
     }
+
+}

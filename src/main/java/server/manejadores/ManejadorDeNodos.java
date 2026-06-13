@@ -1,4 +1,4 @@
-package server.manejadores;
+    package server.manejadores;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -35,5 +35,9 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
         }
     }
     
+    public String getId(){
+        return this.id;
+    }
+
     public abstract void comunicacion();
 }

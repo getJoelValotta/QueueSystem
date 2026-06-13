@@ -131,7 +131,7 @@ public class PuestoGUI extends JFrame {
         this.lblClienteActual.setText("");
     }
 
-    public void setNumPuesto(int puesto) {
+    public void setNumPuesto(String puesto) {
         this.lblNumPuesto.setText("Puesto: " + puesto);
     }
 

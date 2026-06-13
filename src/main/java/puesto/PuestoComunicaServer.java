@@ -13,7 +13,6 @@ import shared.turno.Turno;
 public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     public static final String ATIENDE = "#SIGUIENTE#", RENOTIFICA = "#ACTUAL#";
     private PuestoEventListener escuchadorDeEventos;
-    private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
 
     public void setEscuchadorDeEventos(PuestoEventListener escuchadorDeEventos) {
         this.escuchadorDeEventos = escuchadorDeEventos;
@@ -25,7 +24,10 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         synchronized (mutex) {
             try {
                 out.writeUTF(ATIENDE);
-                cliente = new Cliente(in.readUTF()); // TODO : desencriptar
+                System.out.println("PASE POR ATIENDE");
+                String dniRecibido = in.readUTF();
+                cliente = new Cliente(dniRecibido); // TODO : desencriptar
+                System.out.println("\n\n\n EL CLIENTE ES = " + cliente.getDni() + "\n\n\n");
                 turnoEnAtencion = new Turno();
                 turnoEnAtencion.setCliente(cliente);
                 turnoEnAtencion.atender(idPuesto);
@@ -65,10 +67,10 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         String cantidadEnEspera;
         while (!getSocket().isClosed()) {
             try {
-                getSocket().setSoTimeout(2000);
-                synchronized (mutex) {
+                //getSocket().setSoTimeout(2000);
+                //synchronized (mutex) {
                     cantidadEnEspera = in.readUTF();
-                }
+                //}
                 escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(cantidadEnEspera));
             } catch (SocketException e) {
             } catch (IOException e) {
@@ -87,5 +89,13 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     public PuestoEventListener getEscuchadorDeEventos() {
         return escuchadorDeEventos;
     }
+
+    @Override
+    public void conectaServidor(String IP, int puerto, String nodo) {
+        // TODO Auto-generated method stub
+        super.conectaServidor(IP, puerto, nodo);
+    }
+
+
 
 }

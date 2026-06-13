@@ -30,26 +30,31 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
-                    if (puesto.getId().equals("null")){
+                    if (puesto.getId() == null){
                         String id = comunicaServer.solicitaID();
+                        puesto.setId(id);
                     }
                     else{
                         comunicaServer.informaID(puesto.getId());
                     }
+                    vistaPuesto.setNumPuesto(puesto.getId());
+                    new Thread(comunicaServer).start();
                 });
                 break;
             case PuestoGUI.LLAMAR: //Aca comienza a atender a un cliente y es llamado por primera vez.
                 vistaPuesto.limpiarClienteActual();
                 VistasUtils.ejecutarNoBloqueante(() ->{
+                    System.out.println("Puesto " + puesto.getId() + " atiende siguiente");
                     Turno turno = comunicaServer.atiendeSiguiente(puesto.getId());
                     if (turno != null){
                         puesto.setTurno(turno);
+                        vistaPuesto.setClienteActual(turno.getCliente().getDni());
                     } else {
                         // TODO: mostrar en pantalla que hay 0 en la fila
                     }
+                    vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni()); //Esto antes estaba fuera de ejecutarNoBloqueante y se rompia porque se ejecutaba antes de esperar a la comunicacion.
+                    vistaPuesto.habilitaRenotificar();
                 });
-                vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
-                vistaPuesto.habilitaRenotificar();
                 break;
             case PuestoGUI.RENOTIFICAR: // Tomo el turno y consulto si su estado esta en atencion para poder hacer otro llamado, de ser asi mando al sv la peticion y si me da el ok llamo
                 Turno turnoActual = puesto.getTurno();                  // En caso de que la comunicacion falle (devuelva false por algun motivo) se informa a la vista con un mensaje de error que no se envio su peticion.
@@ -105,8 +110,8 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void conexionExitosa() {
         vistaPuesto.mostrar();
         vistaConexion.cerrar();
-        comunicaServer.solicitaID(); //TODO : Cambiar esto ya que necesita guardarla.
-        new Thread(comunicaServer).start();
+        //comunicaServer.solicitaID(); //TODO : Cambiar esto ya que necesita guardarla.
+        //new Thread(comunicaServer).start();
     }
 
 }
