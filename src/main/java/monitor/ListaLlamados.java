@@ -20,8 +20,11 @@ public class ListaLlamados {
 
     public void renotificaTurno(Turno turno){
         if (llamados.size() > 0){
-            llamados.remove(turno);
-            llamados.push(turno);
+            if (llamados.remove(turno) == false){
+                agregaTurno(turno);
+            }
+            else
+                llamados.push(turno);
         }
     }
 

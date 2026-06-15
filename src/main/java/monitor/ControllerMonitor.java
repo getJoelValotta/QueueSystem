@@ -26,7 +26,7 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     @Override
     public void actionPerformed(ActionEvent e) {
         VistasUtils.ejecutarNoBloqueante(() ->
-            escuchaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO)
+            escuchaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.MONITOR)
         );
     }
 
@@ -35,16 +35,18 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
         vistaConexion.mostrar();
     }
 
-    @Override
+    @Override 
     public void eventoRecibeLlamado(Turno turno) { // Implementa la logica del monitor para persistirlo, con la salvedad que la vista es la misma que la ultima vez
-        if (monitor.listaContieneA(turno)){       // deberiamos adaptar la vista a la logica persistible, pero consume mucho tiempo.
-            monitor.renotificaTurno(turno);
-        }
-        else{
-            monitor.agregaTurno(turno);
-        }
+        monitor.agregaTurno(turno);
         vistaMonitor.registrarLlamado( String.valueOf(turno.getCliente().getDni()) , turno.getIdPuesto());
     }
+
+    @Override
+    public void eventoRenotificaLlamado(Turno turno){
+        monitor.renotificaTurno(turno);
+        vistaMonitor.registrarLlamado( String.valueOf(turno.getCliente().getDni()) , turno.getIdPuesto());
+    }
+
 
     @Override
     public void conexionErronea(String mensaje) {

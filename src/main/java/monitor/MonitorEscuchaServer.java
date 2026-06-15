@@ -9,6 +9,7 @@ import shared.conexion_server.ComunicaServer;
 import shared.turno.*;
 
 public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
+    public static final String LLAMA = "#LLAMA#", RENOTIFICA = "#RENOTIFICA#";
     private MonitorEventListener escuchadorDeEventos;
 
 
@@ -20,6 +21,7 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
     public void run() {
         while (!getSocket().isClosed()) {
             try {
+                String accion = in.readUTF();
                 String dniRecibido = in.readUTF(); // TODO : Desencriptar
                 String puesto = in.readUTF();
                 Cliente cliente = new Cliente(dniRecibido);
@@ -27,6 +29,14 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
                 turno.setCliente(cliente);
                 TurnoEnAtencion turnoEnAtencionState = new TurnoEnAtencion(turno, puesto,1);
                 turno.setEstado(turnoEnAtencionState);
+                switch (accion){
+                    case LLAMA:
+                        escuchadorDeEventos.eventoRecibeLlamado(turno);
+                    break;
+                    case RENOTIFICA:
+                        escuchadorDeEventos.eventoRenotificaLlamado(turno);
+                    break;
+                }
                 escuchadorDeEventos.eventoRecibeLlamado(turno);
             } catch (IOException e) {
                 // TODO : Informar al Admin (Server-Side)
@@ -35,5 +45,7 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
             }
         }
     }
+    
+    
 
 }

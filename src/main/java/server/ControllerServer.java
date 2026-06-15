@@ -31,6 +31,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private CopyOnWriteArrayList<IControllerObserver> observadoresServers;
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
     private ManejaPuesto nodoPuesto;
+    private ManejaMonitor nodoMonitor;
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -89,9 +90,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
 
                 case ComunicaServer.MONITOR:
-                    ManejaMonitor nodoMonitor = new ManejaMonitor(this, "unico");
+                    nodoMonitor = new ManejaMonitor(this, "unico"); //podria ser observer, pero el requerimiento es que haya 1 solo.
                     nodoMonitor.setSocket(socket);
-                    new Thread(nodoMonitor).start();
+                    //new Thread(nodoMonitor).start();
                     break;
 
 
@@ -192,6 +193,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             turno.atender(id);
             System.out.println("======Agregando turno a la Lista de Atencion======");
             notificaPuestos();
+            nodoMonitor.llamaMonitor(turno);
             // TODO : Persistir cambios en ambas listas.
             Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
             while (enAtencion.hasNext()){
@@ -221,6 +223,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
             if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)){
                 turnoEnAtencionEnPuestoActual.llamar();
+                nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
                 valido = true;
             }
         }
