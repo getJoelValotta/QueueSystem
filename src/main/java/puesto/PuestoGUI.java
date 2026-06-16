@@ -105,6 +105,7 @@ public class PuestoGUI extends JFrame {
     }
     public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
+        btnRenotificar.setEnabled(false);
     }
 
     public void cerrar() {
@@ -124,7 +125,7 @@ public class PuestoGUI extends JFrame {
     }
 
     public void cambiaTextRenotificarAabandonado() {
-        this.btnRenotificar.setText("Abandonado");
+        this.btnRenotificar.setText("Turno Abandonado");
     }
 
     public void cambiaTextAbandonadoARenotificar() {

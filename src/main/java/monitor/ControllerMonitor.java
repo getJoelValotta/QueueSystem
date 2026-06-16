@@ -31,7 +31,8 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     }
 
     public void iniciaMonitor(){
-        monitor = new Monitor();
+        // TODO : Persistir (cargar) lista de Llamados.
+        monitor = new Monitor("unico",5,new ListaLlamados(5));
         vistaConexion.mostrar();
     }
 

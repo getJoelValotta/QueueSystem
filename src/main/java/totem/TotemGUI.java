@@ -173,7 +173,7 @@ public class TotemGUI extends JFrame {
     }
  
     public void limpiaDNI() {
-        this.campoDNI.setText("");
+        VistasUtils.enEDT(() -> this.campoDNI.setText(""));
     }
  
 }

@@ -10,5 +10,6 @@ public interface ManejadorEventListener {
     public void cambiaEstadoServer();
     public void serverDejaDeObservar(IControllerObserver suscriptor);
     public boolean actualizaTurnoRenotificado(String idPuesto);
+    public void recibeTurnoEnRespaldo(Turno turno);
 
 }

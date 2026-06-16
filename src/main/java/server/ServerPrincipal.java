@@ -21,6 +21,13 @@ public class ServerPrincipal extends ServerState{
         }
     }
 
+    @Override
+    public boolean esPrincipal() {
+        return true;
+    }
+
+
+    
 /*   
     @Override
     public void hearthbeat(DataInputStream in, DataOutputStream out) {}

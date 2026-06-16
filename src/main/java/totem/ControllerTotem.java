@@ -34,10 +34,14 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM);
-                    if (totem.getId().equals("null")){
+                    if (totem.getId() == null){
+                        System.out.println("PIDO ID");
                         String id = comunicaServer.solicitaID();
+                        System.out.println("id = " + id);
+                        totem.setId(id);
                     }
                     else{
+                        System.out.println("INFORMO EL ID = "+totem.getId());
                         comunicaServer.informaID(totem.getId());
                     }
                 });
@@ -52,6 +56,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
                             vistaTotem.setGuiaError("Usted ya se encuentra registrado.");
                         } else {
                             vistaTotem.setGuiaExito("DNI Ingresado");
+                            vistaTotem.limpiaDNI();
                         }
                     });
                 } catch (ClienteDniVacioException e1) { //Nunca se lanzaran ya que la vista controla esto antes.
@@ -62,8 +67,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void iniciaTotem(){
         // TODO : persistencia + logica de asignacion de ids estilo tot_001... si no tiene persistencia solicita a server primer id y luego persiste.
-        this.totem = new Totem(String.valueOf(idx), null);
-        idx = idx+1;
+        this.totem = new Totem();
         // si id es null o no hay archivo persistido para el totem, invocar ComunicaServer.solicitaID();
         vistaConexion.mostrar(); //temporal
     }

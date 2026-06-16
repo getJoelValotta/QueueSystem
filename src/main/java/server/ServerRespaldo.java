@@ -21,6 +21,12 @@ public class ServerRespaldo extends ServerState{
     }
 
 
+    @Override
+    public boolean esRespaldo() {
+        return true;
+    }
+
+
 
  /* 
     @Override

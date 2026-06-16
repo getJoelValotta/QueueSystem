@@ -22,8 +22,9 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
         while (!getSocket().isClosed()) {
             try {
                 String accion = in.readUTF();
-                String dniRecibido = in.readUTF(); // TODO : Desencriptar
                 String puesto = in.readUTF();
+                String dniRecibido = in.readUTF(); // TODO : Desencriptar
+                System.out.println("ACCION = " + accion + ", DNI = " + dniRecibido + ", PUESTO = " + puesto);
                 Cliente cliente = new Cliente(dniRecibido);
                 Turno turno = new Turno();
                 turno.setCliente(cliente);
@@ -31,7 +32,9 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
                 turno.setEstado(turnoEnAtencionState);
                 switch (accion){
                     case LLAMA:
+                        System.out.println("LLAMANDO A TURNO...");
                         escuchadorDeEventos.eventoRecibeLlamado(turno);
+                        System.out.println("LLAMADO RECIBIDO");
                     break;
                     case RENOTIFICA:
                         escuchadorDeEventos.eventoRenotificaLlamado(turno);
