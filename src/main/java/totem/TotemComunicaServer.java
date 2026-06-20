@@ -21,16 +21,16 @@ public class TotemComunicaServer extends ComunicaServer {
             return validacion;
         } catch (SocketException e) {
             System.out.println("EXCEPTION POR SOCKET");
-            reintentarConexion(dni);
+            return reintentarConexion(dni);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         return validacion;
     }
 
-    public void reintentarConexion(long dni){
+    public boolean reintentarConexion(long dni){
         conectaServidor(IP, puerto, ComunicaServer.TOTEM);
         informaID(escuchadorDeNodoFisico.getId());
-        enviarDNI(dni);
+        return enviarDNI(dni);
     }
 }
