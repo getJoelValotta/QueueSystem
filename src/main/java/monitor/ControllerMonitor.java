@@ -26,7 +26,7 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     @Override
     public void actionPerformed(ActionEvent e) {
         VistasUtils.ejecutarNoBloqueante(() ->
-            escuchaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.MONITOR)
+            escuchaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.MONITOR)
         );
     }
 
@@ -58,7 +58,13 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     public void conexionExitosa() {
         vistaMonitor.mostrar();
         vistaConexion.cerrar();
+        System.out.println("CONEXION EXITOSA");
         new Thread(escuchaServer).start();
+        System.out.println("INSTANCIE MI THREAD");
+    }
+
+    public String getId(){
+        return monitor.getId();
     }
 
 }

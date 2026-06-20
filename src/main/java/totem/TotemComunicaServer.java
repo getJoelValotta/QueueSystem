@@ -1,6 +1,7 @@
 package totem;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 import shared.conexion_server.ComunicaServer;
 
@@ -18,10 +19,18 @@ public class TotemComunicaServer extends ComunicaServer {
             // TODO : Informar al ADMIN (server-side)
             validacion = Boolean.parseBoolean(in.readUTF());
             return validacion;
-        } catch (IOException e) {
-            escuchadorDeEventos.mensajeError("Error de protocolo de conexion"); // TODO : Manejar retry???
-            e.printStackTrace();
-        }
+        } catch (SocketException e) {
+            System.out.println("EXCEPTION POR SOCKET");
+            reintentarConexion(dni);
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         return validacion;
+    }
+
+    public void reintentarConexion(long dni){
+        conectaServidor(IP, puerto, ComunicaServer.TOTEM);
+        informaID(escuchadorDeNodoFisico.getId());
+        enviarDNI(dni);
     }
 }

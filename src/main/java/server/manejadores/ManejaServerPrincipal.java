@@ -96,13 +96,23 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
         } catch (SocketException e) {
             this.cantErrores += 1;
             if (cantErrores == 2){
+                System.out.println("\n\n2 ERRORES\n\n");
                 controllerServer.cambiaEstadoServer();
-                controllerServer.serverDejaDeObservar(this);
+                try {
+                    socket.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
             }
             e.printStackTrace();
         } catch (IOException e) {
+            System.out.println("\n\nNUNCA ENTRO AL SOCKETEXCEPTION\n\n");
             controllerServer.cambiaEstadoServer();
-            controllerServer.serverDejaDeObservar(this);
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             e.printStackTrace();
         }
     }

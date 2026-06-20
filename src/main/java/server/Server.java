@@ -77,18 +77,7 @@ public class Server implements Runnable{
             outConexionInicial.writeUTF(SERVER);
             return socketEntreServers;
         } catch (java.net.ConnectException e) {
-            try {
-                socketEntreServers = new Socket(DNS,puerto2); // TODO : Recordar eliminar esto, ya que solo se conectan a 1 puerto los nodos fisicos
-                outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream());
-                outConexionInicial.writeUTF(SERVER);
-                return socketEntreServers;
-            } catch (java.net.ConnectException e1) {
-                e1.printStackTrace();
-                return null;
-            } catch (IOException e1) {
-                e1.printStackTrace();
-                return null;
-            }
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

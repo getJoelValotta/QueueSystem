@@ -29,7 +29,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
+                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
                     if (puesto.getId() == null){
                         String id = comunicaServer.solicitaID();
                         puesto.setId(id);
@@ -86,7 +86,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 }
                 break;
             }
-        }
+    }
         
     @Override
     public void eventoCantidadEnEspera(int cantEspera) {
@@ -118,6 +118,10 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         vistaConexion.cerrar();
         //comunicaServer.solicitaID(); //TODO : Cambiar esto ya que necesita guardarla.
         //new Thread(comunicaServer).start();
+    }
+
+    public String getId(){
+        return puesto.getId();
     }
 
 }

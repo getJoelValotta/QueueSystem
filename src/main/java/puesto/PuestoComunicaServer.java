@@ -52,11 +52,26 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
                 outSimple.writeUTF(RENOTIFICA);
                 notifica = Boolean.parseBoolean(inSimple.readUTF());
             }
+        } catch (SocketException e){
+            reintentarConexion("RENOTIFICA", null);
         } catch (IOException e) {
             // TODO : INFORMAR AL ADMIN (Server-side)
             e.printStackTrace();
         }
         return notifica;
+    }
+
+    public void reintentarConexion(String op, String idPuesto){
+        conectaServidor(IP, puerto, ComunicaServer.PUESTO);
+        informaID(escuchadorDeNodoFisico.getId());
+        switch (op) {
+            case "LLAMA":
+                atiendeSiguiente(idPuesto);
+                break;
+            case "RENOTIFICA":
+                reNotifica();
+                break;
+        }
     }
 
     // POSIBLE PROBLEMA CON ESTO: MIENTRAS UN PUESTO ATIENDE Y REALIZA UN OUT QUE
@@ -76,6 +91,7 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
                 //}
                 escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(cantidadEnEspera));
             } catch (SocketException e) {
+                reintentarConexion("im sorry, but if you read this you might be gay", "es chiste!!!");
             } catch (IOException e) {
                 // TODO : INFORMAR AL ADMIN (Server-side)
                 try {
@@ -95,7 +111,7 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
 
     @Override
     public void conectaServidor(String IP, int puerto, String nodo) {
-        // TODO Auto-generated method stub
+        
         try {
             super.conectaServidor(IP, puerto, nodo);
             out.writeUTF(PUESTO_COLA);

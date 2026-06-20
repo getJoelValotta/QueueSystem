@@ -33,7 +33,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServer.conectaServidor(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM);
+                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM);
                     if (totem.getId() == null){
                         System.out.println("PIDO ID");
                         String id = comunicaServer.solicitaID();
@@ -86,6 +86,10 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     @Override
     public void mensajeError(String mensaje) {
         VistasUtils.enEDT(() -> vistaTotem.setGuiaError(mensaje));
+    }
+
+    public String getId(){
+        return totem.getId();
     }
 
 }

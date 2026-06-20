@@ -1,6 +1,8 @@
 package monitor;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.net.SocketException;
 
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
@@ -19,8 +21,10 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
 
     @Override
     public void run() {
-        while (!getSocket().isClosed()) {
+        Socket socketActual = getSocket();
+        while (!socketActual.isClosed()) {
             try {
+                System.out.println("LLEGUE AL IN");
                 String accion = in.readUTF();
                 String puesto = in.readUTF();
                 String dniRecibido = in.readUTF(); // TODO : Desencriptar
@@ -41,14 +45,17 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
                     break;
                 }
                 escuchadorDeEventos.eventoRecibeLlamado(turno);
+            } catch (SocketException e) {
+                System.out.println("ENTRE SOCKET EXCEPTION");
+                conectaServidor(IP, puerto, ComunicaServer.MONITOR);
+                e.printStackTrace();
             } catch (IOException e) {
+                System.out.println("entre ioexception");
                 // TODO : Informar al Admin (Server-Side)
                 e.printStackTrace();
             } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {
             }
         }
     }
-    
-    
 
 }

@@ -4,5 +4,6 @@ public interface ConexionListener {
 
     public void conexionErronea(String mensaje);
     public void conexionExitosa();
+    public String getId();
 
 }
