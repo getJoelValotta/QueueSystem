@@ -9,18 +9,19 @@ import shared.persistencia.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class TurnosEsperaJSONMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
-    private static TurnosEsperaJSONMapper instance;
+public class ListaTurnosJSONMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
+    private static ListaTurnosJSONMapper instance;
     String filePath = "turnosEsperaServer.json";
 
-    private TurnosEsperaJSONMapper(String filePath) {
+    private ListaTurnosJSONMapper(String filePath) {
         super(filePath);
     }
 
-    public static TurnosEsperaJSONMapper getInstance(String filePath) {
+    public static ListaTurnosJSONMapper getInstance(String filePath) {
         if (instance == null) {
-            instance = new TurnosEsperaJSONMapper(filePath);
-        }
+            instance = new ListaTurnosJSONMapper(filePath);
+        } else
+            filePath = instance.filePath;
         return instance;
     }
 

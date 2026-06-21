@@ -5,18 +5,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import shared.turno.*;
 import shared.persistencia.*;
 
-public class TurnosEsperaTXTMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
-    private static TurnosEsperaTXTMapper instance;
+public class ListaTurnosTXTMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
+    private static ListaTurnosTXTMapper instance;
     String filePath = "turnosEsperaServer.txt";
 
-    private TurnosEsperaTXTMapper(String filePath) {
+    private ListaTurnosTXTMapper(String filePath) {
         super(filePath);
     }
 
-    public static TurnosEsperaTXTMapper getInstance(String filePath) {
+    public static ListaTurnosTXTMapper getInstance(String filePath) {
         if (instance == null) {
-            instance = new TurnosEsperaTXTMapper(filePath);
-        }
+            instance = new ListaTurnosTXTMapper(filePath);
+        } else
+            filePath = instance.filePath;
         return instance;
     }
 

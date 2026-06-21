@@ -44,7 +44,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaPuesto nodoPuesto;
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
-    private String modo = "xml";
+    // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
+    private String modo = "json";
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -366,6 +367,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         // TODO: Los demas turnos
         switch (cosaAPersistir) {
             case "turnosEspera":
+                System.out.println("Persistiendo turnos en espera...");
                 LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos());
                 break;
             default:

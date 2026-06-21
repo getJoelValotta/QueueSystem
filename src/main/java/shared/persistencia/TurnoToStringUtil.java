@@ -33,10 +33,14 @@ public class TurnoToStringUtil {
         }
         // le saco los aprentesis
         String content = state.substring(1, state.length() - 1);
-        // divido el contenido por comas
-        String[] parts = content.split("; ");
+        // divido el contenido por punto y coma
+        String[] parts = content.split(";");
         if (parts.length != 4) {
             throw new IllegalArgumentException("Formato de estado de turno no válido: " + state);
+        }
+
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].trim();
         }
 
         Turno turno = new Turno();

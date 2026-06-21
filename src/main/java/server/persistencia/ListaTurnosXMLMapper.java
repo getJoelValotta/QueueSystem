@@ -1,5 +1,7 @@
 package server.persistencia;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import shared.turno.*;
@@ -9,29 +11,29 @@ import shared.persistencia.*;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;;
 
-public class TurnosEsperaXMLMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
-    private static TurnosEsperaXMLMapper instance;
+public class ListaTurnosXMLMapper extends AbstractFileMapper<ConcurrentLinkedQueue<Turno>> {
+    private static ListaTurnosXMLMapper instance;
     String filePath = "turnosEsperaServer.xml";
 
-    private TurnosEsperaXMLMapper(String filePath) {
+    private ListaTurnosXMLMapper(String filePath) {
         super(filePath);
     }
 
-    public static TurnosEsperaXMLMapper getInstance(String filePath) {
+    public static ListaTurnosXMLMapper getInstance(String filePath) {
         if (instance == null) {
-            instance = new TurnosEsperaXMLMapper(filePath);
-        }
+            instance = new ListaTurnosXMLMapper(filePath);
+        } else
+            filePath = instance.filePath;
         return instance;
     }
 
     @Override
     protected String serialize(ConcurrentLinkedQueue<Turno> turnos) {
-        // Pasamos a lista de strings formateados de turnos
-        ConcurrentLinkedQueue<String> turnosStr = new ConcurrentLinkedQueue<>();
+        List<String> turnosStr = new ArrayList<>();
         for (Turno turno : turnos) {
             turnosStr.add(TurnoToStringUtil.getStringDelTurno(turno));
         }
-        // Convertimos la lista de strings a XML
+
         XmlMapper xmlMapper = new XmlMapper();
         try {
             return xmlMapper.writeValueAsString(turnosStr);
@@ -46,8 +48,8 @@ public class TurnosEsperaXMLMapper extends AbstractFileMapper<ConcurrentLinkedQu
         ConcurrentLinkedQueue<Turno> turnos = new ConcurrentLinkedQueue<>();
         XmlMapper xmlMapper = new XmlMapper();
         try {
-            ConcurrentLinkedQueue<String> turnosStr = xmlMapper.readValue(data,
-                    new TypeReference<ConcurrentLinkedQueue<String>>() {
+            List<String> turnosStr = xmlMapper.readValue(data,
+                    new TypeReference<List<String>>() {
                     });
             for (String turnoStr : turnosStr) {
                 turnos.add(TurnoToStringUtil.getTurnoFromString(turnoStr));

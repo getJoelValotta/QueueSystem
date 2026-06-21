@@ -10,11 +10,13 @@ public abstract class AbstractFileMapper<T> {
     }
 
     public final void save(T object) {
+        System.out.println("Guardando objeto en " + filePath);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(serialize(object));
         } catch (IOException e) {
             throw new RuntimeException("Error escribiendo archivo", e);
         }
+
     }
 
     public final T load() {
