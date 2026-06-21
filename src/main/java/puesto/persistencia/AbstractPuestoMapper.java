@@ -11,7 +11,7 @@ public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
         super(filePath);
     }
 
-    protected final String getStringState(Turno turno) {
+    protected final String getStringDelTurno(Turno turno) {
         // formato: (estado,cantLlamados,idPuesto,dni) -1 para undefined
         if (turno == null) {
             return "(-1;-1;-1,-1)";

@@ -22,7 +22,7 @@ public class PuestoTXTMapper extends AbstractPuestoMapper {
     protected String serialize(Puesto puesto) {
         // Pasa los datos de puesto a formato txt
         // (Formato: idPuesto,(estado,cantLlamados,idPuesto,dni))
-        return puesto.getId() + "," + getStringState(puesto.getTurno());
+        return puesto.getId() + "," + getStringDelTurno(puesto.getTurno());
     }
 
     @Override

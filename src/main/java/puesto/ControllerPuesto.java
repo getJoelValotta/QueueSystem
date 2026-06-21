@@ -93,11 +93,15 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 break;
         }
         try {
-            Thread.sleep(500);
+            // TREMENDO HARDCODEO PERO FUNCIONA
+            Thread.sleep(250);
         } catch (InterruptedException es) {
             System.out.println("Error al hacer sleep despues de accion realizada");
         }
+        // TODO: Persiste en todos los modos, discriminar por modo admin
         persistePuesto("txt");
+        persistePuesto("json");
+        persistePuesto("xml");
     }
 
     @Override
@@ -116,7 +120,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
         puesto = new Puesto();
         vistaConexion.mostrar(); // temporal
-
+        // TODO: Levantar archivo?
         // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el
         // boton renotificar a "Marcar como abandonado"
     }
