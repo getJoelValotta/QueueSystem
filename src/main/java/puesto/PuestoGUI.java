@@ -105,7 +105,7 @@ public class PuestoGUI extends JFrame {
     }
     public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
-        //btnRenotificar.setEnabled(false);
+        btnRenotificar.setEnabled(false);
     }
 
     public void cerrar() {

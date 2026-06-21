@@ -1,27 +1,27 @@
 package admin;
 
 public class Admin {
-    private int metodoPersistencia;
-    private int metodoEncriptacion;
+    private String metodoPersistencia;
+    private String metodoEncriptacion;
 
-    public Admin(int metodoPersistencia, int metodoEncriptacion){
+    public Admin(String metodoPersistencia, String metodoEncriptacion){
         this.metodoEncriptacion = metodoEncriptacion;
         this.metodoPersistencia = metodoPersistencia;
     }
 
-    public int getMetodoPersistencia() {
+    public String getMetodoPersistencia() {
         return metodoPersistencia;
     }
 
-    public void setMetodoPersistencia(int metodoPersistencia) {
+    public void setMetodoPersistencia(String metodoPersistencia) {
         this.metodoPersistencia = metodoPersistencia;
     }
 
-    public int getMetodoEncriptacion() {
+    public String getMetodoEncriptacion() {
         return metodoEncriptacion;
     }
 
-    public void setMetodoEncriptacion(int metodoEncriptacion) {
+    public void setMetodoEncriptacion(String metodoEncriptacion) {
         this.metodoEncriptacion = metodoEncriptacion;
     }
 

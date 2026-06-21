@@ -1,7 +1,15 @@
 package admin;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class ControllerAdmin implements AdminEventListener {
+import shared.VistasUtils;
+import shared.conexion_server.ComunicaServer;
+import shared.conexion_server.ConexionListener;
+
+public class ControllerAdmin implements AdminEventListener, ActionListener, ConexionListener{
+    public static final String PRINCIPAL = "#PRINCIPAL#", RESPALDO = "#RESPALDO#";
     AdminGUI vistaAdmin;
+    Admin admin;
     AdminComunicaServer comunicaServer;
 
     public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServer comunicaServer){
@@ -12,35 +20,68 @@ public class ControllerAdmin implements AdminEventListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()){
-            case vistaAdmin.XML:
-                comunicaServer.actualizaPersistencia(vistaAdmin.XML);
+            case AdminGUI.XML:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.XML);
+                });
                 break;
             
-            case vistaAdmin.JSON:
-                comunicaServer.actualizaPersistencia(vistaAdmin.JSON);
+            case AdminGUI.JSON:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.JSON);
+                });
                 break;
             
-            case vistaAdmin.TXT:
-                comunicaServer.actualizaPersistencia(vistaAdmin.TXT);
+            case AdminGUI.TXT:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.TXT);
+                });
                 break;
             
-            case vistaAdmin.MD5:
-                comunicaServer.actualizaEncriptacion(vistaAdmin.MD5);
+            case AdminGUI.MD5:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    comunicaServer.enviaTipoEncriptacion(AdminComunicaServer.MD5);
+                });
                 break;
 
-            case vistaAdmin.SHA_2:
-                comunicaServer.actualizaEncriptacion(vistaAdmin.SHA_2);
+            case AdminGUI.SHA_2:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    comunicaServer.enviaTipoEncriptacion(AdminComunicaServer.SHA_2);
+                });
                 break;
-                
             }
     }
 
 
-    public void muestraLog (String server, String msg){ 
-        if (server.equals("PRINCIPAL")){
-            vistaAdmin.muestraLogPrincipal(msg);
-        } else if (server.equals("RESPALDO")){
-            vistaAdmin.muestraLogRespaldo(msg);
+    public void iniciaAdmin(){
+        // Carga el Admin por persistencia. Primera vez hardcodeado con un archivo con formato a definir. si cambia el formato
+        admin = new Admin("TXT","MD5");
+        comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
+        new Thread(comunicaServer).start();
+    }
+
+
+    public void muestraLog (String msg, String server){ 
+        if (server.equals(PRINCIPAL)){
+            vistaAdmin.logServerPrincipal(msg);
+        } else if (server.equals(RESPALDO)){
+            vistaAdmin.logServerRespaldo(msg);
         }
+    }
+
+    @Override
+    public void conexionErronea(String mensaje) {
+        comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
+    }
+
+    @Override
+    public void conexionExitosa() {
+        vistaAdmin.mostrar();
+    }
+
+    @Override
+    public String getId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getId'");
     }
 }

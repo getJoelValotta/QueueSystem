@@ -1,7 +1,11 @@
 package totem;
  
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
  
 import javax.swing.JButton;
@@ -10,8 +14,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
-import javax.swing.border.EmptyBorder;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AbstractDocument;
@@ -19,12 +24,16 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
 import shared.VistasUtils;
  
 public class TotemGUI extends JFrame {
  
+    // Constante exacta requerida por el Controlador
     public static final String REGISTRAR = "#REGISTRAR#";
  
+    // Atributos originales preservados para mantener compatibilidad absoluta
     private JPanel panelAuxCampoDNI;
     private JPanel panelAuxTxtDNI;
     private JPanel panelAuxBtnRegistrar;
@@ -34,70 +43,100 @@ public class TotemGUI extends JFrame {
     private JPanel panelAuxTxtGuia;
     private JLabel labelGuia;
  
-    public TotemGUI() {
-        setTitle("Tótem - Autogestión de Turnos");
-        setLayout(new BorderLayout());
-        setSize(450, 320);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
- 
-        // Padding general
-        ((JPanel) getContentPane()).setBorder(new EmptyBorder(20, 30, 20, 30));
- 
-        // ── Norte: Label guía ──
-        this.panelAuxTxtGuia = new JPanel(new BorderLayout());
-        this.labelGuia = new JLabel("Ingrese su DNI para obtener un turno");
-        this.labelGuia.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 16));
-        this.labelGuia.setHorizontalAlignment(JLabel.CENTER);
-        this.panelAuxTxtGuia.add(this.labelGuia, BorderLayout.CENTER);
-        add(this.panelAuxTxtGuia, BorderLayout.NORTH);
- 
-        // ── Centro: Campo DNI (Distribución Vertical) ──
-        this.panelAuxCampoDNI = new JPanel();
-        this.panelAuxCampoDNI.setLayout(new javax.swing.BoxLayout(this.panelAuxCampoDNI, javax.swing.BoxLayout.Y_AXIS));
-        this.panelAuxCampoDNI.setBorder(new EmptyBorder(25, 0, 25, 0));
- 
-        this.panelAuxTxtDNI = new JPanel(); // Mantenemos el panel original por compatibilidad
-        this.textDNI = new JTextPane();
-        this.textDNI.setText("DNI");
-        this.textDNI.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
-        this.textDNI.setForeground(new java.awt.Color(80, 80, 80));
-        this.textDNI.setEditable(false);
-        this.textDNI.setBackground(null);
-        this.textDNI.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
- 
-        this.campoDNI = new JTextField();
-        this.campoDNI.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 40));
-        this.campoDNI.setHorizontalAlignment(JTextField.CENTER);
-        this.campoDNI.setMaximumSize(new java.awt.Dimension(300, 65));
-        this.campoDNI.setAlignmentX(java.awt.Component.CENTER_ALIGNMENT);
-        // Hint nativo de FlatLaf
-        this.campoDNI.putClientProperty("JTextField.placeholderText", "Ej: 12345678");
+    // Texto por defecto solicitado
+    private final String TEXTO_DEFAULT = "Ingrese su documento para registrarse";
 
-        this.panelAuxCampoDNI.add(this.textDNI);
-        this.panelAuxCampoDNI.add(javax.swing.Box.createVerticalStrut(5));
-        this.panelAuxCampoDNI.add(this.campoDNI);
-        add(this.panelAuxCampoDNI, BorderLayout.CENTER);
+    // Componentes de control interno para el Cartel Guía
+    private Timer timerGuia;
+    private Color colorOriginalLabel;
+
+    public TotemGUI() {
+        // Inicializar FlatLightLaf de manera segura
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (Exception e) {
+            System.err.println("No se pudo aplicar FlatLightLaf en el Tótem");
+        }
+
+        setTitle("Tótem - Autogestión de Turnos");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(450, 450);
+        setMinimumSize(new Dimension(400, 400));
+        setLocationRelativeTo(null);
+        setResizable(true);
  
-        // ── Validación de caracteres: solo dígitos, máximo 8 ──
+        inicializarComponentes();
+        inicializarTimer();
+    }
+ 
+    private void inicializarComponentes() {
+        // Layout principal del Frame en GridBagLayout para flotar el contenido en el centro absoluto
+        this.setLayout(new GridBagLayout());
+        
+        // Instanciación de todos los objetos originales para prevenir NullPointerExceptions externos
+        panelAuxCampoDNI = new JPanel(new GridBagLayout());
+        panelAuxTxtDNI = new JPanel();
+        panelAuxBtnRegistrar = new JPanel();
+        panelAuxTxtGuia = new JPanel();
+        textDNI = new JTextPane(); // Oculto de la vista por diseño limpio
+
+        // 1. Cartel de guía con el texto por defecto solicitado
+        labelGuia = new JLabel(TEXTO_DEFAULT, SwingConstants.CENTER);
+        labelGuia.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        colorOriginalLabel = labelGuia.getForeground(); // <-- GUARDAMOS EL COLOR ORIGINAL AQUÍ
+        
+        // 2. Barra de ingreso (Sin ejemplos ni hints)
+        campoDNI = new JTextField();
+        campoDNI.setFont(new Font("Segoe UI", Font.BOLD, 36));
+        campoDNI.setHorizontalAlignment(JTextField.CENTER);
+        campoDNI.setPreferredSize(new Dimension(280, 55));
+ 
+        // 3. Botón de Registro situado debajo
+        btnRegistrar = new JButton("Registrar Turno");
+        btnRegistrar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnRegistrar.setPreferredSize(new Dimension(280, 45));
+        btnRegistrar.setActionCommand(REGISTRAR);
+        btnRegistrar.setEnabled(false);
+        btnRegistrar.putClientProperty("JButton.buttonType", "roundRect");
+
+        // --- CONSTRUCCIÓN DEL PANEL CENTRAL (COMPONENTE RÍGIDO CENTRADO) ---
+        GridBagConstraints gbcInterno = new GridBagConstraints();
+        gbcInterno.gridx = 0;
+        gbcInterno.fill = GridBagConstraints.HORIZONTAL;
+        gbcInterno.insets = new Insets(15, 0, 15, 0); // Separación vertical limpia
+        gbcInterno.anchor = GridBagConstraints.CENTER;
+
+        gbcInterno.gridy = 0;
+        panelAuxCampoDNI.add(labelGuia, gbcInterno);
+
+        gbcInterno.gridy = 1;
+        panelAuxCampoDNI.add(campoDNI, gbcInterno);
+
+        gbcInterno.gridy = 2;
+        panelAuxCampoDNI.add(btnRegistrar, gbcInterno);
+
+        // Agregamos el contenedor principal al Frame
+        this.add(panelAuxCampoDNI, new GridBagConstraints());
+
+        // ── Validación de caracteres: permite vaciado (string.isEmpty()) ──
         ((AbstractDocument) this.campoDNI.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
                 if (string == null) return;
-                if (string.matches("\\d+") && fb.getDocument().getLength() + string.length() <= 8) {
+                if ((string.isEmpty() || string.matches("\\d+")) && fb.getDocument().getLength() + string.length() <= 8) {
                     super.insertString(fb, offset, string, attr);
                 }
             }
             @Override
             public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attr) throws BadLocationException {
                 if (string == null) return;
-                if (string.matches("\\d+") && fb.getDocument().getLength() - length + string.length() <= 8) {
+                if ((string.isEmpty() || string.matches("\\d+")) && fb.getDocument().getLength() - length + string.length() <= 8) {
                     super.replace(fb, offset, length, string, attr);
                 }
             }
         });
         
-        // ── Habilitar / deshabilitar botón ──
+        // ── Habilitar / deshabilitar botón original ──
         this.campoDNI.getDocument().addDocumentListener(new DocumentListener() {
             @Override public void insertUpdate(DocumentEvent e)  { actualizarBoton(); }
             @Override public void removeUpdate(DocumentEvent e)  { actualizarBoton(); }
@@ -107,20 +146,21 @@ public class TotemGUI extends JFrame {
                 btnRegistrar.setEnabled(largo == 7 || largo == 8);
             }
         });
- 
-        // ── Sur: botón Registrar ──
-        this.panelAuxBtnRegistrar = new JPanel(new BorderLayout());
-        this.btnRegistrar = new JButton("Registrar Turno");
-        this.btnRegistrar.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 16));
-        this.btnRegistrar.setPreferredSize(new java.awt.Dimension(0, 45));
-        this.btnRegistrar.setActionCommand(REGISTRAR);
-        this.btnRegistrar.setEnabled(false);
-        this.btnRegistrar.putClientProperty("JButton.buttonType", "roundRect");
-        this.panelAuxBtnRegistrar.add(this.btnRegistrar, BorderLayout.CENTER);
-        
-        add(this.panelAuxBtnRegistrar, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Inicializa el Timer de Swing de forma segura.
+     */
+    private void inicializarTimer() {
+        timerGuia = new Timer(20000, e -> {
+            labelGuia.setText(TEXTO_DEFAULT);
+            labelGuia.setForeground(colorOriginalLabel); // Restaura el color exacto guardado
+        });
+        timerGuia.setRepeats(false); // Una única ejecución por disparo
     }
  
+    // --- MÉTODOS DE CONTROL DE CICLO DE VIDA ---
+
     public void mostrar(){
         VistasUtils.enEDT(() -> this.setVisible(true));
     }
@@ -129,52 +169,59 @@ public class TotemGUI extends JFrame {
         VistasUtils.enEDT(() -> this.dispose());
     }
 
-    // ── Métodos de estado del label guía ──
- 
-    public void setGuiaInvis() {
-        new Thread(() -> {
-            try {
-              Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            SwingUtilities.invokeLater(() -> this.labelGuia.setVisible(false));
-        }).start();
-    }
+    // ── Métodos de estado del label guía controlados mediante el Timer unificado ──
  
     public void setGuiaError(String guia) {
         VistasUtils.enEDT(() -> {
-            this.labelGuia.setVisible(true);
             this.labelGuia.setText(guia);
             this.labelGuia.setForeground(Color.RED);
-            setGuiaInvis();
+            
+            // CORRECCIÓN SINCRO: Modificamos tanto delay como initialDelay y reiniciamos
+            timerGuia.stop();
+            timerGuia.setInitialDelay(5000); // 20 segundos exactos solicitados
+            timerGuia.setDelay(5000);
+            timerGuia.restart(); // Mata cualquier ejecución previa y arranca de cero
         });
     }
  
     public void setGuiaExito(String guia) {
         VistasUtils.enEDT(() -> {
-            this.labelGuia.setVisible(true);
             this.labelGuia.setText(guia);
-            this.labelGuia.setForeground(new Color(0, 150, 80));
-            setGuiaInvis();
+            this.labelGuia.setForeground(new Color(0, 150, 80)); // Verde éxito
+            
+            // Éxitos visuales cortos (5 segundos) para no entorpecer el uso continuo del Tótem
+            timerGuia.stop();
+            timerGuia.setInitialDelay(5000); 
+            timerGuia.setDelay(5000);
+            timerGuia.restart();
         });
     }
  
-    // ── Listener del botón ──
+    // ── Inyección del Listener del Botón (Envoltorio Seguro de Limpieza) ──
  
     public void setActionListener(ActionListener controlador) {
-        this.btnRegistrar.addActionListener(controlador);
+        for (ActionListener al : btnRegistrar.getActionListeners()) {
+            btnRegistrar.removeActionListener(al);
+        }
+
+        btnRegistrar.addActionListener(e -> {
+            if (controlador != null) {
+                controlador.actionPerformed(e);
+            }
+            limpiaDNI();
+        });
     }
  
-    // ── Getters / setters del campo ──
+    // ── Getters / Setters con nomenclaturas Case-Sensitive exactas ──
  
     public String getDNI() {
         return this.campoDNI.getText().trim();
     }
  
     public void limpiaDNI() {
-        VistasUtils.enEDT(() -> this.campoDNI.setText(""));
+        VistasUtils.enEDT(() -> {
+            this.campoDNI.setText("");
+            this.campoDNI.requestFocus();
+        });
     }
- 
 }
- 
