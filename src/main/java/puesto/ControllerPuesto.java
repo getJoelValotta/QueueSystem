@@ -58,7 +58,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                                                                                            // comunicacion.
                     vistaPuesto.habilitaRenotificar();
                 });
-                persistePuesto("txt");
                 break;
             case PuestoGUI.RENOTIFICAR: // Tomo el turno y consulto si su estado esta en atencion para poder hacer otro
                                         // llamado, de ser asi mando al sv la peticion y si me da el ok llamo
@@ -91,9 +90,14 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                         }
                     });
                 }
-                persistePuesto("txt");
                 break;
         }
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException es) {
+            System.out.println("Error al hacer sleep despues de accion realizada");
+        }
+        persistePuesto("txt");
     }
 
     @Override

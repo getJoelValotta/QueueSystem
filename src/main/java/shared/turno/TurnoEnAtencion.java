@@ -1,6 +1,6 @@
 package shared.turno;
 
-public class TurnoEnAtencion extends TurnoState{
+public class TurnoEnAtencion extends TurnoState {
     private String idPuesto;
     private int cantLlamados;
 
@@ -12,16 +12,16 @@ public class TurnoEnAtencion extends TurnoState{
 
     @Override
     public void llamar() {
-        if (cantLlamados < 4){
+        if (cantLlamados < 3) {
             cantLlamados += 1;
-        }
-        else{
+        } else {
             turno.setEstado(new TurnoAbandonado(turno, idPuesto));
         }
     }
 
     @Override
-    public void atender(String idPuesto) { // Si lo usa el server, atender significa que pasa de espera a en atencion, si lo usa el puesto pasa de en atencion a atendido.
+    public void atender(String idPuesto) { // Si lo usa el server, atender significa que pasa de espera a en atencion,
+                                           // si lo usa el puesto pasa de en atencion a atendido.
         this.turno.setEstado(new TurnoEnAtencion(turno, idPuesto, cantLlamados));
     }
 
@@ -31,7 +31,7 @@ public class TurnoEnAtencion extends TurnoState{
     }
 
     @Override
-    public int getCantLlamados(){
+    public int getCantLlamados() {
         return cantLlamados;
     }
 
@@ -39,5 +39,5 @@ public class TurnoEnAtencion extends TurnoState{
     public boolean estaEnAtencion() {
         return true;
     }
-    
+
 }
