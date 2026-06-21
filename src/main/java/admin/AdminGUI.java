@@ -303,7 +303,30 @@ public class AdminGUI extends JFrame {
         });
     }
 
-    
+    public void setEstadoPrincipal(boolean estado){
+        VistasUtils.enEDT(() -> {
+            if (estado) {
+                lblServerPrincipal.setText("Conectado");
+                lblServerPrincipal.setForeground(new Color(46, 139, 87)); // Verde marino
+            } else {
+                lblServerPrincipal.setText("Desconectado");
+                lblServerPrincipal.setForeground(Color.RED);
+            }
+            
+        });
+    }
+
+    public void setEstadoRespaldo(boolean estado){
+        VistasUtils.enEDT(() -> {
+            if (estado) {
+                lblServerRespaldo.setText("Conectado");
+                lblServerRespaldo.setForeground(new Color(46, 139, 87));
+            } else {
+                lblServerRespaldo.setText("Desconectado");
+                lblServerRespaldo.setForeground(Color.RED);
+            }
+        });
+    }
 
     public void agregarLog(String mensaje) {
         VistasUtils.enEDT(() -> {

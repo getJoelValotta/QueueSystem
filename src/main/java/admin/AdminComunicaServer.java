@@ -52,6 +52,12 @@ public class AdminComunicaServer extends ComunicaServer implements Runnable{
         }
     }
 
+    @Override
+    public void conectaServidor(String IP, int puerto, String nodo) {
+        super.conectaServidor(IP, puerto, nodo);
+        escuchadorDeEventos.cambiarEstado(ControllerAdmin.PRINCIPAL, true);
+    }
+
     public void conectaServidoRespaldo(String IP, int puerto, String nodo) {
         try {
             if (socketRespaldo != null){
@@ -61,6 +67,7 @@ public class AdminComunicaServer extends ComunicaServer implements Runnable{
             this.outRespaldo = new DataOutputStream(socketRespaldo.getOutputStream());
             this.inRespaldo = new DataInputStream(socketRespaldo.getInputStream());
             outRespaldo.writeUTF(nodo);
+            escuchadorDeEventos.cambiarEstado(ControllerAdmin.RESPALDO, true);
         } catch (IOException e) {
             e.printStackTrace();
         }

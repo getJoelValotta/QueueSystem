@@ -84,4 +84,12 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getId'");
     }
+
+    public void cambiarEstado(String server, boolean estado){
+        if (server.equals(PRINCIPAL)){
+            vistaAdmin.setEstadoPrincipal(estado);
+        } else if (server.equals(RESPALDO)){
+            vistaAdmin.setEstadoRespaldo(estado);
+        }    
+    }
 }
