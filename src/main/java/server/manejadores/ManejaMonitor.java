@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import monitor.MonitorEscuchaServer;
 import shared.turno.Turno;
+import admin.AdminComunicaServerP;
 
 public class ManejaMonitor extends ManejadorDeNodos{
 
@@ -28,6 +29,10 @@ public class ManejaMonitor extends ManejadorDeNodos{
             System.out.println("Soy ManejaMonitor y llame4");
         } catch (IOException e) {
             e.printStackTrace();
+            try{
+                socket.close();
+                controllerServer.avisarAdmin("Monitor con ID " + id + " desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
+            } catch(Exception e1){}
         }
     }
 
@@ -38,6 +43,10 @@ public class ManejaMonitor extends ManejadorDeNodos{
             out.writeUTF(String.valueOf(turno.getCliente().getDni()));
         } catch (IOException e) {
             e.printStackTrace();
+            try{
+                socket.close();
+                controllerServer.avisarAdmin("Monitor con ID " + id + " desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
+            } catch(Exception e1){}
         }
     }
 }

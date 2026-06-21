@@ -9,6 +9,7 @@ import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
 import shared.turno.*;
+import admin.AdminComunicaServerP;
 
 public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores, IControllerObserver {
     private int cantErrores;
@@ -95,8 +96,10 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
             }
         } catch (SocketException e) {
             this.cantErrores += 1;
+            controllerServer.avisarAdmin("Fallo en Server Principal.", AdminComunicaServerP.EVENTO_RESPALDO);
             if (cantErrores == 2){
                 System.out.println("\n\n2 ERRORES\n\n");
+                controllerServer.avisarAdmin("Cambiando estado a Server Principal.", AdminComunicaServerP.EVENTO_RESPALDO);
                 controllerServer.cambiaEstadoServer();
                 try {
                     socket.close();

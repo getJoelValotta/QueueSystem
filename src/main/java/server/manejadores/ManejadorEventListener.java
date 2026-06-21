@@ -11,5 +11,6 @@ public interface ManejadorEventListener {
     public void serverDejaDeObservar(IControllerObserver suscriptor);
     public boolean actualizaTurnoRenotificado(String idPuesto);
     public void recibeTurnoEnRespaldo(Turno turno);
+    public void avisarAdmin (String msg, String tipoEvento);
 
 }

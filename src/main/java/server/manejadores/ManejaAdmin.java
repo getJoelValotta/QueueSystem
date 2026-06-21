@@ -2,7 +2,7 @@ package server.manejadores;
 
 import java.io.IOException;
 
-import admin.AdminComunicaServer;
+import admin.AdminComunicaServerP;
 
 public class ManejaAdmin extends ManejadorDeNodos{
 
@@ -17,7 +17,7 @@ public class ManejaAdmin extends ManejadorDeNodos{
 
     public void logEventoPrincipal(String msg){
         try{
-            out.writeUTF(AdminComunicaServer.EVENTO_PRINCIPAL);
+            out.writeUTF(AdminComunicaServerP.EVENTO_PRINCIPAL);
             enviaLog(msg);
         }catch(IOException e){  
         }
@@ -25,7 +25,7 @@ public class ManejaAdmin extends ManejadorDeNodos{
 
     public void logBienPrincipal(String msg){
         try{
-            out.writeUTF(AdminComunicaServer.BIEN_PRINCIPAL);
+            out.writeUTF(AdminComunicaServerP.BIEN_PRINCIPAL);
             enviaLog(msg);
         }catch(IOException e){  
         }
@@ -33,7 +33,15 @@ public class ManejaAdmin extends ManejadorDeNodos{
 
     public void logMalPrincipal(String msg){
         try{
-            out.writeUTF(AdminComunicaServer.MAL_PRINCIPAL);
+            out.writeUTF(AdminComunicaServerP.MAL_PRINCIPAL);
+            enviaLog(msg);
+        }catch(IOException e){  
+        }
+    }
+
+    public void logEventoRespaldo(String msg){
+        try{
+            out.writeUTF(AdminComunicaServerP.EVENTO_RESPALDO);
             enviaLog(msg);
         }catch(IOException e){  
         }

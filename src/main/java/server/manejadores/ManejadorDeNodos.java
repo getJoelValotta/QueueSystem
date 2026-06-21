@@ -44,4 +44,8 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
     }
 
     public abstract void comunicacion();
+
+    public Socket getSocket(){
+        return socket;
+    }
 }

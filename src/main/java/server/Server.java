@@ -34,6 +34,8 @@ public class Server implements Runnable{
     }
 
     public void switchServer(){ //El estado principal se desconecta (cierra sus sockets por failover o switchback), cambia su estado a respaldo y el que estaba de respaldo
+        if (escuchadorDeSockets != null)
+            escuchadorDeSockets.desconectaAdmin();
         estado.switchServer(); //deja de recibir hearthbeats por lo que cambia su estado a principal e instancia su serverSocket como corresponde?
     }
 
@@ -53,6 +55,8 @@ public class Server implements Runnable{
         try {                  // es porque no hay otro server en el DNS configurado (localhost), pero si lo hay entonces es de respaldo, donde guarda el socket de conexion para luego.
             Socket socketEntreServers = conectarseExistente();
             if (socketEntreServers == null){
+                if (socketServer != null)
+                    socketServer.close();
                 this.socketServer = new ServerSocket(puerto1);
                 this.setEstado(new ServerPrincipal());
                 new Thread(this).start(); // Si es principal, acepta conexiones a nodos.

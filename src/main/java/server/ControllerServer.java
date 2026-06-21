@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
+import admin.AdminComunicaServerP;
 
 import server.id.GestorID;
 import server.id.GestorIDListener;
@@ -39,6 +40,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         observadoresServers = new CopyOnWriteArrayList<>();
         observadoresPuestos = new CopyOnWriteArrayList<>();
         nodoMonitor = null;
+        nodoAdmin = null;
     }
 
     @Override
@@ -63,6 +65,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     ManejaTotem nodoTotem = new ManejaTotem(this, id);
                     nodoTotem.setSocket(socket);
                     new Thread(nodoTotem).start();
+                    avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
 
 
@@ -86,8 +89,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.setSocketSimple(socket);
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                         new Thread(nodoPuesto).start();
+                        avisarAdmin("Nodo conectado: Puesto con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
-                    
                     break;
 
 
@@ -95,6 +98,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoMonitor = new ManejaMonitor(this, "unico"); //podria ser observer, pero el requerimiento es que haya 1 solo.
                     nodoMonitor.setSocket(socket);
                     //new Thread(nodoMonitor).start();
+                    avisarAdmin("Nodo conectado: Monitor.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
 
 
@@ -103,6 +107,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoAdmin.setSocket(socket);
                     if (server.esPrincipal())
                         new Thread(nodoAdmin).start();
+                    else
+                        avisarAdmin("Sincronizado y escuchando.", AdminComunicaServerP.EVENTO_RESPALDO);
                     break;
 
                     
@@ -115,6 +121,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     sincronizacionDeEstado(nodoServer);
                     new Thread(nodoServer).start();
                     System.out.println("THREAD INICIADO CORRECTAMENTE\n");
+                    avisarAdmin("Nodo conectado: Server de Respaldo.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
             }
         } catch (IOException e) {  
@@ -130,13 +137,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
         if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
-            System.out.println("LLEGUYE HASTA ESRESPALDO");
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
-            System.out.println("CREE MANEJASERVER");
             nodoServer.setSocket(server.getSocketEntreServers());
-            System.out.println("SETIE EL SOCKET");
             new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
-            System.out.println("PUDE INICIAR EL THREAD");
         }
     }
 
@@ -279,6 +282,26 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
         return valido;
     }
+
+    public void avisarAdmin (String msg, String tipoEvento){
+        if (nodoAdmin != null){
+            switch(tipoEvento){
+                case AdminComunicaServerP.EVENTO_PRINCIPAL:
+                    nodoAdmin.logEventoPrincipal(msg);
+                    break;
+                case AdminComunicaServerP.BIEN_PRINCIPAL:
+                    nodoAdmin.logBienPrincipal(msg);
+                    break;
+                case AdminComunicaServerP.MAL_PRINCIPAL:
+                    nodoAdmin.logMalPrincipal(msg);
+                    break;
+                case AdminComunicaServerP.EVENTO_RESPALDO:
+                    nodoAdmin.logEventoRespaldo(msg);
+                    break;
+            }
+        }
+        
+    }
     
     @Override
     public void cambiaEstadoServer() {
@@ -344,4 +367,19 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         return encontrado;
     }
 
+    @Override
+    public void desconectaAdmin() {
+        if (nodoAdmin != null) {
+            Socket s = nodoAdmin.getSocket();
+            if (s != null && !s.isClosed()) {
+                try {
+                    s.close();
+                } catch (IOException e) {
+                    // ignorable, ya estaba en proceso de cierre
+                }
+            }
+        }
+    }
+
+    
 }

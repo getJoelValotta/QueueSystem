@@ -1,6 +1,7 @@
 package app;
 
-import admin.AdminComunicaServer;
+import admin.AdminComunicaServerP;
+import admin.AdminComunicaServerR;
 import admin.AdminGUI;
 import admin.ControllerAdmin;
 
@@ -8,10 +9,11 @@ public class AdminApp {
 
     public static void main (String[] args){
         AdminGUI vistaAdmin = new AdminGUI();
-        AdminComunicaServer comunicaServer = new AdminComunicaServer();
-        ControllerAdmin controladorAdmin = new ControllerAdmin(vistaAdmin, comunicaServer);
-        comunicaServer.setEscuchadorDeNodoFisico(controladorAdmin);
-        comunicaServer.setEscuchadorDeEventos(controladorAdmin);
+        AdminComunicaServerP comunicaServerPrincipal = new AdminComunicaServerP();
+        AdminComunicaServerR comunicaServerRespaldo = new AdminComunicaServerR();
+        ControllerAdmin controladorAdmin = new ControllerAdmin(vistaAdmin, comunicaServerPrincipal, comunicaServerRespaldo);
+        comunicaServerPrincipal.setEscuchadorDeEventos(controladorAdmin);
+        comunicaServerRespaldo.setEscuchadorDeEventos(controladorAdmin);
         controladorAdmin.iniciaAdmin();
     }
 }

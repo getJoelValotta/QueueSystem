@@ -10,6 +10,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
 
+import javax.swing.text.Style;
+import javax.swing.text.BadLocationException;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -21,9 +23,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -51,7 +56,7 @@ public class AdminGUI extends JFrame {
     private JTextField campoClaveEncriptacion;
 
     // Consola de eventos
-    private JTextArea txtConsola;
+    private JTextPane txtConsola;
 
     // Variables de control de estado actual (Para el Rollback del diálogo)
     private JRadioButton rbPersistenciaActivo;
@@ -181,7 +186,7 @@ public class AdminGUI extends JFrame {
         lblTituloConsola.setFont(new Font("Segoe UI", Font.BOLD, 14));
         panelPrincipal.add(lblTituloConsola, gbc);
 
-        txtConsola = new JTextArea(8, 20);
+        txtConsola = new JTextPane();
         txtConsola.setEditable(false);
         txtConsola.setFont(new Font("Monospaced", Font.PLAIN, 12));
         JScrollPane scrollConsola = new JScrollPane(txtConsola);
@@ -217,11 +222,10 @@ public class AdminGUI extends JFrame {
 
             if (confirmar) {
                 rbPersistenciaActivo = source; // Confirmado: actualizamos el estado activo
-                agregarLog("Persistencia cambiada a: " + source.getText());
+                agregarLogConColor("[ADMIN] Persistencia cambiada a: " + source.getText(), Color.GRAY);
                 // Aquí se informará al controlador real en el futuro
             } else {
                 rbPersistenciaActivo.setSelected(true); // Rollback
-                agregarLog("Cambio de persistencia cancelado.");
             }
         };
 
@@ -242,11 +246,10 @@ public class AdminGUI extends JFrame {
 
             if (confirmar) {
                 rbEncriptacionActivo = source; // Confirmado: actualizamos el estado activo
-                agregarLog("Encriptación cambiada a: " + source.getText());
+                agregarLogConColor("[ADMIN] Encriptación cambiada a: " + source.getText(), Color.GRAY);
                 // Aquí se informará al controlador real en el futuro
             } else {
                 rbEncriptacionActivo.setSelected(true); // Rollback
-                agregarLog("Cambio de encriptación cancelado.");
             }
         };
 
@@ -346,18 +349,36 @@ public class AdminGUI extends JFrame {
         });
     }
 
-    public void agregarLog(String mensaje) {
-        VistasUtils.enEDT(() -> {
-            txtConsola.append("[" + java.time.LocalTime.now().toString().substring(0, 8) + "] " + mensaje + "\n");
-        });
+    private void agregarLogConColor(String mensaje, Color color) {
+    VistasUtils.enEDT(() -> {
+        StyledDocument doc = txtConsola.getStyledDocument();
+        Style style = txtConsola.addStyle("colorStyle", null);
+        StyleConstants.setForeground(style, color);
+
+        String linea = "[" + java.time.LocalTime.now().toString().substring(0, 8) + "] " + mensaje + "\n";
+        try {
+            doc.insertString(doc.getLength(), linea, style);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+        txtConsola.setCaretPosition(doc.getLength()); // auto-scroll
+    });
+}
+
+    public void logEventoPrincipal(String msg) {
+        agregarLogConColor("[PRINCIPAL] " + msg, Color.BLUE);
     }
 
-    public void logServerPrincipal(String msg) {
-        agregarLog("[PRINCIPAL]" + msg);
+    public void logBienPrincipal(String msg) {
+        agregarLogConColor("[PRINCIPAL] " + msg, new Color(46, 139, 87)); // verde
     }
 
-    public void logServerRespaldo(String msg) {
-        agregarLog("[RESPALDO]" + msg);
+    public void logMalPrincipal(String msg) {
+        agregarLogConColor("[PRINCIPAL] " + msg, Color.RED);
+    }
+
+    public void logEventoRespaldo(String msg) {
+        agregarLogConColor("[RESPALDO] " + msg, Color.GRAY);
     }
 
     public void setControlador(ActionListener controlador) {

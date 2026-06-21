@@ -6,15 +6,17 @@ import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionListener;
 
-public class ControllerAdmin implements AdminEventListener, ActionListener, ConexionListener{
-    public static final String PRINCIPAL = "#PRINCIPAL#", RESPALDO = "#RESPALDO#";
+public class ControllerAdmin implements AdminEventListener, ActionListener{
+    public static final String PRINCIPAL = "#PRINCIPAL#", RESPALDO = "#RESPALDO#", DESCONECTA = "#DESCONECTA#";
     AdminGUI vistaAdmin;
     Admin admin;
-    AdminComunicaServer comunicaServer;
+    AdminComunicaServerP comunicaServerPrincipal;
+    AdminComunicaServerR comunicaServerRespaldo;
 
-    public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServer comunicaServer){
+    public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServerP comunicaServerPrincipal, AdminComunicaServerR comunicaServerRespaldo){
         this.vistaAdmin = vistaAdmin;
-        this.comunicaServer = comunicaServer;
+        this.comunicaServerPrincipal = comunicaServerPrincipal;
+        this.comunicaServerRespaldo = comunicaServerRespaldo;
     }
 
     @Override
@@ -22,31 +24,31 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
         switch (e.getActionCommand()){
             case AdminGUI.XML:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.XML);
+                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.XML);
                 });
                 break;
             
             case AdminGUI.JSON:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.JSON);
+                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.JSON);
                 });
                 break;
             
             case AdminGUI.TXT:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServer.enviaTipoPersistencia(AdminComunicaServer.TXT);
+                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.TXT);
                 });
                 break;
             
             case AdminGUI.MD5:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServer.enviaTipoEncriptacion(AdminComunicaServer.MD5);
+                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.MD5);
                 });
                 break;
 
             case AdminGUI.SHA_2:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServer.enviaTipoEncriptacion(AdminComunicaServer.SHA_2);
+                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.SHA_2);
                 });
                 break;
             }
@@ -57,33 +59,29 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
         admin = new Admin("TXT","MD5");
         //comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
         vistaAdmin.mostrar();
-        new Thread(comunicaServer).start();
+        new Thread(comunicaServerPrincipal).start();
+        new Thread(comunicaServerRespaldo).start();
     }
 
 
-    public void muestraLog (String msg, String server){ 
-        if (server.equals(PRINCIPAL)){
-            vistaAdmin.logServerPrincipal(msg);
-        } else if (server.equals(RESPALDO)){
-            vistaAdmin.logServerRespaldo(msg);
+    public void muestraLog (String msg, String tipoEvento){ 
+        switch(tipoEvento){
+            case AdminComunicaServerP.EVENTO_PRINCIPAL:
+                vistaAdmin.logEventoPrincipal(msg);
+                break;
+            case AdminComunicaServerP.BIEN_PRINCIPAL:
+                vistaAdmin.logBienPrincipal(msg);
+                break;
+            case AdminComunicaServerP.MAL_PRINCIPAL:
+                vistaAdmin.logMalPrincipal(msg);
+                break;
+            case AdminComunicaServerP.EVENTO_RESPALDO:
+                vistaAdmin.logEventoRespaldo(msg);
+                break;
         }
     }
 
-    @Override
-    public void conexionErronea(String mensaje) {
-        comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
-    }
 
-    @Override
-    public void conexionExitosa() {
-        //vistaAdmin.mostrar();
-    }
-
-    @Override
-    public String getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
-    }
 
     public void cambiarEstado(String server, boolean estado){
         if (server.equals(PRINCIPAL)){
@@ -92,4 +90,5 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
             vistaAdmin.setEstadoRespaldo(estado);
         }    
     }
+
 }

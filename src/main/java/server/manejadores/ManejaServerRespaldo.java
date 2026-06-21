@@ -6,6 +6,7 @@ import java.util.Iterator;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
+import admin.AdminComunicaServerP;
 public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores, IControllerObserver{
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
 
@@ -26,7 +27,11 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
                 out.writeUTF(IManejaServidores.HBOUT);
                 String respuesta = in.readUTF();
             } catch (IOException e) {
-                // TODO : Informar al ADMIN
+                try{
+                    socket.close();
+                    controllerServer.avisarAdmin("Server de Respaldo desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
+                }catch(IOException e1){}
+                
                 e.printStackTrace();
             }
         }
@@ -49,6 +54,10 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
                 out.writeUTF(bufferContPuesto);
                 out.writeUTF(bufferContMonitor);
             } catch (IOException e) {
+                try{
+                    socket.close();
+                    controllerServer.avisarAdmin("Server de Respaldo desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
+                }catch(IOException e1){}
                 e.printStackTrace();
             }
 
@@ -70,7 +79,10 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
                     } 
                 }
             } catch (IOException e) {
-                // TODO avisarle al admin
+                try{
+                    socket.close();
+                    controllerServer.avisarAdmin("Server de Respaldo desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
+                }catch(IOException e1){}
                 e.printStackTrace();
             }
         }
