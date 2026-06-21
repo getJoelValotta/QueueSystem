@@ -15,6 +15,10 @@ public class Cliente {
         this.dni = Long.parseLong(dni);
     }
 
+    public Cliente(long dni) {
+        this.dni = dni;
+    }
+
     public long getDni() {
         return dni;
     }

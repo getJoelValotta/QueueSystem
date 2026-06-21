@@ -7,15 +7,15 @@ public class Turno {
     private Cliente cliente;
     private TurnoState estado;
 
-    public Turno(){
+    public Turno() {
         this.estado = new TurnoEspera(this);
     }
 
-    public void llamar(){
+    public void llamar() {
         this.estado.llamar();
     }
 
-    public void atender(String idPuesto){
+    public void atender(String idPuesto) {
         this.estado.atender(idPuesto);
     }
 
@@ -23,25 +23,25 @@ public class Turno {
         return estado.getIdPuesto();
     }
 
-    public int getCantLlamados(){
+    public int getCantLlamados() {
         return estado.getCantLlamados();
     }
 
-    public boolean estaEnEspera(){
+    public boolean estaEnEspera() {
         return estado.estaEnEspera();
     }
 
-    public boolean estaEnAtencion(){
+    public boolean estaEnAtencion() {
         return estado.estaEnAtencion();
     }
 
-    public boolean estaAtendido(){
+    public boolean estaAtendido() {
         return estado.estaAtendido();
     }
 
-    public boolean estaAbandonado(){
+    public boolean estaAbandonado() {
         return estado.estaAbandonado();
-    } 
+    }
 
     public Cliente getCliente() {
         return cliente;
@@ -51,12 +51,20 @@ public class Turno {
         this.cliente = cliente;
     }
 
+    public void setCliente(long dni) {
+        this.cliente = new Cliente(dni);
+    }
+
     public TurnoState getEstado() {
         return estado;
     }
 
     public void setEstado(TurnoState estado) {
         this.estado = estado;
+    }
+
+    public Long getDniCliente() {
+        return cliente.getDni();
     }
 
     @Override
@@ -85,16 +93,15 @@ public class Turno {
         if (estado == null) {
             if (other.estado != null)
                 return false;
-        } //else if (!estado.equals(other.estado)) //Como uso contains y quiero analizar solo por DNI esto me jode el programa.
-            //return false;
+        } // else if (!estado.equals(other.estado)) //Como uso contains y quiero analizar
+          // solo por DNI esto me jode el programa.
+          // return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "Turno [cliente=" + cliente.getDni()+ "]";
+        return "Turno [cliente=" + cliente.getDni() + "]";
     }
 
-
-    
 }
