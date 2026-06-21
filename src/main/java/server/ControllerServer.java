@@ -45,7 +45,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
     // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
-    private String modo = "json";
+    private String modo = "txt";
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -364,12 +364,26 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
     public void persistir(String modo, String cosaAPersistir) {
         ListaTurnos turnosEspera = this.server.getEnEspera();
-        // TODO: Los demas turnos
         switch (cosaAPersistir) {
             case "turnosEspera":
                 System.out.println("Persistiendo turnos en espera...");
-                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos());
+                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir);
                 break;
+            case "turnosAtencion":
+                System.out.println("Persistiendo turnos en atencion...");
+                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                break;
+            case "turnosAbandonados":
+                System.out.println("Persistiendo turnos abandonados...");
+                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                break;
+            case "turnosAtendidos":
+                System.out.println("Persistiendo turnos atendidos...");
+                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                break;
+            case "gestorID":
+                System.out.println("Persistiendo gestorID...");
+                // TODO: IMPLEMENTAR y guardar modO Y TIPO DE ENCRIPTACION
             default:
                 System.out.println("No implementaste la persistencia de " + cosaAPersistir);
         }
