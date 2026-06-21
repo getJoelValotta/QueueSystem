@@ -80,6 +80,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         }
                         else 
                             id = solicitud;
+                        nodoPuesto = devuelvePrimerManejador();
                         nodoPuesto.setId(id);
                         nodoPuesto.setSocketSimple(socket);
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
@@ -328,6 +329,17 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             serverRespaldo.comunicaTurno(turno, estadoTurno);
             // TODO : Escribir turno en el archivo que corresponda.
         }
+    }
+
+    public ManejaPuesto devuelvePrimerManejador(){
+        ManejaPuesto encontrado = null;
+        String id = "algo";
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext() & !id.equals("-1")){
+            encontrado = (ManejaPuesto) nodosPuesto.next();
+            id = encontrado.getId();
+        }
+        return encontrado;
     }
 
 }

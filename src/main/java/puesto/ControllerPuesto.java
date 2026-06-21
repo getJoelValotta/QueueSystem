@@ -30,6 +30,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(),
                             Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
+                    vistaPuesto.inhabilitaRenotificar();
                     if (puesto.getId() == null) {
                         String id = comunicaServer.solicitaID();
                         puesto.setId(id);

@@ -58,8 +58,10 @@ public class Server implements Runnable{
                 new Thread(this).start(); // Si es principal, acepta conexiones a nodos.
             }
             else{
+                this.socketServer = new ServerSocket(puerto2);
                 this.setEstado(new ServerRespaldo(this, socketEntreServers));
-                // Si es de respaldo, no va a aceptar conexiones de nodos.
+                new Thread(this).start();
+                // Si es de respaldo, solo acepta conexion a ADMIN (idealmente)
             }
         } catch (IOException e) {
             //Error interno de TCP
@@ -89,7 +91,13 @@ public class Server implements Runnable{
         Socket socket;
         String conectado, solicitud;
         try {
-            while (!socketServer.isClosed()){
+            if (this.esPrincipal()){
+                while (!socketServer.isClosed()){
+                    socket = socketServer.accept();
+                    escuchadorDeSockets.atiendeSockets(socket);
+                }
+            }
+            else{
                 socket = socketServer.accept();
                 escuchadorDeSockets.atiendeSockets(socket);
             }
