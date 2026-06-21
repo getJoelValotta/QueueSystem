@@ -20,6 +20,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -41,16 +42,20 @@ public class AdminGUI extends JFrame {
     private JRadioButton rbTextoPlano;
     private ButtonGroup groupPersistencia;
 
-    private JRadioButton rbPersistenciaActivo;
-    private JRadioButton rbEncriptacionActivo;
-
     // Componentes de Encriptación
     private JRadioButton rbSha2;
     private JRadioButton rbMd5;
     private ButtonGroup groupEncriptacion;
 
+    // Campo para ingresar la clave de encriptación
+    private JTextField campoClaveEncriptacion;
+
     // Consola de eventos
     private JTextArea txtConsola;
+
+    // Variables de control de estado actual (Para el Rollback del diálogo)
+    private JRadioButton rbPersistenciaActivo;
+    private JRadioButton rbEncriptacionActivo;
 
     // Referencia al controlador (Inyección de dependencias / Delegación)
     private ActionListener controlador;
@@ -65,7 +70,7 @@ public class AdminGUI extends JFrame {
 
         setTitle("Panel de Administración - Sistema de Filas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(500, 600));
+        setMinimumSize(new Dimension(500, 680)); // Altura ajustada para el campo de clave
         setLocationRelativeTo(null);
 
         inicializarComponentes();
@@ -77,7 +82,7 @@ public class AdminGUI extends JFrame {
         panelPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(8, 5, 8, 5);
+        gbc.insets = new Insets(6, 5, 6, 5);
         gbc.weightx = 1.0;
 
         int fila = 0;
@@ -118,11 +123,10 @@ public class AdminGUI extends JFrame {
         groupPersistencia.add(rbJson);
         groupPersistencia.add(rbTextoPlano);
 
-        // Por defecto seleccionamos uno inicialmente sin disparar eventos críticos
         rbXml.setSelected(true);
-        rbPersistenciaActivo = rbXml;
+        rbPersistenciaActivo = rbXml; // Guardamos estado confirmado inicial
 
-        gbc.gridy = fila++; gbc.gridwidth = 2;
+        gbc.gridy = fila++;
         panelPrincipal.add(rbXml, gbc);
         gbc.gridy = fila++;
         panelPrincipal.add(rbJson, gbc);
@@ -144,14 +148,28 @@ public class AdminGUI extends JFrame {
         groupEncriptacion = new ButtonGroup();
         groupEncriptacion.add(rbSha2);
         groupEncriptacion.add(rbMd5);
-        
+
         rbSha2.setSelected(true);
-        rbEncriptacionActivo = rbSha2;
+        rbEncriptacionActivo = rbSha2; // Guardamos estado confirmado inicial
 
         gbc.gridy = fila++;
         panelPrincipal.add(rbSha2, gbc);
         gbc.gridy = fila++;
         panelPrincipal.add(rbMd5, gbc);
+
+        // ── Clave de Encriptación (debajo de la selección, alineado a la izquierda) ──
+        gbc.gridy = fila++;
+        gbc.insets = new Insets(10, 5, 2, 5); // Un poco más de aire superior para separar
+        JLabel lblClave = new JLabel("Clave de Encriptación:");
+        lblClave.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        panelPrincipal.add(lblClave, gbc);
+
+        campoClaveEncriptacion = new JTextField();
+        campoClaveEncriptacion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        campoClaveEncriptacion.setPreferredSize(new Dimension(0, 32));
+        gbc.gridy = fila++;
+        gbc.insets = new Insets(2, 5, 6, 5); // Insets estándar
+        panelPrincipal.add(campoClaveEncriptacion, gbc);
 
         // Separador visual
         gbc.gridy = fila++;
@@ -169,7 +187,7 @@ public class AdminGUI extends JFrame {
         JScrollPane scrollConsola = new JScrollPane(txtConsola);
         scrollConsola.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // Esta sección debe expandirse si la ventana se estira hacia abajo
+        // Esta sección absorbe el estiramiento vertical al redimensionar la ventana
         gbc.gridy = fila++;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
@@ -183,31 +201,26 @@ public class AdminGUI extends JFrame {
 
     /**
      * Intercepta el click del usuario para mostrar el diálogo de confirmación.
-     * Si cancela, deshace la selección visual usando VistasUtils de forma segura.
-     */
-   /**
-     * Intercepta el click del usuario para mostrar el diálogo de confirmación.
      * Si cancela, deshace la selección visual regresando al último estado confirmado.
      */
     private void configurarAccionesDeCambio() {
         // Listener para Persistencia
         ActionListener persistenciaListener = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
-            
+
             // Si hace click sobre el método que ya está activo, no hacemos nada
             if (source == rbPersistenciaActivo) {
                 return;
             }
 
             boolean confirmar = mostrarDialogoConfirmacion("Usted está por cambiar el método de persistencia, ¿está seguro?");
-            
+
             if (confirmar) {
                 rbPersistenciaActivo = source; // Confirmado: actualizamos el estado activo
-                agregarLog("Cambio de persistencia solicitado: " + source.getText());
+                agregarLog("Persistencia cambiada a: " + source.getText());
                 // Aquí se informará al controlador real en el futuro
             } else {
-                // ROLLBACK: Volvemos a marcar visualmente el que estaba activo antes del click
-                rbPersistenciaActivo.setSelected(true);
+                rbPersistenciaActivo.setSelected(true); // Rollback
                 agregarLog("Cambio de persistencia cancelado.");
             }
         };
@@ -219,21 +232,20 @@ public class AdminGUI extends JFrame {
         // Listener para Encriptación
         ActionListener encriptacionListener = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
-            
+
             // Si hace click sobre el método que ya está activo, no hacemos nada
             if (source == rbEncriptacionActivo) {
                 return;
             }
 
             boolean confirmar = mostrarDialogoConfirmacion("Usted está por cambiar el método de encriptación, ¿está seguro?");
-            
+
             if (confirmar) {
                 rbEncriptacionActivo = source; // Confirmado: actualizamos el estado activo
-                agregarLog("Cambio de encriptación solicitado: " + source.getText());
+                agregarLog("Encriptación cambiada a: " + source.getText());
                 // Aquí se informará al controlador real en el futuro
             } else {
-                // ROLLBACK: Volvemos a marcar visualmente el que estaba activo antes del click
-                rbEncriptacionActivo.setSelected(true);
+                rbEncriptacionActivo.setSelected(true); // Rollback
                 agregarLog("Cambio de encriptación cancelado.");
             }
         };
@@ -258,7 +270,7 @@ public class AdminGUI extends JFrame {
         JButton btnCambiar = new JButton("Cambiar método");
         JButton btnCancelar = new JButton("Cancelar");
 
-        final boolean[] resultado = {false}; 
+        final boolean[] resultado = {false};
 
         btnCambiar.addActionListener(e -> {
             resultado[0] = true;
@@ -281,7 +293,14 @@ public class AdminGUI extends JFrame {
         return resultado[0];
     }
 
-    // --- MÉTODOS PÚBLICOS DE ACTUALIZACIÓN (Hilos Seguros) ---
+    // --- MÉTODOS PÚBLICOS DE API (Hilos Seguros y Lectura) ---
+
+    /**
+     * Permite al controlador leer el valor de la clave de encriptación ingresada.
+     */
+    public String getClaveEncriptacion() {
+        return campoClaveEncriptacion.getText().trim();
+    }
 
     public void setEstadoServidores(boolean principalConectado, boolean respaldoConectado) {
         VistasUtils.enEDT(() -> {
@@ -303,7 +322,7 @@ public class AdminGUI extends JFrame {
         });
     }
 
-    public void setEstadoPrincipal(boolean estado){
+    public void setEstadoPrincipal(boolean estado) {
         VistasUtils.enEDT(() -> {
             if (estado) {
                 lblServerPrincipal.setText("Conectado");
@@ -312,11 +331,10 @@ public class AdminGUI extends JFrame {
                 lblServerPrincipal.setText("Desconectado");
                 lblServerPrincipal.setForeground(Color.RED);
             }
-            
         });
     }
 
-    public void setEstadoRespaldo(boolean estado){
+    public void setEstadoRespaldo(boolean estado) {
         VistasUtils.enEDT(() -> {
             if (estado) {
                 lblServerRespaldo.setText("Conectado");
@@ -334,23 +352,23 @@ public class AdminGUI extends JFrame {
         });
     }
 
-    public void logServerPrincipal(String msg){
-        agregarLog("[PRINCIPAL]"+ msg);
+    public void logServerPrincipal(String msg) {
+        agregarLog("[PRINCIPAL]" + msg);
     }
 
-    public void logServerRespaldo(String msg){
-        agregarLog("[RESPALDO]"+ msg);
+    public void logServerRespaldo(String msg) {
+        agregarLog("[RESPALDO]" + msg);
     }
-    
+
     public void setControlador(ActionListener controlador) {
         this.controlador = controlador;
     }
 
-    public void mostrar(){
+    public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
     }
 
-    public void cerrar(){
+    public void cerrar() {
         VistasUtils.enEDT(() -> this.dispose());
     }
 }
