@@ -12,6 +12,7 @@ public class ManejaAdmin extends ManejadorDeNodos{
 
     @Override
     public void comunicacion() {
+        
     }
 
     public void logEventoPrincipal(String msg){

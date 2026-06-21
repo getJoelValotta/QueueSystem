@@ -31,6 +31,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
     private ManejaPuesto nodoPuesto;
     private ManejaMonitor nodoMonitor;
+    private ManejaAdmin nodoAdmin;
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -98,9 +99,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
 
                 case ComunicaServer.ADMIN:
-                    ManejaAdmin nodoAdmin = new ManejaAdmin(this, "unico");
+                    nodoAdmin = new ManejaAdmin(this, "unico");
                     nodoAdmin.setSocket(socket);
-                    new Thread(nodoAdmin).start();
+                    if (server.esPrincipal())
+                        new Thread(nodoAdmin).start();
                     break;
 
                     
