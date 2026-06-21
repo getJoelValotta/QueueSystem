@@ -22,6 +22,8 @@ public class AdminComunicaServer extends ComunicaServer implements Runnable{
 
     @Override
     public void run() {
+        System.out.println("Voy a intentar conectar respaldo");
+        conectaServidoRespaldo(IP, puerto2, ComunicaServer.ADMIN);
         String comando;
         while (!getSocket().isClosed()){
             try {
@@ -38,7 +40,7 @@ public class AdminComunicaServer extends ComunicaServer implements Runnable{
                     break;
                 }
 
-                if (socketRespaldo == null | socketRespaldo.isClosed()){
+                if (socketRespaldo == null || socketRespaldo.isClosed()){
                     new Thread(() -> {
                         conectaServidoRespaldo(IP, puerto2, ComunicaServer.ADMIN);
                     }).start();
@@ -60,10 +62,12 @@ public class AdminComunicaServer extends ComunicaServer implements Runnable{
 
     public void conectaServidoRespaldo(String IP, int puerto, String nodo) {
         try {
+            System.out.println("Conectando respaldo");
             if (socketRespaldo != null){
                 socketRespaldo.close();
             }
             this.socketRespaldo = new Socket(IP, puerto);
+            System.out.println("Socket creado");
             this.outRespaldo = new DataOutputStream(socketRespaldo.getOutputStream());
             this.inRespaldo = new DataInputStream(socketRespaldo.getInputStream());
             outRespaldo.writeUTF(nodo);

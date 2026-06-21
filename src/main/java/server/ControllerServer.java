@@ -127,7 +127,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
-        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
+        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             System.out.println("LLEGUYE HASTA ESRESPALDO");
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             System.out.println("CREE MANEJASERVER");
