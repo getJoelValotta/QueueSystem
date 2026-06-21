@@ -16,8 +16,7 @@ public class ListaTurnosTXTMapper extends AbstractFileMapper<ConcurrentLinkedQue
     public static ListaTurnosTXTMapper getInstance(String filePath) {
         if (instance == null) {
             instance = new ListaTurnosTXTMapper(filePath);
-        } else
-            filePath = instance.filePath;
+        }
         return instance;
     }
 

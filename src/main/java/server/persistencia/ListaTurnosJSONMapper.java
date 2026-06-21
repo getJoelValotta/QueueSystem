@@ -20,8 +20,7 @@ public class ListaTurnosJSONMapper extends AbstractFileMapper<ConcurrentLinkedQu
     public static ListaTurnosJSONMapper getInstance(String filePath) {
         if (instance == null) {
             instance = new ListaTurnosJSONMapper(filePath);
-        } else
-            filePath = instance.filePath;
+        }
         return instance;
     }
 

@@ -13,13 +13,13 @@ public class LlamaMappersServer {
             String filePath = cosaAPersistir + "Server.";
             if (modo.equals("txt")) {
                 filePath += "txt";
-                ListaTurnosTXTMapper.getInstance(filePath).save(turnos);
+                ListaTurnosTXTMapper.getInstance(filePath).save(turnos, filePath);
             } else if (modo.equals("xml")) {
                 filePath += "xml";
-                ListaTurnosXMLMapper.getInstance(filePath).save(turnos);
+                ListaTurnosXMLMapper.getInstance(filePath).save(turnos, filePath);
             } else if (modo.equals("json")) {
                 filePath += "json";
-                ListaTurnosJSONMapper.getInstance(filePath).save(turnos);
+                ListaTurnosJSONMapper.getInstance(filePath).save(turnos, filePath);
             } else {
                 throw new IllegalArgumentException("Modo de persistencia no soportado: " + modo);
             }

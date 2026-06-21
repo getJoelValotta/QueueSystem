@@ -22,8 +22,7 @@ public class ListaTurnosXMLMapper extends AbstractFileMapper<ConcurrentLinkedQue
     public static ListaTurnosXMLMapper getInstance(String filePath) {
         if (instance == null) {
             instance = new ListaTurnosXMLMapper(filePath);
-        } else
-            filePath = instance.filePath;
+        }
         return instance;
     }
 

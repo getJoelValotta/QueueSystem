@@ -271,6 +271,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
         persistir(modo, "turnosEspera");
         persistir(modo, "turnosAtencion");
+        persistir(modo, "turnosAtendidos");
         return turno;
     }
 
@@ -365,25 +366,35 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void persistir(String modo, String cosaAPersistir) {
         ListaTurnos turnosEspera = this.server.getEnEspera();
         switch (cosaAPersistir) {
+            // TODO: Hardcoded mode para test
             case "turnosEspera":
                 System.out.println("Persistiendo turnos en espera...");
-                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("txt", turnosEspera.getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("json", turnosEspera.getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("xml", turnosEspera.getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAtencion":
                 System.out.println("Persistiendo turnos en atencion...");
-                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("txt", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("json", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("xml", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAbandonados":
                 System.out.println("Persistiendo turnos abandonados...");
-                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("txt", server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("json", server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("xml", server.getAbandonados().getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAtendidos":
                 System.out.println("Persistiendo turnos atendidos...");
-                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("txt", server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("json", server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir("xml", server.getAtendidos().getListaTurnos(), cosaAPersistir);
                 break;
             case "gestorID":
                 System.out.println("Persistiendo gestorID...");
                 // TODO: IMPLEMENTAR y guardar modO Y TIPO DE ENCRIPTACION
+                break;
             default:
                 System.out.println("No implementaste la persistencia de " + cosaAPersistir);
         }
