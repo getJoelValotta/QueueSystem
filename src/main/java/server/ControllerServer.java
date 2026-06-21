@@ -24,14 +24,27 @@ import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.turno.Turno;
 import server.manejadores.IManejaServidores;
-public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener{ //SocketListener es para escuchar al Server que delega atencion, ManejadorEventListener dispara eventos de interes desde los manejadores para ser atendido por el controller
+
+public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener { // SocketListener es
+                                                                                                    // para escuchar al
+                                                                                                    // Server que delega
+                                                                                                    // atencion,
+                                                                                                    // ManejadorEventListener
+                                                                                                    // dispara eventos
+                                                                                                    // de interes desde
+                                                                                                    // los manejadores
+                                                                                                    // para ser atendido
+                                                                                                    // por el controller
     private Server server;
-    private GestorID gestorID; // gestor ID es parte del server, pero necesita persistirse y ademas pasarle info al server de Respaldo, justo como la informacion de la lista de espera del server
+    private GestorID gestorID; // gestor ID es parte del server, pero necesita persistirse y ademas pasarle
+                               // info al server de Respaldo, justo como la informacion de la lista de espera
+                               // del server
     private CopyOnWriteArrayList<IControllerObserver> observadoresServers;
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
     private ManejaPuesto nodoPuesto;
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
+    private String modo = "xml";
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -51,20 +64,20 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
             conectado = in.readUTF();
-            switch (conectado) { 
+            switch (conectado) {
                 case ComunicaServer.TOTEM:
-                    solicitud = in.readUTF(); //Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
-                    if (solicitud.equals(ComunicaServer.ID)) { 
+                    solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que
+                                              // tiene el string ID es porque ya tiene una id.
+                    if (solicitud.equals(ComunicaServer.ID)) {
                         id = gestorID.generarIdTotem();
-                        out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
-                    }
-                    else 
+                        out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio
+                                          // y debe persistirse.
+                    } else
                         id = solicitud;
                     ManejaTotem nodoTotem = new ManejaTotem(this, id);
                     nodoTotem.setSocket(socket);
                     new Thread(nodoTotem).start();
                     break;
-
 
                 case ComunicaServer.PUESTO:
                     solicitud = in.readUTF();
@@ -72,14 +85,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto = new ManejaPuesto(this, "-1");
                         puestoObservaControlador(nodoPuesto);
                         nodoPuesto.setSocket(socket);
-                    }
-                    else if (solicitud.equals(ComunicaServer.PUESTO_LLAMADOS)){
+                    } else if (solicitud.equals(ComunicaServer.PUESTO_LLAMADOS)) {
                         solicitud = in.readUTF();
                         if (solicitud.equals(ComunicaServer.ID)) {
                             id = gestorID.generarIdPuesto();
                             out.writeUTF(id);
-                        }
-                        else 
+                        } else
                             id = solicitud;
                         nodoPuesto = devuelvePrimerManejador();
                         nodoPuesto.setId(id);
@@ -87,16 +98,15 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                         new Thread(nodoPuesto).start();
                     }
-                    
-                    break;
 
+                    break;
 
                 case ComunicaServer.MONITOR:
-                    nodoMonitor = new ManejaMonitor(this, "unico"); //podria ser observer, pero el requerimiento es que haya 1 solo.
+                    nodoMonitor = new ManejaMonitor(this, "unico"); // podria ser observer, pero el requerimiento es que
+                                                                    // haya 1 solo.
                     nodoMonitor.setSocket(socket);
-                    //new Thread(nodoMonitor).start();
+                    // new Thread(nodoMonitor).start();
                     break;
-
 
                 case ComunicaServer.ADMIN:
                     nodoAdmin = new ManejaAdmin(this, "unico");
@@ -105,7 +115,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         new Thread(nodoAdmin).start();
                     break;
 
-                    
                 case Server.SERVER:
                     System.out.println("LLEGUE HASTA ACA\n");
                     ManejaServerRespaldo nodoServer = new ManejaServerRespaldo(this, "unico");
@@ -117,7 +126,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     System.out.println("THREAD INICIADO CORRECTAMENTE\n");
                     break;
             }
-        } catch (IOException e) {  
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -125,23 +134,24 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void iniciaServer() {
         // TODO : PERSISTIR LISTAS ESPERA Y ATENCION y volcar al metodo inicializaListas
         server.inicializaListas();
-        server.abreConexion();       
+        server.abreConexion();
         // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
-        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
+        if (server.esRespaldo()) { // Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             System.out.println("LLEGUYE HASTA ESRESPALDO");
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             System.out.println("CREE MANEJASERVER");
             nodoServer.setSocket(server.getSocketEntreServers());
             System.out.println("SETIE EL SOCKET");
-            new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
+            new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
+                                            // con el serverprincipal como atributo de state.
             System.out.println("PUDE INICIAR EL THREAD");
         }
     }
 
     // Transfiere todo lo que necesita el nuevo servidor cuando recien se conecta
-    public void sincronizacionDeEstado(IManejaServidores nodoServer){
+    public void sincronizacionDeEstado(IManejaServidores nodoServer) {
         ListaTurnos enEspera, enAtencion, abandonados, atendidos;
         enEspera = server.getEnEspera();
         enAtencion = server.getEnAtencion();
@@ -155,17 +165,20 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     @Override
-    public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el hilo Server que esta aceptando terminales.
+    public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el
+                                                    // hilo Server que esta aceptando terminales.
         // TODO : escribir (persistir) GESTORID
         ManejaServerRespaldo nodoServer;
-        for (IControllerObserver obs : observadoresServers){
+        for (IControllerObserver obs : observadoresServers) {
             nodoServer = (ManejaServerRespaldo) obs;
             nodoServer.comunicaGestor(gestorID);
         }
+        // TODO IMPLEMENTARLO
+        persistir(modo, "gestorID");
     }
 
-    //@Override
-    public void recibeYPersisteGestor(String totem, String puesto, String monitor){
+    // @Override
+    public void recibeYPersisteGestor(String totem, String puesto, String monitor) {
         System.out.println("Recibi el mensaje de admin para setear gestorID");
         int cantTotem = Integer.valueOf(totem);
         int cantPuesto = Integer.valueOf(puesto);
@@ -176,20 +189,20 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.gestorID.setContadorPuesto(cantPuesto);
         this.gestorID.setContadorMonitor(cantMonitor);
         System.out.println("Todo seteado");
-        // TODO : ESCRIBE LOCALMENTE GESTORID...
+        persistir(modo, "gestorID");
     }
 
-    //@Override
-    public boolean recibeYPersisteTurno(String dni, String estado){
+    // @Override
+    public boolean recibeYPersisteTurno(String dni, String estado) {
         boolean validacion = false;
         Cliente cliente;
         try {
             cliente = new Cliente(dni);
             Turno turno = new Turno();
             turno.setCliente(cliente);
-            if (estado.equals(IManejaServidores.TURNO_ESPERA)){
+            if (estado.equals(IManejaServidores.TURNO_ESPERA)) {
                 validacion = server.getEnEspera().contieneA(turno) | server.getEnAtencion().contieneA(turno);
-                if (!validacion){
+                if (!validacion) {
                     server.getEnEspera().agregaTurno(turno);
                     System.out.println(server.getEnEspera());
                     System.out.println(server.getEnAtencion());
@@ -197,61 +210,66 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     notificaTurnosAServers(turno);
                 }
             }
-        } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {}
-        // TODO : Escribir turno en el archivo que corresponda.
+        } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {
+        }
+        persistir(modo, "turnosEspera");
         return validacion;
     }
 
-    public void recibeTurnoEnRespaldo(Turno turno){
+    public void recibeTurnoEnRespaldo(Turno turno) {
+        String archivoAPersistir = "";
         Cliente cliente;
-        if (turno.estaEnAtencion()){
+        if (turno.estaEnAtencion()) {
             if (server.getEnEspera().contieneA(turno))
                 server.getEnEspera().eliminaTurno(turno);
             server.getEnAtencion().agregaTurno(turno);
-        }
-        else if (turno.estaEnEspera()){
+            persistir(modo, "turnosAtencion");
+            persistir(modo, "turnosEspera");
+        } else if (turno.estaEnEspera()) {
             server.getEnEspera().agregaTurno(turno);
-        }
-        else if (turno.estaAbandonado()){
+            persistir(modo, "turnosEspera");
+        } else if (turno.estaAbandonado()) {
             if (server.getEnAtencion().contieneA(turno))
                 server.getEnAtencion().eliminaTurno(turno);
             server.getAbandonados().agregaTurno(turno);
-        }
-        else if (turno.estaAtendido()){
+            persistir(modo, "turnosAtencion");
+            persistir(modo, "turnosAbandonados");
+        } else if (turno.estaAtendido()) {
             if (server.getEnAtencion().contieneA(turno))
                 server.getEnAtencion().eliminaTurno(turno);
             server.getAtendidos().agregaTurno(turno);
+            persistir(modo, "turnosAtendidos");
+            persistir(modo, "turnosAtencion");
         }
-        // TODO : Escribir turno en el archivo que corresponda.
     }
 
-    public Turno llamaSiguienteTurno(String id) { //TODO: Tiene la id porque se la tiene que pasar al monitor...
+    public Turno llamaSiguienteTurno(String id) { // TODO: Tiene la id porque se la tiene que pasar al monitor...
         Turno turno = server.getEnEspera().llamaTurno();
         if (turno != null) {
             turno.atender(id);
             notificaPuestos();
             notificaTurnosAServers(turno);
-            if (nodoMonitor != null){
+            if (nodoMonitor != null) {
                 nodoMonitor.llamaMonitor(turno);
             }
-            // TODO : Persistir cambios en ambas listas.
             Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
-            while (enAtencion.hasNext()){
+            while (enAtencion.hasNext()) {
                 Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
-                if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)){
+                if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)) {
 
-                    if (turnoEnAtencionEnPuestoActual.estaEnAtencion()){
+                    if (turnoEnAtencionEnPuestoActual.estaEnAtencion()) {
 
                         turnoEnAtencionEnPuestoActual.atender(id); // pasa a estado Atendido
                         server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
                         server.getAtendidos().agregaTurno(turnoEnAtencionEnPuestoActual);
                         notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
-                        // TODO : Persistir turnos Atendidos por x puesto a x hora.
                     }
                 }
             }
             server.getEnAtencion().agregaTurno(turno);
         }
+        persistir(modo, "turnosEspera");
+        persistir(modo, "turnosAtencion");
         return turno;
     }
 
@@ -259,38 +277,41 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public boolean actualizaTurnoRenotificado(String idPuesto) {
         boolean valido = false;
         Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
-        while (enAtencion.hasNext()){
+        while (enAtencion.hasNext()) {
             Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
-            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)){
-                if (nodoMonitor != null & turnoEnAtencionEnPuestoActual.getCantLlamados() < 3){
+            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)) {
+                if (nodoMonitor != null & turnoEnAtencionEnPuestoActual.getCantLlamados() < 3) {
                     nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
-                }
-                else if (nodoMonitor != null){
+                    persistir(modo, "turnosAtencion");
+                } else if (nodoMonitor != null) {
                     System.out.println("ABANDONADOOOOOOOO\n\n");
                     server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     server.getAbandonados().agregaTurno(turnoEnAtencionEnPuestoActual);
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
+                    persistir(modo, "turnosAtencion");
+                    persistir(modo, "turnosAbandonados");
                 }
                 valido = true;
             }
         }
         return valido;
     }
-    
+
     @Override
     public void cambiaEstadoServer() {
-        server.switchServer(); // Nombre no representativo la verdad, porque no cambia de server, porque el server en si es el mismo, solo transiciona de estado y crea un socket server
-        
+        server.switchServer(); // Nombre no representativo la verdad, porque no cambia de server, porque el
+                               // server en si es el mismo, solo transiciona de estado y crea un socket server
+
     }
 
-    public void serverObservaControlador(IControllerObserver nodoServerRespaldo){
+    public void serverObservaControlador(IControllerObserver nodoServerRespaldo) {
         observadoresServers.add(nodoServerRespaldo);
     }
 
-    public void puestoObservaControlador(IControllerObserver nodoPuesto){
+    public void puestoObservaControlador(IControllerObserver nodoPuesto) {
         observadoresPuestos.add(nodoPuesto);
     }
 
@@ -302,46 +323,58 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         observadoresPuestos.remove(suscriptor);
     }
 
-    public void notificaPuestos(){
+    public void notificaPuestos() {
         int cantTurnos = server.getEnEspera().getCantidadTurnos();
         Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
-        while (nodosPuesto.hasNext()){
+        while (nodosPuesto.hasNext()) {
             ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
             puestoActual.enviaCantidadEnEspera(cantTurnos);
         }
     }
 
-    public void notificaTurnosAServers(Turno turno){
+    public void notificaTurnosAServers(Turno turno) {
         Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
         String estadoTurno;
-        if (turno.estaEnEspera()){
+        if (turno.estaEnEspera()) {
             estadoTurno = IManejaServidores.TURNO_ESPERA;
-        }
-        else if (turno.estaEnAtencion()){
+        } else if (turno.estaEnAtencion()) {
             estadoTurno = IManejaServidores.TURNO_ATENCION;
-        }
-        else if (turno.estaAbandonado()){
-            estadoTurno =  IManejaServidores.TURNO_ABANDONADO;
-        }
-        else{ //(turno.estaAtendido())
+        } else if (turno.estaAbandonado()) {
+            estadoTurno = IManejaServidores.TURNO_ABANDONADO;
+        } else { // (turno.estaAtendido())
             estadoTurno = IManejaServidores.TURNO_ATENDIDO;
         }
-        while (nodosDeServer.hasNext()){
+        while (nodosDeServer.hasNext()) {
             ManejaServerRespaldo serverRespaldo = (ManejaServerRespaldo) nodosDeServer.next();
             serverRespaldo.comunicaTurno(turno, estadoTurno);
-            // TODO : Escribir turno en el archivo que corresponda.
         }
     }
 
-    public ManejaPuesto devuelvePrimerManejador(){
+    public ManejaPuesto devuelvePrimerManejador() {
         ManejaPuesto encontrado = null;
         String id = "algo";
         Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
-        while (nodosPuesto.hasNext() & !id.equals("-1")){
+        while (nodosPuesto.hasNext() & !id.equals("-1")) {
             encontrado = (ManejaPuesto) nodosPuesto.next();
             id = encontrado.getId();
         }
         return encontrado;
+    }
+
+    public void persistir(String modo, String cosaAPersistir) {
+        ListaTurnos turnosEspera = this.server.getEnEspera();
+        // TODO: Los demas turnos
+        switch (cosaAPersistir) {
+            case "turnosEspera":
+                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos());
+                break;
+            default:
+                System.out.println("No implementaste la persistencia de " + cosaAPersistir);
+        }
+    }
+
+    public void cambiarModo(String modo) {
+        this.modo = modo;
     }
 
 }

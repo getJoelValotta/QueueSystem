@@ -3,7 +3,7 @@ package puesto;
 import puesto.persistencia.*;
 
 public class LlamaMappers {
-    public static void Persistir(String modo, Puesto puesto) {
+    public static void persistir(String modo, Puesto puesto) {
         if (modo.equals("txt")) {
             PuestoTXTMapper.getInstance("puestos.txt").save(puesto);
         } else if (modo.equals("xml")) {

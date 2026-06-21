@@ -117,16 +117,15 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void iniciaPuesto() {
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al
         // server la id por primera vez: pue_001
-
+        // TODO: IF ARCHIVO LEVANTO ELSE NEW PUESTO
         puesto = new Puesto();
         vistaConexion.mostrar(); // temporal
-        // TODO: Levantar archivo?
         // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el
         // boton renotificar a "Marcar como abandonado"
     }
 
     private void persistePuesto(String modo) {
-        LlamaMappers.Persistir(modo, this.puesto);
+        LlamaMappers.persistir(modo, this.puesto);
     }
 
     @Override
