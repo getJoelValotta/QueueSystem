@@ -8,28 +8,32 @@ import shared.turno.Turno;
 public class ListaTurnos {
     private ConcurrentLinkedQueue<Turno> listaTurnos = new ConcurrentLinkedQueue<>();
 
-    public void agregaTurno(Turno turno){
+    public void agregaTurno(Turno turno) {
         listaTurnos.offer(turno);
     }
 
-    public Turno llamaTurno(){
-        return listaTurnos.poll();    
+    public Turno llamaTurno() {
+        return listaTurnos.poll();
     }
 
     public void eliminaTurno(Turno turno) {
         listaTurnos.remove(turno);
     }
-    
-    public int getCantidadTurnos(){
+
+    public int getCantidadTurnos() {
         return listaTurnos.size();
     }
 
-    public boolean contieneA(Turno turno){
+    public boolean contieneA(Turno turno) {
         return listaTurnos.contains(turno);
     }
 
-    public Iterator<Turno> devuelveIterator(){
+    public Iterator<Turno> devuelveIterator() {
         return listaTurnos.iterator();
+    }
+
+    public ConcurrentLinkedQueue<Turno> getListaTurnos() {
+        return listaTurnos;
     }
 
     @Override

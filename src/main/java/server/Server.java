@@ -7,9 +7,9 @@ import java.net.Socket;
 
 import server.id.GestorID;
 
-
-public class Server implements Runnable{
-    public static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv principal
+public class Server implements Runnable {
+    public static final String SERVER = "#SERVER#"; // Se utiliza para cuando se conecte un server de respaldo al sv
+                                                    // principal
     private ListaTurnos enEspera, enAtencion, abandonados, atendidos;
     private ServerState estado;
     private ServerSocket socketServer;
@@ -18,7 +18,7 @@ public class Server implements Runnable{
     private int puerto1 = 1337, puerto2 = 1338;
     private SocketListener escuchadorDeSockets;
 
-    public Server(){
+    public Server() {
         socketServer = null;
         enEspera = null;
         enAtencion = null;
@@ -28,7 +28,7 @@ public class Server implements Runnable{
         gestorID = null;
     }
 
-    public void setServerState(ServerState estado){
+    public void setServerState(ServerState estado) {
         this.estado = estado;
         estado.setServer(this);
     }
@@ -39,20 +39,22 @@ public class Server implements Runnable{
         estado.switchServer(); //deja de recibir hearthbeats por lo que cambia su estado a principal e instancia su serverSocket como corresponde?
     }
 
-    public boolean esPrincipal(){
+    public boolean esPrincipal() {
         return estado.esPrincipal();
     }
 
-    public boolean esRespaldo(){
+    public boolean esRespaldo() {
         return estado.esRespaldo();
     }
 
-    public Socket getSocketEntreServers(){
+    public Socket getSocketEntreServers() {
         return estado.getSocketEntreServers();
     }
 
-    public void abreConexion(){ //Este metodo es el primero que se ejecuta desde el controlador de servers. La idea es que defina que tipo de server es, si es principal 
-        try {                  // es porque no hay otro server en el DNS configurado (localhost), pero si lo hay entonces es de respaldo, donde guarda el socket de conexion para luego.
+    public void abreConexion() { // Este metodo es el primero que se ejecuta desde el controlador de servers. La
+                                 // idea es que defina que tipo de server es, si es principal
+        try { // es porque no hay otro server en el DNS configurado (localhost), pero si lo
+              // hay entonces es de respaldo, donde guarda el socket de conexion para luego.
             Socket socketEntreServers = conectarseExistente();
             if (socketEntreServers == null){
                 if (socketServer != null)
@@ -60,26 +62,28 @@ public class Server implements Runnable{
                 this.socketServer = new ServerSocket(puerto1);
                 this.setEstado(new ServerPrincipal());
                 new Thread(this).start(); // Si es principal, acepta conexiones a nodos.
-            }
-            else{
+            } else {
                 this.socketServer = new ServerSocket(puerto2);
                 this.setEstado(new ServerRespaldo(this, socketEntreServers));
                 new Thread(this).start();
                 // Si es de respaldo, solo acepta conexion a ADMIN (idealmente)
             }
         } catch (IOException e) {
-            //Error interno de TCP
+            // Error interno de TCP
             e.printStackTrace();
         }
     }
-    
-    public Socket conectarseExistente(){ //devuelve el socket a donde se conecto si logra conectarse a un server prendido, null en caso contrario
+
+    public Socket conectarseExistente() { // devuelve el socket a donde se conecto si logra conectarse a un server
+                                          // prendido, null en caso contrario
         String DNS = IP; // siempre es localhost hasta que configuremos una red....
         DataOutputStream outConexionInicial;
         Socket socketEntreServers;
         try {
-            socketEntreServers = new Socket(DNS,puerto1);
-            outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream()); // Le notifica al otro servidor que se conecto otro server a él
+            socketEntreServers = new Socket(DNS, puerto1);
+            outConexionInicial = new DataOutputStream(socketEntreServers.getOutputStream()); // Le notifica al otro
+                                                                                             // servidor que se conecto
+                                                                                             // otro server a él
             outConexionInicial.writeUTF(SERVER);
             return socketEntreServers;
         } catch (java.net.ConnectException e) {
@@ -89,19 +93,18 @@ public class Server implements Runnable{
             return null;
         }
     }
-    
+
     @Override
     public void run() {
         Socket socket;
         String conectado, solicitud;
         try {
-            if (this.esPrincipal()){
-                while (!socketServer.isClosed()){
+            if (this.esPrincipal()) {
+                while (!socketServer.isClosed()) {
                     socket = socketServer.accept();
                     escuchadorDeSockets.atiendeSockets(socket);
                 }
-            }
-            else{
+            } else {
                 socket = socketServer.accept();
                 escuchadorDeSockets.atiendeSockets(socket);
             }
@@ -110,8 +113,8 @@ public class Server implements Runnable{
             e.printStackTrace();
         }
     }
-    
-    public void inicializaListas(){
+
+    public void inicializaListas() {
         this.enEspera = new ListaTurnos();
         this.enAtencion = new ListaTurnos();
         this.abandonados = new ListaTurnos();
@@ -162,14 +165,12 @@ public class Server implements Runnable{
         return gestorID;
     }
 
-    public ServerSocket getServerSocket(){
+    public ServerSocket getServerSocket() {
         return socketServer;
     }
 
-    public void setSocketListener(SocketListener controller){
+    public void setSocketListener(SocketListener controller) {
         this.escuchadorDeSockets = controller;
     }
-
-
 
 }

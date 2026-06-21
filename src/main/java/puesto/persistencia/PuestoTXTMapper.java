@@ -1,9 +1,10 @@
 package puesto.persistencia;
 
 import shared.turno.Turno;
+import shared.persistencia.*;
 import puesto.Puesto;
 
-public class PuestoTXTMapper extends AbstractPuestoMapper {
+public class PuestoTXTMapper extends AbstractFileMapper<Puesto> {
     private static PuestoTXTMapper instance;
     String filePath = "puestos.txt";
 
@@ -22,7 +23,7 @@ public class PuestoTXTMapper extends AbstractPuestoMapper {
     protected String serialize(Puesto puesto) {
         // Pasa los datos de puesto a formato txt
         // (Formato: idPuesto,(estado,cantLlamados,idPuesto,dni))
-        return puesto.getId() + "," + getStringState(puesto.getTurno());
+        return puesto.getId() + "," + TurnoToStringUtil.getStringDelTurno(puesto.getTurno());
     }
 
     @Override
@@ -32,7 +33,7 @@ public class PuestoTXTMapper extends AbstractPuestoMapper {
             throw new IllegalArgumentException("Invalid data format");
         }
         String id = parts[0];
-        Turno turno = getTurnoFromString(parts[1]);
+        Turno turno = TurnoToStringUtil.getTurnoFromString(parts[1]);
         return new Puesto(id, turno);
     }
 

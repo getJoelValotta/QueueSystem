@@ -37,3 +37,18 @@ build/
 
 ### Mac OS ###
 .DS_Store
+puestos.json
+puestos.txt
+puestos.xml
+turnosEsperaServer.json
+turnosEsperaServer.txt
+turnosEsperaServer.xml
+turnosAbandonadosServer.json
+turnosAbandonadosServer.txt
+turnosAbandonadosServer.xml
+turnosAtencionServer.json
+turnosAtencionServer.txt
+turnosAtencionServer.xml
+turnosAtendidosServer.json
+turnosAtendidosServer.txt
+turnosAtendidosServer.xml

@@ -1,17 +1,14 @@
-package puesto.persistencia;
+package shared.persistencia;
 
-import shared.persistencia.AbstractFileMapper;
-import shared.turno.*;
-import puesto.Puesto;
+import shared.turno.Turno;
+import shared.turno.TurnoAbandonado;
+import shared.turno.TurnoAtendido;
+import shared.turno.TurnoEnAtencion;
+import shared.turno.TurnoState;
 
-public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
-    String filePath = "puestos.txt";
+public class TurnoToStringUtil {
 
-    public AbstractPuestoMapper(String filePath) {
-        super(filePath);
-    }
-
-    protected final String getStringState(Turno turno) {
+    public static String getStringDelTurno(Turno turno) {
         // formato: (estado,cantLlamados,idPuesto,dni) -1 para undefined
         if (turno == null) {
             return "(-1;-1;-1,-1)";
@@ -29,17 +26,21 @@ public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
         throw new IllegalArgumentException("Estado de turno no válido");
     }
 
-    protected final Turno getTurnoFromString(String state) {
+    public static Turno getTurnoFromString(String state) {
         // Si el string no empieza con parentesis, esta jodido chavales
         if (!state.startsWith("(") || !state.endsWith(")")) {
             throw new IllegalArgumentException("Formato de estado de turno no válido: " + state);
         }
         // le saco los aprentesis
         String content = state.substring(1, state.length() - 1);
-        // divido el contenido por comas
-        String[] parts = content.split("; ");
+        // divido el contenido por punto y coma
+        String[] parts = content.split(";");
         if (parts.length != 4) {
             throw new IllegalArgumentException("Formato de estado de turno no válido: " + state);
+        }
+
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].trim();
         }
 
         Turno turno = new Turno();
@@ -68,5 +69,4 @@ public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
                 throw new IllegalArgumentException("Estado de turno no válido: " + state);
         }
     }
-
 }
