@@ -31,6 +31,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
     private ManejaPuesto nodoPuesto;
     private ManejaMonitor nodoMonitor;
+    private ManejaAdmin nodoAdmin;
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -98,9 +99,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
 
                 case ComunicaServer.ADMIN:
-                    ManejaAdmin nodoAdmin = new ManejaAdmin(this, "unico");
+                    nodoAdmin = new ManejaAdmin(this, "unico");
                     nodoAdmin.setSocket(socket);
-                    new Thread(nodoAdmin).start();
+                    if (server.esPrincipal())
+                        new Thread(nodoAdmin).start();
                     break;
 
                     
@@ -127,7 +129,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
-        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
+        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             System.out.println("LLEGUYE HASTA ESRESPALDO");
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             System.out.println("CREE MANEJASERVER");

@@ -52,11 +52,11 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
             }
     }
 
-
     public void iniciaAdmin(){
         // Carga el Admin por persistencia. Primera vez hardcodeado con un archivo con formato a definir. si cambia el formato
         admin = new Admin("TXT","MD5");
-        comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
+        //comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
+        vistaAdmin.mostrar();
         new Thread(comunicaServer).start();
     }
 
@@ -76,7 +76,7 @@ public class ControllerAdmin implements AdminEventListener, ActionListener, Cone
 
     @Override
     public void conexionExitosa() {
-        vistaAdmin.mostrar();
+        //vistaAdmin.mostrar();
     }
 
     @Override
