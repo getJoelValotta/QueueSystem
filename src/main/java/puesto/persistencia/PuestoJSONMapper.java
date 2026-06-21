@@ -1,9 +1,10 @@
 package puesto.persistencia;
 
 import shared.turno.Turno;
+import shared.persistencia.*;
 import puesto.Puesto;
 
-public class PuestoJSONMapper extends AbstractPuestoMapper {
+public class PuestoJSONMapper extends AbstractFileMapper<Puesto> {
     private static PuestoJSONMapper instance;
     String filePath = "puestos.json";
 
@@ -22,7 +23,8 @@ public class PuestoJSONMapper extends AbstractPuestoMapper {
     protected String serialize(Puesto puesto) {
         // Pasa los datos de puesto a formato JSON
         // (Formato: {puesto:idPuesto,turno:(estado,cantLlamados,idPuesto,dni)})
-        return "{\"puesto\":\"" + puesto.getId() + "\",\"turno\":\"" + getStringDelTurno(puesto.getTurno()) + "\"}";
+        return "{\"puesto\":\"" + puesto.getId() + "\",\"turno\":\""
+                + TurnoToStringUtil.getStringDelTurno(puesto.getTurno()) + "\"}";
     }
 
     @Override
@@ -55,7 +57,7 @@ public class PuestoJSONMapper extends AbstractPuestoMapper {
         String turnoData = turnoPart.substring(9, turnoPart.length() - 1); // Elimina "turno":""
         System.out.println("Debug: ID: " + id);
         System.out.println("Debug: Turno data: " + turnoData);
-        Turno turno = getTurnoFromString(turnoData);
+        Turno turno = TurnoToStringUtil.getTurnoFromString(turnoData);
         return new Puesto(idPart, turno);
     }
 

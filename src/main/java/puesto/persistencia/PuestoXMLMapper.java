@@ -2,8 +2,9 @@ package puesto.persistencia;
 
 import puesto.Puesto;
 import shared.turno.Turno;
+import shared.persistencia.*;
 
-public class PuestoXMLMapper extends AbstractPuestoMapper {
+public class PuestoXMLMapper extends AbstractFileMapper<Puesto> {
     private static PuestoXMLMapper instance;
     String filePath = "puestos.xml";
 
@@ -20,7 +21,7 @@ public class PuestoXMLMapper extends AbstractPuestoMapper {
 
     @Override
     protected String serialize(Puesto puesto) {
-        return "<puesto><id>" + puesto.getId() + "</id><turno>" + getStringDelTurno(puesto.getTurno())
+        return "<puesto><id>" + puesto.getId() + "</id><turno>" + TurnoToStringUtil.getStringDelTurno(puesto.getTurno())
                 + "</turno></puesto>";
     }
 
@@ -30,7 +31,7 @@ public class PuestoXMLMapper extends AbstractPuestoMapper {
         String turnoData = data.replaceAll(".*<turno>(.*)</turno>.*", "$1");
 
         int id = Integer.parseInt(idStr);
-        Turno turno = getTurnoFromString(turnoData);
+        Turno turno = TurnoToStringUtil.getTurnoFromString(turnoData);
         return new Puesto(String.valueOf(id), turno);
     }
 }

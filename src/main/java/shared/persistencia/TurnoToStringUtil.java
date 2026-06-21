@@ -1,17 +1,14 @@
-package puesto.persistencia;
+package shared.persistencia;
 
-import shared.persistencia.AbstractFileMapper;
-import shared.turno.*;
-import puesto.Puesto;
+import shared.turno.Turno;
+import shared.turno.TurnoAbandonado;
+import shared.turno.TurnoAtendido;
+import shared.turno.TurnoEnAtencion;
+import shared.turno.TurnoState;
 
-public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
-    String filePath = "puestos.txt";
+public class TurnoToStringUtil {
 
-    public AbstractPuestoMapper(String filePath) {
-        super(filePath);
-    }
-
-    protected final String getStringDelTurno(Turno turno) {
+    public static String getStringDelTurno(Turno turno) {
         // formato: (estado,cantLlamados,idPuesto,dni) -1 para undefined
         if (turno == null) {
             return "(-1;-1;-1,-1)";
@@ -29,7 +26,7 @@ public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
         throw new IllegalArgumentException("Estado de turno no válido");
     }
 
-    protected final Turno getTurnoFromString(String state) {
+    public static Turno getTurnoFromString(String state) {
         // Si el string no empieza con parentesis, esta jodido chavales
         if (!state.startsWith("(") || !state.endsWith(")")) {
             throw new IllegalArgumentException("Formato de estado de turno no válido: " + state);
@@ -68,5 +65,4 @@ public abstract class AbstractPuestoMapper extends AbstractFileMapper<Puesto> {
                 throw new IllegalArgumentException("Estado de turno no válido: " + state);
         }
     }
-
 }
