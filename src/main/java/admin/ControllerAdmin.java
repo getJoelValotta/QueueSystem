@@ -24,7 +24,6 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
         switch (e.getActionCommand()){
             case AdminGUI.XML:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    System.out.println("Estoy xml");
                     comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.XML);
                 });
                 break;
@@ -44,20 +43,19 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
             case AdminGUI.AES:
                 VistasUtils.ejecutarNoBloqueante(() ->{
                     System.out.println("Estoy aes");
-                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.MD5);
+                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.AES);
                 });
                 break;
 
             case AdminGUI.CHACHA20:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.SHA_2);
+                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.CHACHA20);
                 });
                 break;
 
             case AdminGUI.ENVIAR_CLAVE:
                 VistasUtils.ejecutarNoBloqueante(() ->{
-                    System.out.println("Estoy enviarclave");
-                    //enviar clave;
+                    comunicaServerPrincipal.enviaNuevaClave(vistaAdmin.getClaveEncriptacion());
                 });
                 break;
             }
