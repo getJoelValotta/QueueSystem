@@ -47,7 +47,7 @@ public abstract class ComunicaServer {
             this.in = new DataInputStream(socket.getInputStream());
             System.out.println("ACABO DE INSTANCIAR UN SOCKET");
             out.writeUTF(nodo);
-            //escuchadorDeNodoFisico.conexionExitosa();
+            escuchadorDeNodoFisico.conexionExitosa();
         } catch (UnknownHostException e) { // Excepcion que discierne si el formato de la IP es invalido
             System.out.println("IP ERRONEA ");
             escuchadorDeNodoFisico.conexionErronea("Formato de IP Invalido");

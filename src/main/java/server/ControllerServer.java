@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
-import admin.AdminComunicaServerP;
 
+import admin.AdminComunicaServerP;
 import server.id.GestorID;
 import server.id.GestorIDListener;
 import server.manejadores.IControllerObserver;
@@ -24,7 +24,6 @@ import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.turno.Turno;
-import server.manejadores.IManejaServidores;
 
 public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener { // SocketListener es
                                                                                                     // para escuchar al
@@ -103,6 +102,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.setSocket(socket);
                     } else if (solicitud.equals(ComunicaServer.PUESTO_LLAMADOS)) {
                         solicitud = in.readUTF();
+                        System.out.println("REcibi la solicitud de id:" + solicitud);
                         if (solicitud.equals(ComunicaServer.ID)) {
                             id = gestorID.generarIdPuesto();
                             out.writeUTF(id);
