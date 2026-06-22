@@ -1,8 +1,5 @@
 package server.persistencia;
 
-import java.awt.List;
-import java.util.LinkedList;
-
 import shared.persistencia.AbstractFileMapper;
 
 import server.ServerConfig;
@@ -40,7 +37,8 @@ public class ServerConfigJSONMapper extends AbstractFileMapper<ServerConfig> {
     protected ServerConfig deserialize(String data) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(data, ServerConfig.class);
+            return objectMapper.readValue(data, new TypeReference<ServerConfig>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
             return null;

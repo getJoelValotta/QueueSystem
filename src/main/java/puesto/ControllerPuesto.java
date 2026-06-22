@@ -30,7 +30,8 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(),
-                            Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO, vistaConexion.getClaveEncriptacion());
+                            Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO,
+                            vistaConexion.getClaveEncriptacion());
                     // vistaPuesto.inhabilitaRenotificar();
                     if (puesto.getId() == null) {
                         String id = comunicaServer.solicitaID();
@@ -115,7 +116,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void iniciaPuesto() {
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al
         // server la id por primera vez: pue_001
-        // TODO: IF ARCHIVO LEVANTO ELSE NEW PUESTO
         try {
             this.modoPersistencia = LlamaMappers.cargarConfig();
         } catch (RuntimeException e) {

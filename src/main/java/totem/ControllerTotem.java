@@ -12,7 +12,9 @@ import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 import shared.criptografia.ICriptografia;
 
-public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener{
+import totem.persistencia.TotemConfigTXTMapper;
+
+public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener {
     private ConexionGUI vistaConexion;
     private TotemGUI vistaTotem;
     private Totem totem;
@@ -33,47 +35,60 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        switch (e.getActionCommand()){
+        switch (e.getActionCommand()) {
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM, vistaConexion.getClaveEncriptacion());
-                    
-                    if (totem.getId() == null){
+                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(),
+                            Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM,
+                            vistaConexion.getClaveEncriptacion());
+
+                    if (totem.getId() == null) {
                         System.out.println("PIDO ID");
                         String id = comunicaServer.solicitaID();
                         System.out.println("id = " + id);
                         totem.setId(id);
-                    }
-                    else{
-                        System.out.println("INFORMO EL ID = "+totem.getId());
+                    } else {
+                        System.out.println("INFORMO EL ID = " + totem.getId());
                         comunicaServer.informaID(totem.getId());
                     }
                 });
-                //iniciaTotem();
+                // iniciaTotem();
                 break;
             case TotemGUI.REGISTRAR:
                 try {
                     totem.setCliente(new Cliente(vistaTotem.getDNI()));
                     VistasUtils.ejecutarNoBloqueante(() -> {
                         boolean validacion = comunicaServer.enviarDNI(totem.getCliente().getDni());
-                        if (validacion){
+                        if (validacion) {
                             vistaTotem.setGuiaError("Usted ya se encuentra registrado.");
                         } else {
                             vistaTotem.setGuiaExito("DNI Ingresado");
                             vistaTotem.limpiaDNI();
                         }
                     });
-                } catch (ClienteDniVacioException e1) { //Nunca se lanzaran ya que la vista controla esto antes.
-                } catch (ClienteDniInvalidoException e1) {}
+                } catch (ClienteDniVacioException e1) { // Nunca se lanzaran ya que la vista controla esto antes.
+                } catch (ClienteDniInvalidoException e1) {
+                }
                 break;
         }
+        try {
+            Thread.sleep(100);
+        } catch (Exception e1) {
+            System.out.println("Error sleep: " + e1.getMessage());
+        }
+        persistir();
     }
 
-    public void iniciaTotem(){
-        // TODO : persistencia + logica de asignacion de ids estilo tot_001... si no tiene persistencia solicita a server primer id y luego persiste.
-        this.totem = new Totem();
-        // si id es null o no hay archivo persistido para el totem, invocar ComunicaServer.solicitaID();
-        vistaConexion.mostrar(); //temporal
+    public void iniciaTotem() {
+        try {
+            this.totem = recuperar();
+            System.out.println("Totem recuperado con ID: " + totem.getId());
+        } catch (RuntimeException e) {
+            System.out.println("Error al recuperar el totem, se creará un nuevo totem: " + e.getMessage());
+            this.totem = new Totem();
+        }
+        vistaConexion.mostrar(); // temporal
+        persistir();
     }
 
     @Override
@@ -92,8 +107,16 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         VistasUtils.enEDT(() -> vistaTotem.setGuiaError(mensaje));
     }
 
-    public String getId(){
+    public String getId() {
         return totem.getId();
+    }
+
+    private void persistir() {
+        LlamaMappersTotem.persistir(totem);
+    }
+
+    private Totem recuperar() throws RuntimeException {
+        return LlamaMappersTotem.recuperar();
     }
 
 }
