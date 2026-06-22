@@ -29,8 +29,36 @@ public abstract class ComunicaServer {
     public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
         this.IP = IP;
         this.puerto = puerto;
-        //this.claveEncriptacion = claveEncriptacion;
-        conectaServidor(IP, puerto, nodo);
+        try {
+            this.socket = new Socket(IP, puerto);
+            this.out = new DataOutputStream(socket.getOutputStream());
+            this.in = new DataInputStream(socket.getInputStream());
+            out.writeUTF(CLAVE);
+            out.writeUTF(claveEncriptacion);
+            boolean claveValida = Boolean.parseBoolean(in.readUTF());
+            if (!claveValida){
+                System.out.println("CLAVE DE ENCRIPTACION INVALIDA");
+                escuchadorDeNodoFisico.conexionErronea("Clave de encriptacion invalida");
+                socket.close();
+            }
+            else{
+                out.writeUTF(nodo);
+                escuchadorDeNodoFisico.conexionExitosa();
+            }
+        } catch (UnknownHostException e) { // Excepcion que discierne si el formato de la IP es invalido
+            System.out.println("IP ERRONEA ");
+            escuchadorDeNodoFisico.conexionErronea("Formato de IP Invalido");
+            e.printStackTrace();
+        } catch (java.net.ConnectException e) { // Excepcion que discierne si el puerto es incorrecto o el host esta
+                                                // indispuesto.
+            System.out.println("IP QUE NO EXISTE ");
+            escuchadorDeNodoFisico.conexionErronea("Puerto incorrecto o host indispuesto");
+            e.printStackTrace();
+        } catch (IOException e) { // Excepcion que discierne si hubo un error en el handshake del protocolo TCP
+                                  // (SYN, SYNACK, ACK).
+            escuchadorDeNodoFisico.conexionErronea("Error de protocolo de conexion");
+            e.printStackTrace();
+        }
     }
 
     // Asumimos que la infra de la conexion de las ips es con ayuda de un DNS con un
