@@ -24,9 +24,9 @@ import javax.swing.border.EmptyBorder;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import shared.VistasUtils;
- 
+
 public class ConexionGUI extends JFrame {
- 
+
     // Constante exacta del archivo original preserved para acoplamiento estricto
     public static final String CONECTAR = "#CONECTAR#";
 
@@ -38,7 +38,7 @@ public class ConexionGUI extends JFrame {
 
     // NUEVO COMPONENTE: Campo para la clave de encriptación solicitado
     private JTextField campoClaveEncriptacion;
- 
+
     public ConexionGUI() {
         // Inicializar FlatLightLaf de manera segura para mantener consistencia visual
         try {
@@ -53,7 +53,7 @@ public class ConexionGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(true);
- 
+
         inicializarComponentes();
     }
 
@@ -67,7 +67,7 @@ public class ConexionGUI extends JFrame {
         gbc.gridx = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.WEST;
-        
+
         int fila = 0;
 
         // ── 1. TÍTULO: Mucho más chico en la esquina superior izquierda ──
@@ -78,7 +78,8 @@ public class ConexionGUI extends JFrame {
         gbc.insets = new Insets(0, 0, 10, 0);
         panelPrincipal.add(lblTitulo, gbc);
 
-        // ── 2. NUEVO CAMPO: Clave de Encriptación (Sobre IP/Puerto, alineado a la izquierda) ──
+        // ── 2. NUEVO CAMPO: Clave de Encriptación (Sobre IP/Puerto, alineado a la
+        // izquierda) ──
         JLabel lblClave = new JLabel("Clave de Encriptación:");
         lblClave.setFont(new Font("Segoe UI", Font.BOLD, 12));
         gbc.gridy = fila++;
@@ -96,23 +97,28 @@ public class ConexionGUI extends JFrame {
         JPanel panelIpPuerto = new JPanel(new GridBagLayout());
         GridBagConstraints subGbc = new GridBagConstraints();
         subGbc.anchor = GridBagConstraints.WEST;
-        
+
         JLabel lblIP = new JLabel("IP: ");
         lblIP.setFont(new Font("Segoe UI", Font.BOLD, 12));
         campoIP = new JTextField("localhost");
         campoIP.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         campoIP.setPreferredSize(new Dimension(150, 30));
-        
+
         JLabel lblPuerto = new JLabel(" Puerto: ");
         lblPuerto.setFont(new Font("Segoe UI", Font.BOLD, 12));
         campoPuerto = new JTextField("1337");
         campoPuerto.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         campoPuerto.setPreferredSize(new Dimension(70, 30));
 
-        subGbc.gridx = 0; panelIpPuerto.add(lblIP, subGbc);
-        subGbc.gridx = 1; panelIpPuerto.add(campoIP, subGbc);
-        subGbc.gridx = 2; panelIpPuerto.add(lblPuerto, subGbc);
-        subGbc.gridx = 3; subGbc.fill = GridBagConstraints.HORIZONTAL; subGbc.weightx = 1.0;
+        subGbc.gridx = 0;
+        panelIpPuerto.add(lblIP, subGbc);
+        subGbc.gridx = 1;
+        panelIpPuerto.add(campoIP, subGbc);
+        subGbc.gridx = 2;
+        panelIpPuerto.add(lblPuerto, subGbc);
+        subGbc.gridx = 3;
+        subGbc.fill = GridBagConstraints.HORIZONTAL;
+        subGbc.weightx = 1.0;
         panelIpPuerto.add(campoPuerto, subGbc);
 
         gbc.gridy = fila++;
@@ -125,11 +131,12 @@ public class ConexionGUI extends JFrame {
         areaLog.setLineWrap(true);
         areaLog.setWrapStyleWord(true);
         areaLog.setFont(new Font("Monospaced", Font.PLAIN, 12));
- 
+
         JScrollPane scroll = new JScrollPane(areaLog);
         scroll.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1));
-        
-        // Configuramos la consola para que absorba todo el estiramiento vertical de la ventana
+
+        // Configuramos la consola para que absorba todo el estiramiento vertical de la
+        // ventana
         gbc.gridy = fila++;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
@@ -143,28 +150,28 @@ public class ConexionGUI extends JFrame {
         btnConectar.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnConectar.setPreferredSize(new Dimension(0, 36));
         btnConectar.putClientProperty("JButton.buttonType", "roundRect"); // Borde redondeado moderno de FlatLaf
-        
+
         gbc.gridy = fila++;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weighty = 0.0;
         gbc.insets = new Insets(4, 0, 0, 0);
         panelPrincipal.add(btnConectar, gbc);
     }
- 
+
     // --- METODOS DE API PÚBLICA (Compatibilidad Absoluta Case-Sensitive) ---
 
-    public void mostrar(){
+    public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
     }
 
-    public void cerrar(){
+    public void cerrar() {
         VistasUtils.enEDT(() -> this.dispose());
     }
- 
+
     public String getIP() {
         return campoIP.getText().trim();
     }
- 
+
     public String getPuerto() {
         return campoPuerto.getText().trim();
     }
@@ -175,21 +182,21 @@ public class ConexionGUI extends JFrame {
     public String getClaveEncriptacion() {
         return campoClaveEncriptacion.getText().trim();
     }
- 
+
     public void appendLog(String mensaje) {
         VistasUtils.enEDT(() -> {
             areaLog.append(mensaje + "\n");
             areaLog.setCaretPosition(areaLog.getDocument().getLength());
         });
     }
- 
+
     public void appendLogError(String mensaje) {
         VistasUtils.enEDT(() -> {
             areaLog.append("[ERROR] " + mensaje + "\n");
             areaLog.setCaretPosition(areaLog.getDocument().getLength());
         });
     }
- 
+
     public void setActionListener(ActionListener listener) {
         // Limpieza preventiva contra listeners duplicados
         for (ActionListener al : btnConectar.getActionListeners()) {
@@ -197,25 +204,29 @@ public class ConexionGUI extends JFrame {
         }
         btnConectar.addActionListener(listener);
     }
- 
+
     public void setBtnConectarEnabled(boolean enabled) {
         SwingUtilities.invokeLater(() -> btnConectar.setEnabled(enabled));
     }
- 
+
     public void transicionVista(JFrame vista) {
-        SwingUtilities.invokeLater(() -> {   
-            vista.setVisible(true);    
-            this.dispose();              
-        });                             
+        SwingUtilities.invokeLater(() -> {
+            vista.setVisible(true);
+            this.dispose();
+        });
     }
 
-    public void ejecutarNoBloqueante(Runnable tarea) { 
-        new SwingWorker<Void, Void>() {               
+    public void ejecutarNoBloqueante(Runnable tarea) {
+        new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
                 tarea.run();
                 return null;
             }
         }.execute();
+    }
+
+    public void setClaveEncriptacion(String clave) {
+        VistasUtils.enEDT(() -> campoClaveEncriptacion.setText(clave));
     }
 }

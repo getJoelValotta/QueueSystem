@@ -99,6 +99,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
             this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
 
         }
+        vistaConexion.setClaveEncriptacion(claveSimetrica);
         vistaConexion.mostrar(); // temporal
         persistir();
     }

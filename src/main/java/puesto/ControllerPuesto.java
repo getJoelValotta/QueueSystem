@@ -173,6 +173,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             this.modoEncriptacion = "AES";
             this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         }
+        vistaConexion.setClaveEncriptacion(claveEncriptacion);
         vistaConexion.mostrar(); // temporal
     }
 
