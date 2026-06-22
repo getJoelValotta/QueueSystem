@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import admin.AdminComunicaServerP;
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
@@ -85,14 +86,31 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     // CHEQUEAR LUEGO
     @Override
     public void run() {
-        String cantidadEnEspera;
+        String mensaje;
         while (!getSocket().isClosed()) {
             try {
-                //getSocket().setSoTimeout(2000);
-                //synchronized (mutex) {
-                    cantidadEnEspera = in.readUTF();
-                //}
-                escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(cantidadEnEspera));
+                mensaje = in.readUTF();
+                switch(mensaje){
+                    case AdminComunicaServerP.PERSISTENCIA:
+                        mensaje = in.readUTF();
+                        escuchadorDeEventos.setModoPersistencia(mensaje);
+                        break;
+                    case AdminComunicaServerP.ENCRIPTACION:
+                        mensaje = in.readUTF();
+                        System.out.print("Cambiando la encriptacion");
+                        escuchadorDeEventos.setModoEncriptacion(mensaje);
+                        break;
+                    case AdminComunicaServerP.CLAVE:
+                        mensaje = in.readUTF();
+                        escuchadorDeEventos.setClaveEncriptacion(mensaje);
+                        break;
+                    default:
+                        escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(mensaje));
+                        break;
+                }
+                
+                              
+                
             } catch (SocketException e) {
                 reintentarConexion("im sorry, but if you read this you might be gay", "es chiste!!!");
             } catch (IOException e) {

@@ -7,7 +7,7 @@ import admin.ControllerAdmin;
 
 public class AdminApp {
 
-    public static void main (String[] args){
+    public static void main (String[] args){ñ
         AdminGUI vistaAdmin = new AdminGUI();
         AdminComunicaServerP comunicaServerPrincipal = new AdminComunicaServerP();
         AdminComunicaServerR comunicaServerRespaldo = new AdminComunicaServerR();

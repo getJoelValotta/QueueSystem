@@ -3,6 +3,7 @@ package puesto;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import admin.AdminComunicaServerP;
 import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
@@ -18,7 +19,8 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     private PuestoComunicaServer comunicaServer;
     private String modoPersistencia = "txt";
     private ICriptografia criptografia;
-    private String claveEncriptacion;
+    private String claveEncriptacion, modoEncriptacion;
+    
 
     public ControllerPuesto(ConexionGUI vistaConexion, PuestoGUI vistaPuesto, PuestoComunicaServer comunicaServer) {
         this.vistaConexion = vistaConexion;
@@ -187,5 +189,20 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public String desencriptar(String mensajeEncriptado) {
         return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
+
+    public void setModoEncriptacion(String modo) {
+        this.modoEncriptacion = modo;
+            if (modo.equals(AdminComunicaServerP.AES)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        }else if (modo.equals(AdminComunicaServerP.CHACHA20)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+        System.out.println("Encrip cambiada");
+    }
+
+    public void setModoPersistencia(String modo) {
+        this.modoPersistencia = modo;
+    }
+
 
 }
