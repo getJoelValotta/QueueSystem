@@ -2,7 +2,7 @@ package puesto.persistencia;
 
 import shared.persistencia.*;
 
-public class PuestoConfigTXTMapper extends AbstractFileMapper<String> {
+public class PuestoConfigTXTMapper extends AbstractFileMapper<ConfigPuesto> {
     private static PuestoConfigTXTMapper instance;
     String filePath = "puestoConfig.txt";
 
@@ -18,13 +18,14 @@ public class PuestoConfigTXTMapper extends AbstractFileMapper<String> {
     }
 
     @Override
-    protected String serialize(String config) {
-        return config;
+    protected String serialize(ConfigPuesto config) {
+        return config.getModoPersistencia() + "," + config.getModoEncriptacion();
     }
 
     @Override
-    protected String deserialize(String data) {
-        return data;
+    protected ConfigPuesto deserialize(String data) {
+        String[] parts = data.split(",");
+        return new ConfigPuesto(parts[0], parts[1]);
     }
 
 }

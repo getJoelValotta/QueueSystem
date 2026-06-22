@@ -12,6 +12,8 @@ import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
+import puesto.persistencia.ConfigPuesto;
+
 public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener {
     private ConexionGUI vistaConexion;
     private PuestoGUI vistaPuesto;
@@ -20,7 +22,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     private String modoPersistencia = "txt";
     private ICriptografia criptografia;
     private String claveEncriptacion, modoEncriptacion;
-    
 
     public ControllerPuesto(ConexionGUI vistaConexion, PuestoGUI vistaPuesto, PuestoComunicaServer comunicaServer) {
         this.vistaConexion = vistaConexion;
@@ -127,10 +128,13 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al
         // server la id por primera vez: pue_001
         try {
-            this.modoPersistencia = LlamaMappers.cargarConfig();
+            ConfigPuesto config = LlamaMappers.cargarConfig();
+            this.modoPersistencia = config.getModoPersistencia();
+            this.modoEncriptacion = config.getModoEncriptacion();
         } catch (RuntimeException e) {
-            System.err.println("Error al cargar config, puesto se configura en txt: " + e.getMessage());
+            System.err.println("Error al cargar config, puesto se configura en txt y AES: " + e.getMessage());
             this.modoPersistencia = "txt";
+            this.modoEncriptacion = "AES";
         }
 
         try {
@@ -139,7 +143,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             System.err.println("Error al cargar puesto, se inicia uno nuevo: " + e.getMessage());
             puesto = new Puesto();
         }
-        LlamaMappers.persistirConfig(modoPersistencia);
+        LlamaMappers.persistirConfig(modoPersistencia, modoEncriptacion);
 
         // Actualizar vista si hay un puesto y turno cargado
         if (puesto != null && puesto.getId() != null) {
@@ -188,17 +192,17 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
     public void setModoEncriptacion(String modo) {
         this.modoEncriptacion = modo;
-            if (modo.equals(AdminComunicaServerP.AES)){
+        if (modo.equals(AdminComunicaServerP.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        }else if (modo.equals(AdminComunicaServerP.CHACHA20)){
+        } else if (modo.equals(AdminComunicaServerP.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
-        System.out.println("Encrip cambiada");
+        LlamaMappers.persistirConfig(this.modoPersistencia, this.modoEncriptacion);
     }
 
     public void setModoPersistencia(String modo) {
         this.modoPersistencia = modo;
+        LlamaMappers.persistirConfig(this.modoPersistencia, this.modoEncriptacion);
     }
-
 
 }
