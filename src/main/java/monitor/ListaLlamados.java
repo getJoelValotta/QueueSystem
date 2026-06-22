@@ -2,8 +2,7 @@ package monitor;
 
 import java.util.LinkedList;
 import shared.turno.Turno;
-
-import shared.persistencia.TurnoToStringUtil;
+import shared.turno.TurnoToStringUtil;
 
 public class ListaLlamados {
     private LinkedList<Turno> llamados = new LinkedList<>();

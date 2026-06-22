@@ -36,16 +36,9 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     }
 
     public void iniciaMonitor() {
-        try {
-            monitor = recuperar();
-            System.out.println("Monitor recuperado exitosamente: " + monitor.getId());
-        } catch (RuntimeException e) {
-            System.out.println("No se pudo recuperar el monitor, se iniciará uno nuevo: " + e.getMessage());
-            monitor = new Monitor("unico", 5, new ListaLlamados(5));
-        }
+        monitor = new Monitor("unico", 5, new ListaLlamados(5));
         vistaConexion.mostrar();
         cargarHistorialEnGUI();
-        persist();
     }
 
     @Override
@@ -53,14 +46,12 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
                                                    // que la vista es la misma que la ultima vez
         monitor.agregaTurno(turno);
         vistaMonitor.registrarLlamado(String.valueOf(turno.getCliente().getDni()), turno.getIdPuesto());
-        persist();
     }
 
     @Override
     public void eventoRenotificaLlamado(Turno turno) {
         monitor.renotificaTurno(turno);
         vistaMonitor.registrarLlamado(String.valueOf(turno.getCliente().getDni()), turno.getIdPuesto());
-        persist();
     }
 
     @Override
@@ -81,16 +72,6 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
         return monitor.getId();
     }
 
-    private void persist() {
-        LlamaMappersMonitor.persist(modo, monitor);
-    }
-
-    private Monitor recuperar() throws RuntimeException {
-        System.out.println("Intentando recuperar el monitor...");
-        Monitor monitor = LlamaMappersMonitor.load(modo);
-        System.out.println("Monitor recuperado exitosamente: " + monitor.getId());
-        return monitor;
-    }
 
     private void cargarHistorialEnGUI() {
         LinkedList<Turno> llamados = monitor.getLlamados().getLlamadosList();

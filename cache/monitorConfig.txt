@@ -1,1 +1,0 @@
-unico,5,[(atencion;1;pue_001;88888888)|(atencion;1;pue_001;88888888)|(atencion;1;pue_001;77777777)|(atencion;1;pue_001;77777777)|(atencion;1;pue_001;66666666)|]

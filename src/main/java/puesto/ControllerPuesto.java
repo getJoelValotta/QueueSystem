@@ -12,8 +12,6 @@ import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
-import puesto.persistencia.ConfigPuesto;
-
 public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener {
     private ConexionGUI vistaConexion;
     private PuestoGUI vistaPuesto;
@@ -106,7 +104,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         } catch (InterruptedException es) {
             System.out.println("Error al hacer sleep despues de accion realizada");
         }
-        persistePuesto(modoPersistencia);
     }
 
     @Override
@@ -122,63 +119,12 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     @Override
     public void setClaveEncriptacion(String clave) {
         this.claveEncriptacion = clave;
-        LlamaMappers.persistirConfig(this.modoPersistencia, this.modoEncriptacion, this.claveEncriptacion);
     }
 
     public void iniciaPuesto() {
-        // Carga el puesto por persistencia. si no hay archivo entonces le pido al
-        // server la id por primera vez: pue_001
-        try {
-            ConfigPuesto config = LlamaMappers.cargarConfig();
-            this.modoPersistencia = config.getModoPersistencia();
-            this.modoEncriptacion = config.getModoEncriptacion();
-            this.claveEncriptacion = config.getClaveEncriptacion();
-        } catch (RuntimeException e) {
-            System.err.println("Error al cargar config, puesto se configura en txt y AES: " + e.getMessage());
-            this.modoPersistencia = "txt";
-            this.modoEncriptacion = "AES";
-            this.claveEncriptacion = "clave";
-        }
-
-        try {
-            this.puesto = LlamaMappers.cargarPuesto(modoPersistencia);
-        } catch (RuntimeException e) {
-            System.err.println("Error al cargar puesto, se inicia uno nuevo: " + e.getMessage());
-            puesto = new Puesto();
-        }
-        LlamaMappers.persistirConfig(modoPersistencia, modoEncriptacion, claveEncriptacion);
-
-        // Actualizar vista si hay un puesto y turno cargado
-        if (puesto != null && puesto.getId() != null) {
-            vistaPuesto.setNumPuesto(puesto.getId());
-            if (puesto.getTurno() != null) {
-                vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
-                if (puesto.getTurno().estaEnAtencion()) {
-                    vistaPuesto.habilitaRenotificar();
-                } else {
-                    vistaPuesto.inhabilitaRenotificar();
-                }
-                vistaPuesto.habilitarBtn();
-            }
-        } else {
-            vistaPuesto.inhabilitarBtn();
-            vistaPuesto.inhabilitaRenotificar();
-        }
-        if (this.modoEncriptacion == "AES") {
-            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        } else if (this.modoEncriptacion == "CHACHA20") {
-            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
-        } else {
-            System.err.println("Modo de encriptacion no reconocido, se setea AES por defecto");
-            this.modoEncriptacion = "AES";
-            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        }
-        vistaConexion.setClaveEncriptacion(claveEncriptacion);
-        vistaConexion.mostrar(); // temporal
-    }
-
-    private void persistePuesto(String modo) {
-        LlamaMappers.persistir(modo, this.puesto);
+        puesto = new Puesto();
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        vistaConexion.mostrar(); //temporal
     }
 
     @Override
@@ -209,12 +155,10 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         } else if (modo.equals(AdminComunicaServerP.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
-        LlamaMappers.persistirConfig(this.modoPersistencia, this.modoEncriptacion, this.claveEncriptacion);
     }
 
     public void setModoPersistencia(String modo) {
         this.modoPersistencia = modo;
-        LlamaMappers.persistirConfig(this.modoPersistencia, this.modoEncriptacion, this.claveEncriptacion);
     }
 
 }

@@ -59,13 +59,14 @@ public class Server implements Runnable {
               // hay entonces es de respaldo, donde guarda el socket de conexion para luego.
             Socket socketEntreServers = conectarseExistente();
             if (socketEntreServers == null) {
+                System.out.println("SOY PRINCIPAL");
                 if (socketServer != null)
                     socketServer.close();
                 this.socketServer = new ServerSocket(puerto1);
                 this.setEstado(new ServerPrincipal());
                 new Thread(this).start(); // Si es principal, acepta conexiones a nodos.
             } else {
-                this.socketServer = new ServerSocket(puerto2);
+                System.out.println("SOY RESPALDO");
                 this.setEstado(new ServerRespaldo(this, socketEntreServers));
                 new Thread(this).start();
                 // Si es de respaldo, solo acepta conexion a ADMIN (idealmente)

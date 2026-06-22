@@ -1,10 +1,4 @@
-package shared.persistencia;
-
-import shared.turno.Turno;
-import shared.turno.TurnoAbandonado;
-import shared.turno.TurnoAtendido;
-import shared.turno.TurnoEnAtencion;
-import shared.turno.TurnoState;
+package shared.turno;
 
 public class TurnoToStringUtil {
 

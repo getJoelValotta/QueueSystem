@@ -31,7 +31,9 @@ public class ManejaTotem extends ManejadorDeNodos implements IControllerObserver
     public void comunicacion() {
         try {
             String respuesta = inSimple.readUTF();
+            System.out.println("Recibi DNI.");
             boolean validacion = this.controllerServer.recibeYPersisteTurno(respuesta, IManejaServidores.TURNO_ESPERA); // Revisa si ya se encuentra en la fila y sino lo agrega
+            System.out.println("Guarde en lista y devuelvo validacion.");
             outSimple.writeUTF(String.valueOf(validacion));
             if (!validacion){
                 controllerServer.avisarAdmin("DNI agregado desde Totem " + id, AdminComunicaServerP.BIEN_PRINCIPAL);

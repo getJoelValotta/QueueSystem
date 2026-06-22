@@ -52,7 +52,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaTotem nodoTotem;
     private String modo = "txt";
     private String modoEncriptacion;
-    private String claveEncriptacion = "pepe";
+    private String claveEncriptacion = "";
     private ICriptografia criptografia;
 
     public ControllerServer(Server server) {
@@ -83,11 +83,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             }
             switch (conectado) {
                 case ComunicaServer.TOTEM:
+                    System.out.println("Conectando un Totem...");
                     solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que
                                               // tiene el string ID es porque ya tiene una id.
                     if (solicitud.equals(ComunicaServer.TOTEM_INIT)) {
                         ManejaTotem nodoTotem = new ManejaTotem(this, "-1");
-                        totemObservaControlador(nodoTotem);
+                        totemObservaControlador(nodoTotem); 
                         nodoTotem.setSocket(socket);
                     } else if (solicitud.equals(ComunicaServer.TOTEM_END)) {
                         solicitud = in.readUTF();
@@ -100,6 +101,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoTotem = devuelvePrimerManejadorTotem();
                         nodoTotem.setId(id);
                         nodoTotem.setSocketSimple(socket);
+                        System.out.println("Totem conectado con id "+ id);
                         new Thread(nodoTotem).start();
                         avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
@@ -160,51 +162,27 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     public void iniciaServer() {
-        server.abreConexion();
-        try {
-            ServerConfig config = cargaConfig(); // Cargo file config
-            this.server.setGestorID(GestorID.parse(config.getGestorIDString()));
-            this.modoEncriptacion = config.getTipoEncriptacion();
-            this.modo = (config.getModoPersistencia());
-            this.claveEncriptacion = config.getClaveEncriptacion();
-
-            System.out.println("Carga de configuracion exitosa: " + config.toString());
-        } catch (RuntimeException e) {
-            System.out.println("No se pudo cargar la config, se inicia con valores por defecto");
-            gestorID = new GestorID(0, 0, 0, this);
-            server.setGestorID(gestorID);
-            this.modoEncriptacion = AdminComunicaServerP.AES;
-            setModo("txt");
-        }
-        try {
-
-            ConcurrentLinkedQueue<Turno> turnosEspera = cargarTurnos("turnosEspera");
-            ConcurrentLinkedQueue<Turno> turnosAtencion = cargarTurnos("turnosAtencion");
-            ConcurrentLinkedQueue<Turno> turnosAbandonados = cargarTurnos("turnosAbandonados");
-            ConcurrentLinkedQueue<Turno> turnosAtendidos = cargarTurnos("turnosAtendidos");
-            server.inicializaListas(new ListaTurnos(turnosEspera), new ListaTurnos(),
-                    new ListaTurnos(turnosAbandonados), new ListaTurnos(turnosAtendidos));
-            System.out.println("Listas recuperadas");
-        } catch (RuntimeException e) {
-            System.out.println("No se pudieron cargar las listas de turnos, se inicia con listas vacias");
-            server.inicializaListas();
-        }
-        if (this.modoEncriptacion.equals(AdminComunicaServerP.AES)) {
-            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        } else if (this.modoEncriptacion.equals(AdminComunicaServerP.CHACHA20)) {
-            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
-        }
-        this.gestorID = server.getGestorID();
-        this.gestorID.setListener(this);
-        System.out.println("Gestor ID: " + this.gestorID.toString());
-        if (server.esRespaldo()) { // Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
+        // TODO : PERSISTIR LISTAS ESPERA Y ATENCION y volcar al metodo inicializaListas
+        System.out.println("Iniciando el server.");
+        server.inicializaListas();
+        server.abreConexion();       
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        System.out.println("Conexion realizada.");
+        // TODO : leer (persistir) GESTORID
+        gestorID = new GestorID(0, 0, 0, this);
+        server.setGestorID(gestorID);
+        System.out.println("Fin parte principal.");
+        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
+            System.out.println("LLEGUYE HASTA ESRESPALDO");
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
+            System.out.println("CREE MANEJASERVER");
             nodoServer.setSocket(server.getSocketEntreServers());
-            new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
-                                            // con el serverprincipal como atributo de state.
+            System.out.println("SETIE EL SOCKET");
+            new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
+            System.out.println("PUDE INICIAR EL THREAD");
         }
-        persisteConfig(modo);
     }
+
 
     // Transfiere todo lo que necesita el nuevo servidor cuando recien se conecta
     public void sincronizacionDeEstado(IManejaServidores nodoServer) {
@@ -232,7 +210,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             nodoServer = (ManejaServerRespaldo) obs;
             nodoServer.comunicaGestor(gestorID);
         }
-        persisteConfig(modo); // El gestorID se persiste cada vez que se genera una ID nueva
     }
 
     // @Override
@@ -247,7 +224,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.gestorID.setContadorPuesto(cantPuesto);
         this.gestorID.setContadorMonitor(cantMonitor);
         System.out.println("Todo seteado");
-        persistir(modo, "gestorID");
     }
 
     // @Override
@@ -271,7 +247,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {
         }
-        persistir(modo, "turnosEspera");
         return validacion;
     }
 
@@ -282,23 +257,16 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             if (server.getEnEspera().contieneA(turno))
                 server.getEnEspera().eliminaTurno(turno);
             server.getEnAtencion().agregaTurno(turno);
-            persistir(modo, "turnosAtencion");
-            persistir(modo, "turnosEspera");
         } else if (turno.estaEnEspera()) {
             server.getEnEspera().agregaTurno(turno);
-            persistir(modo, "turnosEspera");
         } else if (turno.estaAbandonado()) {
             if (server.getEnAtencion().contieneA(turno))
                 server.getEnAtencion().eliminaTurno(turno);
             server.getAbandonados().agregaTurno(turno);
-            persistir(modo, "turnosAtencion");
-            persistir(modo, "turnosAbandonados");
         } else if (turno.estaAtendido()) {
             if (server.getEnAtencion().contieneA(turno))
                 server.getEnAtencion().eliminaTurno(turno);
             server.getAtendidos().agregaTurno(turno);
-            persistir(modo, "turnosAtendidos");
-            persistir(modo, "turnosAtencion");
         }
     }
 
@@ -328,9 +296,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             }
             server.getEnAtencion().agregaTurno(turno);
         }
-        persistir(modo, "turnosEspera");
-        persistir(modo, "turnosAtencion");
-        persistir(modo, "turnosAtendidos");
         return turno;
     }
 
@@ -346,15 +311,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
-                    persistir(modo, "turnosAtencion");
                 } else if (nodoMonitor != null) {
                     System.out.println("ABANDONADOOOOOOOO\n\n");
                     server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     server.getAbandonados().agregaTurno(turnoEnAtencionEnPuestoActual);
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
-                    persistir(modo, "turnosAtencion");
-                    persistir(modo, "turnosAbandonados");
                 }
                 valido = true;
             }
@@ -472,75 +434,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
     }
 
-    public void persistir(String modo, String cosaAPersistir) {
-        ListaTurnos turnosEspera = this.server.getEnEspera();
-        switch (cosaAPersistir) {
-            case "turnosEspera":
-                System.out.println("Persistiendo turnos en espera...");
-                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir,
-                        this.server.esPrincipal());
-                break;
-            case "turnosAtencion":
-                System.out.println("Persistiendo turnos en atencion...");
-                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir,
-                        this.server.esPrincipal());
-                break;
-            case "turnosAbandonados":
-                System.out.println("Persistiendo turnos abandonados...");
-                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir,
-                        this.server.esPrincipal());
-                break;
-            case "turnosAtendidos":
-                System.out.println("Persistiendo turnos atendidos...");
-                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir,
-                        this.server.esPrincipal());
-                break;
-            case "gestorID":
-                persisteConfig(modo);
-                break;
-            default:
-                System.out.println("No implementaste la persistencia de " + cosaAPersistir);
-        }
-    }
-
-    public ConcurrentLinkedQueue<Turno> cargarTurnos(String estado) throws RuntimeException {
-        ConcurrentLinkedQueue<Turno> turnos = null;
-        switch (estado) {
-            case "turnosEspera":
-                turnos = LlamaMappersServer.cargar(modo, "turnosEspera", this.server.esPrincipal());
-                break;
-            case "turnosAtencion":
-                turnos = LlamaMappersServer.cargar(modo, "turnosAtencion", this.server.esPrincipal());
-                break;
-            case "turnosAbandonados":
-                turnos = LlamaMappersServer.cargar(modo, "turnosAbandonados", this.server.esPrincipal());
-                break;
-            case "turnosAtendidos":
-                turnos = LlamaMappersServer.cargar(modo, "turnosAtendidos", this.server.esPrincipal());
-                break;
-            default:
-                System.out.println("No implementaste la carga de " + estado);
-        }
-        return turnos;
-    }
-
-    private void persisteConfig(String modo) {
-        ServerConfig config = new ServerConfig(modo, this.server.getGestorID().toString(),
-                this.modoEncriptacion, this.claveEncriptacion);
-        LlamaMappersServer.persistirConfig(config, this.server.esPrincipal());
-        System.out.println("Persistencia de configuracion exitosa: " + config.toString());
-    }
-
-    private ServerConfig cargaConfig() throws RuntimeException {
-        ServerConfig config = LlamaMappersServer.cargarConfig();
-        System.out.println("Config cargada: " + config.toString());
-        return config;
-    }
 
     public void setModo(String modo) {
         System.out.println(modo);
         this.modo = modo;
-        persisteConfig(modo);
     }
 
     public String getClave() {
@@ -561,7 +458,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setClaveEncriptacion(String clave) {
         System.out.println(clave);
         this.claveEncriptacion = clave;
-        persisteConfig(modo);
     }
 
     public void setModoEncriptacion(String modoEncriptacion) {
@@ -594,7 +490,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             ManejaServerPrincipal nodoRespaldo = (ManejaServerPrincipal) nodosDeServer.next();
             nodoRespaldo.enviaModoEncriptacion(modoEncriptacion);
         }
-        persisteConfig(modo);
         // nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
     }
 }

@@ -30,7 +30,6 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable {
             validacion = Boolean.parseBoolean(inSimple.readUTF());
             return validacion;
         } catch (SocketException | java.io.EOFException e) {
-            System.out.println("EXCEPTION POR SOCKET");
             return reintentarConexion(dni);
         } catch (IOException e1) {
             e1.printStackTrace();
