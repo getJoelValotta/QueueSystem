@@ -26,4 +26,14 @@ public class LlamaMappersServer {
         }
     }
 
+    public static void persistirConfig(ServerConfig config) {
+        String filePath = "serverConfig.json";
+        ServerConfigJSONMapper.getInstance(filePath).save(config);
+    }
+
+    public static ServerConfig cargarConfig() {
+        String filePath = "serverConfig.json";
+        return ServerConfigJSONMapper.getInstance(filePath).load();
+    }
+
 }

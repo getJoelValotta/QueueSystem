@@ -72,7 +72,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             conectado = in.readUTF();
             switch (conectado) {
                 case ComunicaServer.TOTEM:
-                    solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
+                    solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que
+                                              // tiene el string ID es porque ya tiene una id.
                     if (solicitud.equals(ComunicaServer.TOTEM_INIT)) {
                         ManejaTotem nodoTotem = new ManejaTotem(this, "-1");
                         totemObservaControlador(nodoTotem);
@@ -81,7 +82,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         solicitud = in.readUTF();
                         if (solicitud.equals(ComunicaServer.ID)) {
                             id = gestorID.generarIdTotem();
-                            out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
+                            out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem
+                                              // cambio y debe persistirse.
                         } else
                             id = solicitud;
                         nodoTotem = devuelvePrimerManejadorTotem();
@@ -89,7 +91,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoTotem.setSocketSimple(socket);
                         new Thread(nodoTotem).start();
                         avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
-                    }  
+                    }
                     break;
 
                 case ComunicaServer.PUESTO:
@@ -118,7 +120,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoMonitor = new ManejaMonitor(this, "unico"); // podria ser observer, pero el requerimiento es que
                                                                     // haya 1 solo.
                     nodoMonitor.setSocket(socket);
-                    //new Thread(nodoMonitor).start();
+                    // new Thread(nodoMonitor).start();
                     avisarAdmin("Nodo conectado: Monitor.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
 
@@ -152,10 +154,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
-        if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
+        if (server.esRespaldo()) { // Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             nodoServer.setSocket(server.getSocketEntreServers());
-            new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
+            new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
+                                            // con el serverprincipal como atributo de state.
         }
     }
 
@@ -310,9 +313,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         return valido;
     }
 
-    public void avisarAdmin (String msg, String tipoEvento){
-        if (nodoAdmin != null){
-            switch(tipoEvento){
+    public void avisarAdmin(String msg, String tipoEvento) {
+        if (nodoAdmin != null) {
+            switch (tipoEvento) {
                 case AdminComunicaServerP.EVENTO_PRINCIPAL:
                     nodoAdmin.logEventoPrincipal(msg);
                     break;
@@ -327,9 +330,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     break;
             }
         }
-        
+
     }
-    
+
     @Override
     public void cambiaEstadoServer() {
         server.switchServer(); // Nombre no representativo la verdad, porque no cambia de server, porque el
@@ -420,7 +423,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
     }
 
-    
     public void persistir(String modo, String cosaAPersistir) {
         ListaTurnos turnosEspera = this.server.getEnEspera();
         switch (cosaAPersistir) {
@@ -456,6 +458,18 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             default:
                 System.out.println("No implementaste la persistencia de " + cosaAPersistir);
         }
+    }
+
+    private void persisteConfig(String modo) {
+        ServerConfig config = new ServerConfig(modo, this.server.getGestorID(), this.server.getTipoEncriptacion());
+        LlamaMappersServer.persistirConfig(config);
+    }
+
+    private void cargaConfig() {
+        ServerConfig config = LlamaMappersServer.cargarConfig();
+        this.server.setGestorID(config.getGestorID());
+        this.server.setTipoEncriptacion(config.getTipoEncriptacion());
+        this.modo = (config.getModoPersistencia());
     }
 
     public void cambiarModo(String modo) {
