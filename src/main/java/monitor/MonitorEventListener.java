@@ -6,5 +6,7 @@ public interface MonitorEventListener {
 
     public void eventoRecibeLlamado(Turno turno);
     public void eventoRenotificaLlamado(Turno turno);
+    public String encriptar(String mensaje);
+    public String desencriptar(String mensajeEncriptado);
 
 }

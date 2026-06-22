@@ -27,7 +27,8 @@ public class MonitorEscuchaServer extends ComunicaServer implements Runnable{
                 System.out.println("LLEGUE AL IN");
                 String accion = in.readUTF();
                 String puesto = in.readUTF();
-                String dniRecibido = in.readUTF(); // TODO : Desencriptar
+                String dniEncriptado = in.readUTF(); // TODO : Desencriptar
+                String dniRecibido = escuchadorDeEventos.desencriptar(dniEncriptado);
                 System.out.println("ACCION = " + accion + ", DNI = " + dniRecibido + ", PUESTO = " + puesto);
                 Cliente cliente = new Cliente(dniRecibido);
                 Turno turno = new Turno();

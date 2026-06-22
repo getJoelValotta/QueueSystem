@@ -20,13 +20,11 @@ public class ManejaMonitor extends ManejadorDeNodos{
 
     public void llamaMonitor(Turno turno){
         try {
-            System.out.println("Soy ManejaMonitor y llame1");
             out.writeUTF(MonitorEscuchaServer.LLAMA);
-            System.out.println("Soy ManejaMonitor y llame2");
             out.writeUTF(turno.getIdPuesto());
-            System.out.println("Soy ManejaMonitor y llame3");
-            out.writeUTF(String.valueOf(turno.getCliente().getDni()));
-            System.out.println("Soy ManejaMonitor y llame4");
+            String dni = String.valueOf(turno.getCliente().getDni());
+            String dniEncriptado = controllerServer.encriptar(dni);
+            out.writeUTF(dniEncriptado);
         } catch (IOException e) {
             e.printStackTrace();
             try{
@@ -40,7 +38,9 @@ public class ManejaMonitor extends ManejadorDeNodos{
         try {
             out.writeUTF(MonitorEscuchaServer.RENOTIFICA);
             out.writeUTF(turno.getIdPuesto());
-            out.writeUTF(String.valueOf(turno.getCliente().getDni()));
+            String dni = String.valueOf(turno.getCliente().getDni());
+            String dniEncriptado = controllerServer.encriptar(dni);
+            out.writeUTF(dniEncriptado);
         } catch (IOException e) {
             e.printStackTrace();
             try{

@@ -16,7 +16,6 @@ public abstract class ComunicaServer {
     protected Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
     protected String IP;
     protected int puerto;
-    protected String claveEncriptacion = null;
 
     public ComunicaServer(){
         socket = null;
@@ -127,5 +126,4 @@ public abstract class ComunicaServer {
     public ConexionListener getEscuchadorDeNodoFisico() {
         return escuchadorDeNodoFisico;
     }
-
 }

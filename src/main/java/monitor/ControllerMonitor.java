@@ -9,6 +9,8 @@ import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.criptografia.FactoryCriptografia;
+import shared.criptografia.ICriptografia;
 //import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
@@ -18,14 +20,15 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     private Monitor monitor;
     private MonitorEscuchaServer escuchaServer;
     private String modo = "txt";
-    // private String claveEncriptacion;
-    // private ICriptografia criptografia;
+    private ICriptografia criptografia;
+    private String claveEncriptacion;
 
     public ControllerMonitor(ConexionGUI vistaConexion, MonitorGUI vistaMonitor, MonitorEscuchaServer escuchaServer) {
         this.vistaConexion = vistaConexion;
         this.vistaMonitor = vistaMonitor;
         this.vistaConexion.setActionListener(this);
         this.escuchaServer = escuchaServer;
+        this.claveEncriptacion = null;
     }
 
     @Override
@@ -37,8 +40,19 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
 
     public void iniciaMonitor() {
         monitor = new Monitor("unico", 5, new ListaLlamados(5));
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         vistaConexion.mostrar();
         cargarHistorialEnGUI();
+    }
+
+    @Override
+    public String encriptar(String mensaje) {
+        return criptografia.encriptar(mensaje, claveEncriptacion);
+    }
+
+    @Override
+    public String desencriptar(String mensajeEncriptado) {
+        return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
 
     @Override
@@ -86,7 +100,7 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     }
 
     public void setClaveEncriptacion(String clave) {
-        // this.claveEncriptacion = clave;
+        this.claveEncriptacion = clave;
     }
 
 }
