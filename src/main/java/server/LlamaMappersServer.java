@@ -6,11 +6,17 @@ import server.persistencia.*;
 
 import shared.turno.Turno;
 
-public class LlamaMappersServer { // TODO: Implementar criptografia
-    public static void persistir(String modo, ConcurrentLinkedQueue<Turno> turnos, String cosaAPersistir) {
+public class LlamaMappersServer {
+    public static void persistir(String modo, ConcurrentLinkedQueue<Turno> turnos, String cosaAPersistir,
+            boolean esPrincipal) {
         // Si hay que persistir listas de turnos
         if (cosaAPersistir.startsWith("turnos")) {
-            String filePath = cosaAPersistir + "Server.";
+            String filePath = cosaAPersistir;
+            if (esPrincipal) {
+                filePath += "_ServerPrincipal.";
+            } else {
+                filePath += "_ServerBackup.";
+            }
             if (modo.equals("txt")) {
                 filePath += "txt";
                 ListaTurnosTXTMapper.getInstance(filePath).save(turnos, filePath);
@@ -26,8 +32,13 @@ public class LlamaMappersServer { // TODO: Implementar criptografia
         }
     }
 
-    public static void persistirConfig(ServerConfig config) {
-        String filePath = "serverConfig.json";
+    public static void persistirConfig(ServerConfig config, boolean esPrincipal) {
+        String filePath = null;
+        if (esPrincipal) {
+            filePath = "serverConfig.json";
+        } else {
+            filePath = "serverConfigBackup.json";
+        }
         ServerConfigJSONMapper.getInstance(filePath).save(config);
     }
 

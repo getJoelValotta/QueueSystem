@@ -7,11 +7,12 @@ import admin.ControllerAdmin;
 
 public class AdminApp {
 
-    public static void main (String[] args){ñ
+    public static void main(String[] args) {
         AdminGUI vistaAdmin = new AdminGUI();
         AdminComunicaServerP comunicaServerPrincipal = new AdminComunicaServerP();
         AdminComunicaServerR comunicaServerRespaldo = new AdminComunicaServerR();
-        ControllerAdmin controladorAdmin = new ControllerAdmin(vistaAdmin, comunicaServerPrincipal, comunicaServerRespaldo);
+        ControllerAdmin controladorAdmin = new ControllerAdmin(vistaAdmin, comunicaServerPrincipal,
+                comunicaServerRespaldo);
         comunicaServerPrincipal.setEscuchadorDeEventos(controladorAdmin);
         comunicaServerRespaldo.setEscuchadorDeEventos(controladorAdmin);
         controladorAdmin.iniciaAdmin();

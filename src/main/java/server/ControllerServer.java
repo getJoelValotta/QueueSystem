@@ -459,19 +459,23 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         switch (cosaAPersistir) {
             case "turnosEspera":
                 System.out.println("Persistiendo turnos en espera...");
-                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir,
+                        this.server.esPrincipal());
                 break;
             case "turnosAtencion":
                 System.out.println("Persistiendo turnos en atencion...");
-                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir,
+                        this.server.esPrincipal());
                 break;
             case "turnosAbandonados":
                 System.out.println("Persistiendo turnos abandonados...");
-                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir,
+                        this.server.esPrincipal());
                 break;
             case "turnosAtendidos":
                 System.out.println("Persistiendo turnos atendidos...");
-                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir,
+                        this.server.esPrincipal());
                 break;
             case "gestorID":
                 persisteConfig(modo);
@@ -483,8 +487,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
     private void persisteConfig(String modo) {
         ServerConfig config = new ServerConfig(modo, this.server.getGestorID().toString(),
-                this.server.getTipoEncriptacion());
-        LlamaMappersServer.persistirConfig(config);
+                this.server.getTipoEncriptacion(), this.claveEncriptacion);
+        LlamaMappersServer.persistirConfig(config, this.server.esPrincipal());
         System.out.println("Persistencia de configuracion exitosa: " + config.toString());
     }
 

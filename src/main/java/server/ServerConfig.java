@@ -4,15 +4,18 @@ public class ServerConfig {
     private String modoPersistencia;
     private String tipoEncriptacion;
     private String gestorIDString;
+    private String claveEncriptacion;
 
     // Default constructor for Jackson deserialization
     public ServerConfig() {
     }
 
-    public ServerConfig(String modoPersistencia, String gestorIDString, String tipoEncriptacion) {
+    public ServerConfig(String modoPersistencia, String gestorIDString, String tipoEncriptacion,
+            String claveEncriptacion) {
         this.modoPersistencia = modoPersistencia;
         this.gestorIDString = gestorIDString;
         this.tipoEncriptacion = tipoEncriptacion;
+        this.claveEncriptacion = claveEncriptacion;
     }
 
     public String getModoPersistencia() {
@@ -43,12 +46,21 @@ public class ServerConfig {
         this.tipoEncriptacion = tipoEncriptacion;
     }
 
+    public String getClaveEncriptacion() {
+        return claveEncriptacion;
+    }
+
+    public void setClaveEncriptacion(String claveEncriptacion) {
+        this.claveEncriptacion = claveEncriptacion;
+    }
+
     @Override
     public String toString() {
         return "ServerConfig{" +
                 "modoPersistencia='" + modoPersistencia + '\'' +
                 ", tipoEncriptacion='" + tipoEncriptacion + '\'' +
                 ", gestorID='" + gestorIDString + '\'' +
+                ", claveEncriptacion='" + claveEncriptacion + '\'' +
                 '}';
     }
 }
