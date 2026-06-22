@@ -50,9 +50,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaTotem nodoTotem;
     private String modo = "txt";
     private String modoEncriptacion;
-    private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el
-                                               // admin, y el totem lo tiene que pedir al server cada vez que se
-                                               // conecta.
+    private String claveEncriptacion = "pepe";
     private ICriptografia criptografia;
 
     public ControllerServer(Server server) {
@@ -265,8 +263,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     public void recibeTurnoEnRespaldo(Turno turno) {
-        String archivoAPersistir = "";
-        Cliente cliente;
+        // String archivoAPersistir = "";
+        // Cliente cliente;
         if (turno.estaEnAtencion()) {
             if (server.getEnEspera().contieneA(turno))
                 server.getEnEspera().eliminaTurno(turno);
@@ -563,5 +561,4 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         persisteConfig(modo);
         // nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
     }
-
 }

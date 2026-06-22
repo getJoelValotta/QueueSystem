@@ -26,21 +26,21 @@ public class ControllerAdmin implements AdminEventListener, ActionListener {
         switch (e.getActionCommand()) {
             case AdminGUI.XML:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.XML);
+                    comunicaServerPrincipal.enviaTipoPersistencia("xml");
                 });
                 admin.setMetodoPersistencia("XML");
                 break;
 
             case AdminGUI.JSON:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.JSON);
+                    comunicaServerPrincipal.enviaTipoPersistencia("json");
                 });
                 admin.setMetodoPersistencia("JSON");
                 break;
 
             case AdminGUI.TXT:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.TXT);
+                    comunicaServerPrincipal.enviaTipoPersistencia("txt");
                 });
                 admin.setMetodoPersistencia("TXT");
                 break;
@@ -48,14 +48,14 @@ public class ControllerAdmin implements AdminEventListener, ActionListener {
             case AdminGUI.AES:
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     System.out.println("Estoy aes");
-                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.AES);
+                    comunicaServerPrincipal.enviaTipoEncriptacion("AES");
                 });
                 admin.setMetodoEncriptacion("AES");
                 break;
 
             case AdminGUI.CHACHA20:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.CHACHA20);
+                    comunicaServerPrincipal.enviaTipoEncriptacion("CHACHA20");
                 });
                 admin.setMetodoEncriptacion("CHACHA20");
                 break;

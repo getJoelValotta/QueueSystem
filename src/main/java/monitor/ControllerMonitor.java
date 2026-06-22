@@ -9,7 +9,7 @@ import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
-import shared.criptografia.ICriptografia;
+//import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
 public class ControllerMonitor implements ActionListener, ConexionListener, MonitorEventListener {
@@ -18,8 +18,8 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     private Monitor monitor;
     private MonitorEscuchaServer escuchaServer;
     private String modo = "txt";
-    private String claveEncriptacion;
-    private ICriptografia criptografia;
+    // private String claveEncriptacion;
+    // private ICriptografia criptografia;
 
     public ControllerMonitor(ConexionGUI vistaConexion, MonitorGUI vistaMonitor, MonitorEscuchaServer escuchaServer) {
         this.vistaConexion = vistaConexion;
@@ -103,8 +103,9 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
                     turno.getIdPuesto());
         }
     }
-    public void setClaveEncriptacion(String clave){
-        this.claveEncriptacion = clave;
+
+    public void setClaveEncriptacion(String clave) {
+        // this.claveEncriptacion = clave;
     }
 
 }

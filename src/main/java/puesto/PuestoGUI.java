@@ -2,7 +2,7 @@ package puesto;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
+//import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -24,8 +24,8 @@ public class PuestoGUI extends JFrame {
     private JPanel panelAuxNorte;
     private JLabel lblCantClientesEspera;
     private JLabel lblClienteActual;
-    private JPanel panelAuxLlamar;
-    private JPanel panelAuxReLlamar;
+    // private JPanel panelAuxLlamar;
+    // private JPanel panelAuxReLlamar;
     private JButton btnLlamar;
     private JButton btnRenotificar;
     private JLabel lblNumPuesto;
