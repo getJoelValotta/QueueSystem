@@ -129,6 +129,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             System.err.println("Error al cargar puesto, se inicia uno nuevo: " + e.getMessage());
             puesto = new Puesto();
         }
+        LlamaMappers.persistirConfig(modoPersistencia);
         vistaConexion.mostrar(); // temporal
     }
 
