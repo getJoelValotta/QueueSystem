@@ -55,4 +55,5 @@ public class ManejaTotem extends ManejadorDeNodos implements IControllerObserver
     public void actualizar() {
     }
 
+
 }

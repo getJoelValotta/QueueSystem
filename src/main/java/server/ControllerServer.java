@@ -531,6 +531,35 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setModoEncriptacion(String modoEncriptacion){
         System.out.println(modoEncriptacion);
         this.modoEncriptacion = modoEncriptacion;
+
+        if (modoEncriptacion.equals(AdminComunicaServerP.AES)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        }else if (modoEncriptacion.equals(AdminComunicaServerP.CHACHA20)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+
+        //puestos
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext()) {
+            ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+            puestoActual.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        //totems
+        Iterator<IControllerObserver> nodosTotem = observadoresTotems.iterator();
+        while (nodosTotem.hasNext()) {
+            ManejaTotem totemActual = (ManejaTotem) nodosTotem.next();
+            totemActual.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        //servers de respaldo
+        Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
+        while (nodosDeServer.hasNext()) {
+            ManejaServerPrincipal nodoRespaldo = (ManejaServerPrincipal) nodosDeServer.next();
+            nodoRespaldo.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        //nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
     }
 
 }

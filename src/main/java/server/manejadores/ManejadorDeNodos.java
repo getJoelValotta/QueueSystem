@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
 import admin.AdminComunicaServerP;
 
 public abstract class ManejadorDeNodos implements Runnable{ //Aplica template method
@@ -50,4 +51,13 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
     public Socket getSocket(){
         return socket;
     }
+
+    public void enviaModoEncriptacion(String modo){
+        try {
+            out.writeUTF(AdminComunicaServerP.ENCRIPTACION);
+            out.writeUTF(modo);
+        } catch (IOException e) {
+        }
+    }
+
 }
