@@ -96,7 +96,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
             this.totem = new Totem();
             this.modoEncriptacion = "AES";
             this.claveSimetrica = "clave";
-            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
+            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
 
         }
         vistaConexion.mostrar(); // temporal

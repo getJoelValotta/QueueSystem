@@ -164,7 +164,15 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             vistaPuesto.inhabilitarBtn();
             vistaPuesto.inhabilitaRenotificar();
         }
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        if (this.modoEncriptacion == "AES") {
+            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        } else if (this.modoEncriptacion == "CHACHA20") {
+            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        } else {
+            System.err.println("Modo de encriptacion no reconocido, se setea AES por defecto");
+            this.modoEncriptacion = "AES";
+            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        }
         vistaConexion.mostrar(); // temporal
     }
 
