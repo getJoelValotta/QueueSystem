@@ -49,7 +49,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaTotem nodoTotem;
     // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
     private String modo = "txt";
-    private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el admin, y el totem lo tiene que pedir al server cada vez que se conecta.
+    //private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el admin, y el totem lo tiene que pedir al server cada vez que se conecta.
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -72,12 +72,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             in = new DataInputStream(socket.getInputStream());
             conectado = in.readUTF();
             switch (conectado) {
-                case ComunicaServer.CLAVE:
-                    solicitud = in.readUTF(); 
-                    boolean respuesta = validacionClave(in.readUTF());
-                    out.writeUTF(String.valueOf(respuesta));
-                    break;
-
                 case ComunicaServer.TOTEM:
                     solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que
                                               // tiene el string ID es porque ya tiene una id.
@@ -184,9 +178,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
 
-    public boolean validacionClave(String clave){
-        return clave.equals(claveEncriptacion);
-    }
 
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el
@@ -486,6 +477,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
     public void cambiarModo(String modo) {
         this.modo = modo;
+    }
+
+    public String getClave(){
+        return "pepe";
+        //return this.claveEncriptacion;
     }
 
 }

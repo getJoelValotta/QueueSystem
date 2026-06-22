@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import server.ControllerServer;
 import admin.AdminComunicaServerP;
 
 public class ManejaTotem extends ManejadorDeNodos implements IControllerObserver{
