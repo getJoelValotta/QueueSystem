@@ -29,9 +29,7 @@ public class PuestoXMLMapper extends AbstractFileMapper<Puesto> {
     protected Puesto deserialize(String data) {
         String idStr = data.replaceAll(".*<id>(.*)</id>.*", "$1");
         String turnoData = data.replaceAll(".*<turno>(.*)</turno>.*", "$1");
-
-        int id = Integer.parseInt(idStr);
         Turno turno = TurnoToStringUtil.getTurnoFromString(turnoData);
-        return new Puesto(String.valueOf(id), turno);
+        return new Puesto(idStr.trim(), turno);
     }
 }
