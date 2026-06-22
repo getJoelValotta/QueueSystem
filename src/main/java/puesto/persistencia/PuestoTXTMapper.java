@@ -30,7 +30,9 @@ public class PuestoTXTMapper extends AbstractFileMapper<Puesto> {
     protected Puesto deserialize(String data) {
         String[] parts = data.split(",");
         if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid data format");
+            throw new IllegalArgumentException(
+                    "Invalid data format, parts length: " + parts.length + ", data: " + data);
+
         }
         String id = parts[0];
         Turno turno = TurnoToStringUtil.getTurnoFromString(parts[1]);

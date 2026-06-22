@@ -9,19 +9,19 @@ import shared.turno.TurnoState;
 public class TurnoToStringUtil {
 
     public static String getStringDelTurno(Turno turno) {
-        // formato: (estado,cantLlamados,idPuesto,dni) -1 para undefined
+        // formato: (estado;cantLlamados;idPuesto;dni) -1 para undefined
         if (turno == null) {
-            return "(-1;-1;-1,-1)";
+            return "(-1;-1;-1;-1)";
         }
         if (turno.estaEnEspera()) {
-            return "(espera;-1;-1," + turno.getDniCliente() + ")";
+            return "(espera;-1;-1;" + turno.getDniCliente() + ")";
         } else if (turno.estaEnAtencion()) {
-            return "(atencion;" + turno.getCantLlamados() + ";" + turno.getIdPuesto() + "," + turno.getDniCliente()
+            return "(atencion;" + turno.getCantLlamados() + ";" + turno.getIdPuesto() + ";" + turno.getDniCliente()
                     + ")";
         } else if (turno.estaAtendido()) {
-            return "(atendido;-1;" + turno.getIdPuesto() + "," + turno.getDniCliente() + ")";
+            return "(atendido;-1;" + turno.getIdPuesto() + ";" + turno.getDniCliente() + ")";
         } else if (turno.estaAbandonado()) {
-            return "(abandonado;-1;" + turno.getIdPuesto() + "," + turno.getDniCliente() + ")";
+            return "(abandonado;-1;" + turno.getIdPuesto() + ";" + turno.getDniCliente() + ")";
         }
         throw new IllegalArgumentException("Estado de turno no válido");
     }

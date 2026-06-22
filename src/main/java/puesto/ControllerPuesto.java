@@ -14,6 +14,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     private PuestoGUI vistaPuesto;
     private Puesto puesto;
     private PuestoComunicaServer comunicaServer;
+    private String modoPersistencia = "txt";
 
     public ControllerPuesto(ConexionGUI vistaConexion, PuestoGUI vistaPuesto, PuestoComunicaServer comunicaServer) {
         this.vistaConexion = vistaConexion;
@@ -98,10 +99,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         } catch (InterruptedException es) {
             System.out.println("Error al hacer sleep despues de accion realizada");
         }
-        // TODO: Persiste en todos los modos, discriminar por modo admin
-        persistePuesto("txt");
-        persistePuesto("json");
-        persistePuesto("xml");
+        persistePuesto(modoPersistencia);
     }
 
     @Override
@@ -118,10 +116,21 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al
         // server la id por primera vez: pue_001
         // TODO: IF ARCHIVO LEVANTO ELSE NEW PUESTO
-        puesto = new Puesto();
+        try {
+            this.modoPersistencia = LlamaMappers.cargarConfig();
+        } catch (RuntimeException e) {
+            System.err.println("Error al cargar config, puesto se configura en txt: " + e.getMessage());
+            this.modoPersistencia = "txt";
+        }
+
+        try {
+            this.puesto = LlamaMappers.cargarPuesto(modoPersistencia);
+        } catch (RuntimeException e) {
+            System.err.println("Error al cargar puesto, se inicia uno nuevo: " + e.getMessage());
+            puesto = new Puesto();
+        }
+        LlamaMappers.persistirConfig(modoPersistencia);
         vistaConexion.mostrar(); // temporal
-        // Agregar que si el estado del turno tiene exactamente 3 llamados, cambie el
-        // boton renotificar a "Marcar como abandonado"
     }
 
     private void persistePuesto(String modo) {
