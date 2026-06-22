@@ -31,7 +31,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(),
                             Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.PUESTO);
-                    vistaPuesto.inhabilitaRenotificar();
+                    // vistaPuesto.inhabilitaRenotificar();
                     if (puesto.getId() == null) {
                         String id = comunicaServer.solicitaID();
                         puesto.setId(id);
@@ -130,6 +130,24 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             puesto = new Puesto();
         }
         LlamaMappers.persistirConfig(modoPersistencia);
+
+        // Actualizar vista si hay un puesto y turno cargado
+        if (puesto != null && puesto.getId() != null) {
+            vistaPuesto.setNumPuesto(puesto.getId());
+            if (puesto.getTurno() != null) {
+                vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni());
+                if (puesto.getTurno().estaEnAtencion()) {
+                    vistaPuesto.habilitaRenotificar();
+                } else {
+                    vistaPuesto.inhabilitaRenotificar();
+                }
+                vistaPuesto.habilitarBtn();
+            }
+        } else {
+            vistaPuesto.inhabilitarBtn();
+            vistaPuesto.inhabilitaRenotificar();
+        }
+
         vistaConexion.mostrar(); // temporal
     }
 

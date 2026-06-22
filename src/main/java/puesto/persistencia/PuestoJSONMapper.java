@@ -53,12 +53,10 @@ public class PuestoJSONMapper extends AbstractFileMapper<Puesto> {
         if (!turnoPart.startsWith("\"turno\":")) {
             throw new IllegalArgumentException("Invalid JSON format for turno");
         }
-        int id = Integer.parseInt(idPart.substring(10, idPart.length() - 1)); // Elimina "puesto":"" y parsea el número
-        String turnoData = turnoPart.substring(9, turnoPart.length() - 1); // Elimina "turno":""
-        System.out.println("Debug: ID: " + id);
-        System.out.println("Debug: Turno data: " + turnoData);
+        String id = idPart.substring("\"puesto\":\"".length(), idPart.length() - 1);
+        String turnoData = turnoPart.substring("\"turno\":\"".length(), turnoPart.length() - 1);
         Turno turno = TurnoToStringUtil.getTurnoFromString(turnoData);
-        return new Puesto(idPart, turno);
+        return new Puesto(id.trim(), turno);
     }
 
 }

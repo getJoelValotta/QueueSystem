@@ -15,7 +15,6 @@ import javax.swing.SwingUtilities;
 
 import shared.VistasUtils;
 
-
 public class PuestoGUI extends JFrame {
 
     public static final String LLAMAR = "#LLAMAR#", RENOTIFICAR = "#RENOTIFICAR";
@@ -30,8 +29,7 @@ public class PuestoGUI extends JFrame {
     private JButton btnLlamar;
     private JButton btnRenotificar;
     private JLabel lblNumPuesto;
-    private JLabel lblMensaje;          // <-- nuevo
-
+    private JLabel lblMensaje; // <-- nuevo
 
     public PuestoGUI() {
         setTitle("Gestión de Turnos - Puesto Operador");
@@ -39,8 +37,9 @@ public class PuestoGUI extends JFrame {
         this.setSize(450, 290);
         this.setLocationRelativeTo(null);
 
-        // Margen perimetral interno para que los componentes respiren y no toquen los bordes
-        ((JPanel)getContentPane()).setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        // Margen perimetral interno para que los componentes respiren y no toquen los
+        // bordes
+        ((JPanel) getContentPane()).setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
         // 1. ZONA NORTE: Cantidad de clientes en espera (Alineado a la derecha)
         this.panelAuxNorte = new JPanel(new BorderLayout());
@@ -103,9 +102,10 @@ public class PuestoGUI extends JFrame {
         this.panelAuxBtn.add(this.lblMensaje, BorderLayout.SOUTH);
         add(this.panelAuxBtn, BorderLayout.SOUTH);
     }
+
     public void mostrar() {
         VistasUtils.enEDT(() -> this.setVisible(true));
-        btnRenotificar.setEnabled(false);
+        // btnRenotificar.setEnabled(false);
     }
 
     public void cerrar() {
@@ -118,7 +118,7 @@ public class PuestoGUI extends JFrame {
 
     public void inhabilitarBtn() {
         this.btnLlamar.setEnabled(false);
-    }    
+    }
 
     public void habilitarBtn() {
         this.btnLlamar.setEnabled(true);
@@ -189,7 +189,7 @@ public class PuestoGUI extends JFrame {
     // ─────────────────────────────────────────────────────────────
 
     public static void main(String[] args) {
-		//FlatLightLaf.setup();
-		(new PuestoGUI()).setVisible(true);
+        // FlatLightLaf.setup();
+        (new PuestoGUI()).setVisible(true);
     }
 }
