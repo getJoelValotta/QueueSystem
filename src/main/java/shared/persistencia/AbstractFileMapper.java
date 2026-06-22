@@ -10,8 +10,14 @@ public abstract class AbstractFileMapper<T> {
     }
 
     public final void save(T object) {
-        System.out.println("Guardando objeto en " + filePath);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        File dir = new File("cache");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        File file = new File(dir, filePath);
+
+        System.out.println("Guardando objeto en " + file.getPath());
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(serialize(object));
         } catch (IOException e) {
             throw new RuntimeException("Error escribiendo archivo", e);
@@ -20,8 +26,14 @@ public abstract class AbstractFileMapper<T> {
     }
 
     public final void save(T object, String filePath) {
-        System.out.println("Guardando objeto en " + filePath);
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        File dir = new File("cache");
+        if (!dir.exists())
+            dir.mkdirs();
+
+        File file = new File(dir, filePath);
+
+        System.out.println("Guardando objeto en " + file.getPath());
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             writer.write(serialize(object));
         } catch (IOException e) {
             throw new RuntimeException("Error escribiendo archivo", e);
@@ -30,7 +42,8 @@ public abstract class AbstractFileMapper<T> {
     }
 
     public final T load() throws RuntimeException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        File file = new File("cache", filePath);
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             StringBuilder content = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
