@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 public abstract class ComunicaServer {
     protected Socket socket;
     protected ConexionListener escuchadorDeNodoFisico;
-    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#", PUESTO_COLA = "#COLA#", PUESTO_LLAMADOS = "#LLAMADOS#", TOTEM_INIT = "#TOTEM_INIT#",
+    public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#", PUESTO_COLA = "#COLA#", PUESTO_LLAMADOS = "#LLAMADOS#", TOTEM_INIT = "#TOTEM_INIT#", TOTEM_END = "#TOTEM_END#",
             ID = "#IDX#";
     protected DataOutputStream out;
     protected DataInputStream in;

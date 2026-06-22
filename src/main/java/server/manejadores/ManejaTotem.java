@@ -1,22 +1,39 @@
 package server.manejadores;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 import server.ControllerServer;
 import admin.AdminComunicaServerP;
 
-public class ManejaTotem extends ManejadorDeNodos {
+public class ManejaTotem extends ManejadorDeNodos implements IControllerObserver{
+    private Socket socketSimple;
+    protected DataOutputStream outSimple;
+    protected DataInputStream inSimple;
 
     public ManejaTotem(ManejadorEventListener controllerServer, String id) {
         super(controllerServer, id);
     }
 
+    public void setSocketSimple(Socket socket){
+        this.socketSimple = socket;
+        try {
+            outSimple = new DataOutputStream(socketSimple.getOutputStream());
+            inSimple = new DataInputStream(socketSimple.getInputStream());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void comunicacion() {
         try {
-            String respuesta = in.readUTF();
+            String respuesta = inSimple.readUTF();
             boolean validacion = this.controllerServer.recibeYPersisteTurno(respuesta, IManejaServidores.TURNO_ESPERA); // Revisa si ya se encuentra en la fila y sino lo agrega
-            out.writeUTF(String.valueOf(validacion));
+            outSimple.writeUTF(String.valueOf(validacion));
             if (!validacion){
                 controllerServer.avisarAdmin("DNI agregado desde Totem " + id, AdminComunicaServerP.BIEN_PRINCIPAL);
             } else {
@@ -24,6 +41,7 @@ public class ManejaTotem extends ManejadorDeNodos {
             }
         } catch (Exception e) {
             try {
+                socketSimple.close();
                 socket.close();
                 controllerServer.avisarAdmin("Totem con ID " + id + " desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
             } catch (IOException e1) {
@@ -32,6 +50,10 @@ public class ManejaTotem extends ManejadorDeNodos {
             }
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void actualizar() {
     }
 
 }

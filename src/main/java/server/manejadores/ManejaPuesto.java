@@ -52,6 +52,7 @@ public class ManejaPuesto extends ManejadorDeNodos implements IControllerObserve
         } catch (IOException e) {
             try{
                 socket.close();
+                socketSimple.close(); //TODO : OJO CON ESTO, SI HACE CAGADA EN PUESTO BORRAR
                 controllerServer.avisarAdmin("Puesto con ID " + id + " desconectado.", AdminComunicaServerP.MAL_PRINCIPAL);
             } catch(Exception e1){}
             
