@@ -111,6 +111,8 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         return totem.getId();
     }
 
+    // TODO: Revisar por si los cambios de los chicos cambian algo @Lolo (yo)
+
     private void persistir() {
         LlamaMappersTotem.persistir(totem);
     }

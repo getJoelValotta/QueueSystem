@@ -4,6 +4,9 @@ import totem.persistencia.*;
 
 public class LlamaMappersTotem {
     public static void persistir(Totem totem) {
+        if (totem.getId() == null) {
+            return;
+        }
         TotemConfigTXTMapper.getInstance("totemConfig.txt").save(totem.getId());
     }
 
