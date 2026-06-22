@@ -152,15 +152,30 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         // TODO : PERSISTIR LISTAS ESPERA Y ATENCION y volcar al metodo inicializaListas
         server.inicializaListas();
         server.abreConexion();
-        // TODO : leer (persistir) GESTORID
-        gestorID = new GestorID(0, 0, 0, this);
-        server.setGestorID(gestorID);
+        try {
+            ServerConfig config = cargaConfig(); // Cargo file config
+            this.server.setGestorID(GestorID.parse(config.getGestorIDString()));
+            this.server.setTipoEncriptacion(config.getTipoEncriptacion());
+            this.modo = (config.getModoPersistencia());
+            System.out.println("Carga de configuracion exitosa: " + config.toString());
+        } catch (RuntimeException e) {
+            System.out.println("No se pudo cargar la config, se inicia con valores por defecto");
+            gestorID = new GestorID(0, 0, 0, this);
+            server.setGestorID(gestorID);
+            // TODO: DEFINIR UNA ENCRIPTACION DEFAULT
+            this.server.setTipoEncriptacion(null);
+            setModo("txt");
+        }
         if (server.esRespaldo()) { // Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             nodoServer.setSocket(server.getSocketEntreServers());
             new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
                                             // con el serverprincipal como atributo de state.
         }
+        this.gestorID = server.getGestorID();
+        this.gestorID.setListener(this);
+        System.out.println("Gestor ID: " + this.gestorID.toString());
+        persisteConfig(modo);
     }
 
     // Transfiere todo lo que necesita el nuevo servidor cuando recien se conecta
@@ -182,14 +197,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el
                                                     // hilo Server que esta aceptando terminales.
-        // TODO : escribir (persistir) GESTORID
         ManejaServerRespaldo nodoServer;
         for (IControllerObserver obs : observadoresServers) {
             nodoServer = (ManejaServerRespaldo) obs;
             nodoServer.comunicaGestor(gestorID);
         }
-        // TODO IMPLEMENTARLO
-        persistir(modo, "gestorID");
+        persisteConfig(modo); // El gestorID se persiste cada vez que se genera una ID nueva
     }
 
     // @Override
@@ -455,8 +468,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 LlamaMappersServer.persistir("xml", server.getAtendidos().getListaTurnos(), cosaAPersistir);
                 break;
             case "gestorID":
-                System.out.println("Persistiendo gestorID...");
-                // TODO: IMPLEMENTAR y guardar modO Y TIPO DE ENCRIPTACION
+                persisteConfig(modo);
                 break;
             default:
                 System.out.println("No implementaste la persistencia de " + cosaAPersistir);
@@ -464,18 +476,19 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     private void persisteConfig(String modo) {
-        ServerConfig config = new ServerConfig(modo, this.server.getGestorID(), this.server.getTipoEncriptacion());
+        ServerConfig config = new ServerConfig(modo, this.server.getGestorID().toString(),
+                this.server.getTipoEncriptacion());
         LlamaMappersServer.persistirConfig(config);
+        System.out.println("Persistencia de configuracion exitosa: " + config.toString());
     }
 
-    private void cargaConfig() {
+    private ServerConfig cargaConfig() throws RuntimeException {
         ServerConfig config = LlamaMappersServer.cargarConfig();
-        this.server.setGestorID(config.getGestorID());
-        this.server.setTipoEncriptacion(config.getTipoEncriptacion());
-        this.modo = (config.getModoPersistencia());
+        System.out.println("Config cargada: " + config.toString());
+        return config;
     }
 
-    public void cambiarModo(String modo) {
+    public void setModo(String modo) {
         this.modo = modo;
     }
 

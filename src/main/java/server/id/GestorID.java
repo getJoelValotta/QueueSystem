@@ -13,6 +13,10 @@ public class GestorID {
         this.controllerServer = controllerServer;
     }
 
+    public void setListener(GestorIDListener controllerServer) {
+        this.controllerServer = controllerServer;
+    }
+
     private String generarId(String prefijo, int contador) {
         return String.format("%s_%03d", prefijo, contador);
     }
@@ -67,8 +71,17 @@ public class GestorID {
     }
 
     @Override
+    // No modificar, o mantener consistente con la funcion parse.
     public String toString() { // Con el formato (contadortotem,contadorpuesto,contadormonitor)
         return "(" + contadorTotem + "," + contadorPuesto + "," + contadorMonitor + ')';
+    }
+
+    public static GestorID parse(String gestorID) {
+        String[] partes = gestorID.replaceAll("[()]", "").split(",");
+        int contadorTotem = Integer.parseInt(partes[0]);
+        int contadorPuesto = Integer.parseInt(partes[1]);
+        int contadorMonitor = Integer.parseInt(partes[2]);
+        return new GestorID(contadorTotem, contadorPuesto, contadorMonitor, null);
     }
 
 }

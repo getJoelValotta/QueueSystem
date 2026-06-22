@@ -1,14 +1,17 @@
 package server;
 
-import server.id.GestorID;
-
 public class ServerConfig {
-    private String modoPersistencia, tipoEncriptacion;
-    private GestorID gestorID;
+    private String modoPersistencia;
+    private String tipoEncriptacion;
+    private String gestorIDString;
 
-    public ServerConfig(String modoPersistencia, GestorID gestorID, String tipoEncriptacion) {
+    // Default constructor for Jackson deserialization
+    public ServerConfig() {
+    }
+
+    public ServerConfig(String modoPersistencia, String gestorIDString, String tipoEncriptacion) {
         this.modoPersistencia = modoPersistencia;
-        this.gestorID = gestorID;
+        this.gestorIDString = gestorIDString;
         this.tipoEncriptacion = tipoEncriptacion;
     }
 
@@ -20,12 +23,16 @@ public class ServerConfig {
         this.modoPersistencia = modoPersistencia;
     }
 
-    public GestorID getGestorID() {
-        return gestorID;
+    public String getGestorIDString() {
+        return gestorIDString;
     }
 
-    public void setGestorID(GestorID gestorID) {
-        this.gestorID = gestorID;
+    public void setGestorID(String gestorID) {
+        this.gestorIDString = gestorID;
+    }
+
+    public void setGestorIDString(String gestorIDString) {
+        this.gestorIDString = gestorIDString;
     }
 
     public String getTipoEncriptacion() {
@@ -36,4 +43,12 @@ public class ServerConfig {
         this.tipoEncriptacion = tipoEncriptacion;
     }
 
+    @Override
+    public String toString() {
+        return "ServerConfig{" +
+                "modoPersistencia='" + modoPersistencia + '\'' +
+                ", tipoEncriptacion='" + tipoEncriptacion + '\'' +
+                ", gestorID='" + gestorIDString + '\'' +
+                '}';
+    }
 }

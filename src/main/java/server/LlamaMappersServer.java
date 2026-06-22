@@ -31,7 +31,7 @@ public class LlamaMappersServer {
         ServerConfigJSONMapper.getInstance(filePath).save(config);
     }
 
-    public static ServerConfig cargarConfig() {
+    public static ServerConfig cargarConfig() throws RuntimeException {
         String filePath = "serverConfig.json";
         return ServerConfigJSONMapper.getInstance(filePath).load();
     }
