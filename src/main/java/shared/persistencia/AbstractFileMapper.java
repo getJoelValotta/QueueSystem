@@ -29,7 +29,7 @@ public abstract class AbstractFileMapper<T> {
 
     }
 
-    public final T load() {
+    public final T load() throws RuntimeException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             StringBuilder content = new StringBuilder();
             String line;
