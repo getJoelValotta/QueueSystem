@@ -19,13 +19,13 @@ public class TotemConfigTXTMapper extends AbstractFileMapper<ConfigTotem> {
 
     @Override
     protected String serialize(ConfigTotem config) {
-        return config.getID() + "," + config.getModoEncriptacion();
+        return config.getID() + "," + config.getModoEncriptacion() + "," + config.getClaveEncriptacion();
     }
 
     @Override
     protected ConfigTotem deserialize(String data) {
         String[] parts = data.split(",");
-        return new ConfigTotem(parts[0], parts[1]);
+        return new ConfigTotem(parts[0], parts[1], parts[2]);
     }
 
 }

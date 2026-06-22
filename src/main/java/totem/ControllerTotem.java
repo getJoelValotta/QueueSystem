@@ -86,10 +86,18 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         try {
             this.totem = recuperar();
             System.out.println("Totem recuperado con ID: " + totem.getId());
-            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
+            if (this.modoEncriptacion == "AES") {
+                this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+            } else if (this.modoEncriptacion == "CHACHA20") {
+                this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+            }
         } catch (RuntimeException e) {
             System.out.println("Error al recuperar el totem, se creará un nuevo totem: " + e.getMessage());
             this.totem = new Totem();
+            this.modoEncriptacion = "AES";
+            this.claveSimetrica = "clave";
+            this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
+
         }
         vistaConexion.mostrar(); // temporal
         persistir();
@@ -116,15 +124,18 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         return totem.getId();
     }
 
-    // TODO: Revisar por si los cambios de los chicos cambian algo @Lolo (yo)
-
     private void persistir() {
-        ConfigTotem config = new ConfigTotem(totem.getId(), this.modoEncriptacion);
+        ConfigTotem config = new ConfigTotem(totem.getId(), this.modoEncriptacion, this.claveSimetrica);
         LlamaMappersTotem.persistir(config);
     }
 
-    private ConfigTotem recuperar() throws RuntimeException {
-        return LlamaMappersTotem.recuperar();
+    private Totem recuperar() throws RuntimeException {
+        ConfigTotem config = LlamaMappersTotem.recuperar();
+        Totem totem = new Totem();
+        totem.setId(config.getID());
+        this.modoEncriptacion = config.getModoEncriptacion();
+        this.claveSimetrica = config.getClaveEncriptacion();
+        return totem;
     }
 
     public void setClaveEncriptacion(String clave) {
