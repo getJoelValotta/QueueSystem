@@ -166,18 +166,23 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         try {
             ServerConfig config = cargaConfig(); // Cargo file config
             this.server.setGestorID(GestorID.parse(config.getGestorIDString()));
-            this.server.setTipoEncriptacion(config.getTipoEncriptacion());
+            this.modoEncriptacion = config.getTipoEncriptacion();
             this.modo = (config.getModoPersistencia());
+            this.claveEncriptacion = config.getClaveEncriptacion();
+
             System.out.println("Carga de configuracion exitosa: " + config.toString());
         } catch (RuntimeException e) {
             System.out.println("No se pudo cargar la config, se inicia con valores por defecto");
             gestorID = new GestorID(0, 0, 0, this);
             server.setGestorID(gestorID);
-            // TODO: DEFINIR UNA ENCRIPTACION DEFAULT
-            this.server.setTipoEncriptacion(null);
+            this.modoEncriptacion = AdminComunicaServerP.AES;
             setModo("txt");
         }
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
+        if (this.modoEncriptacion.equals(AdminComunicaServerP.AES)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        } else if (this.modoEncriptacion.equals(AdminComunicaServerP.CHACHA20)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
         this.gestorID = server.getGestorID();
         this.gestorID.setListener(this);
         System.out.println("Gestor ID: " + this.gestorID.toString());
@@ -487,7 +492,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
     private void persisteConfig(String modo) {
         ServerConfig config = new ServerConfig(modo, this.server.getGestorID().toString(),
-                this.server.getTipoEncriptacion(), this.claveEncriptacion);
+                this.modoEncriptacion, this.claveEncriptacion);
         LlamaMappersServer.persistirConfig(config, this.server.esPrincipal());
         System.out.println("Persistencia de configuracion exitosa: " + config.toString());
     }
@@ -501,6 +506,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setModo(String modo) {
         System.out.println(modo);
         this.modo = modo;
+        persisteConfig(modo);
     }
 
     public String getClave() {
@@ -521,6 +527,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setClaveEncriptacion(String clave) {
         System.out.println(clave);
         this.claveEncriptacion = clave;
+        persisteConfig(modo);
     }
 
     public void setModoEncriptacion(String modoEncriptacion) {
@@ -553,7 +560,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             ManejaServerPrincipal nodoRespaldo = (ManejaServerPrincipal) nodosDeServer.next();
             nodoRespaldo.enviaModoEncriptacion(modoEncriptacion);
         }
-
+        persisteConfig(modo);
         // nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
     }
 

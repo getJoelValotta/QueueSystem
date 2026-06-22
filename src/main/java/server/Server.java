@@ -175,13 +175,4 @@ public class Server implements Runnable {
         this.escuchadorDeSockets = controller;
     }
 
-    public String getTipoEncriptacion() {
-        // TODO IMPLEMENTAR @JOEL @NAHUE
-        return null;
-    }
-
-    public void setTipoEncriptacion(String tipo) {
-        // TODO IMPLEMENTAR @JOEL @NAHUE
-    }
-
 }
