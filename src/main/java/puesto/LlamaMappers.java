@@ -16,8 +16,8 @@ public class LlamaMappers { // TODO: PERSISTIR TAMBIEN TIPO ENCRIPTACION
         }
     }
 
-    public static void persistirConfig(String modoPersistencia, String modoEncriptacion) {
-        ConfigPuesto config = new ConfigPuesto(modoPersistencia, modoEncriptacion);
+    public static void persistirConfig(String modoPersistencia, String modoEncriptacion, String claveEncriptacion) {
+        ConfigPuesto config = new ConfigPuesto(modoPersistencia, modoEncriptacion, claveEncriptacion);
         PuestoConfigTXTMapper.getInstance("puestoConfig.txt").save(config);
     }
 
@@ -36,7 +36,8 @@ public class LlamaMappers { // TODO: PERSISTIR TAMBIEN TIPO ENCRIPTACION
     public static ConfigPuesto cargarConfig() throws RuntimeException {
         ConfigPuesto config = PuestoConfigTXTMapper.getInstance("puestoConfig.txt").load();
         System.out.println(
-                "Configuración cargada: " + config.getModoPersistencia() + ", " + config.getModoEncriptacion());
+                "Configuración cargada: " + config.getModoPersistencia() + ", " + config.getModoEncriptacion() + ", "
+                        + config.getClaveEncriptacion());
         return config;
     }
 

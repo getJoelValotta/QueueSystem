@@ -3,10 +3,20 @@ package puesto.persistencia;
 public class ConfigPuesto {
     String modoPersistencia;
     String modoEncriptacion;
+    String claveEncriptacion;
 
-    public ConfigPuesto(String modoPersistencia, String modoEncriptacion) {
+    public ConfigPuesto(String modoPersistencia, String modoEncriptacion, String claveEncriptacion) {
         this.modoPersistencia = modoPersistencia;
         this.modoEncriptacion = modoEncriptacion;
+        this.claveEncriptacion = claveEncriptacion;
+    }
+
+    public String getClaveEncriptacion() {
+        return claveEncriptacion;
+    }
+
+    public void setClaveEncriptacion(String claveEncriptacion) {
+        this.claveEncriptacion = claveEncriptacion;
     }
 
     public String getModoPersistencia() {

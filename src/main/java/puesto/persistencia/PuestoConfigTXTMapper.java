@@ -19,13 +19,13 @@ public class PuestoConfigTXTMapper extends AbstractFileMapper<ConfigPuesto> {
 
     @Override
     protected String serialize(ConfigPuesto config) {
-        return config.getModoPersistencia() + "," + config.getModoEncriptacion();
+        return config.getModoPersistencia() + "," + config.getModoEncriptacion() + "," + config.getClaveEncriptacion();
     }
 
     @Override
     protected ConfigPuesto deserialize(String data) {
         String[] parts = data.split(",");
-        return new ConfigPuesto(parts[0], parts[1]);
+        return new ConfigPuesto(parts[0], parts[1], parts[2]);
     }
 
 }

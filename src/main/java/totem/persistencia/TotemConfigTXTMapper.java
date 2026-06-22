@@ -2,7 +2,7 @@ package totem.persistencia;
 
 import shared.persistencia.*;
 
-public class TotemConfigTXTMapper extends AbstractFileMapper<String> {
+public class TotemConfigTXTMapper extends AbstractFileMapper<ConfigTotem> {
     private static TotemConfigTXTMapper instance;
     String filePath = "totemConfig.txt";
 
@@ -18,13 +18,14 @@ public class TotemConfigTXTMapper extends AbstractFileMapper<String> {
     }
 
     @Override
-    protected String serialize(String config) {
-        return config;
+    protected String serialize(ConfigTotem config) {
+        return config.getID() + "," + config.getModoEncriptacion();
     }
 
     @Override
-    protected String deserialize(String data) {
-        return data;
+    protected ConfigTotem deserialize(String data) {
+        String[] parts = data.split(",");
+        return new ConfigTotem(parts[0], parts[1]);
     }
 
 }

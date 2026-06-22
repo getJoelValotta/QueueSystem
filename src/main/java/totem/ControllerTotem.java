@@ -13,6 +13,7 @@ import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
+import totem.persistencia.ConfigTotem;
 
 public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener {
     private ConexionGUI vistaConexion;
@@ -20,7 +21,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     private Totem totem;
     private TotemComunicaServer comunicaServer;
     private ICriptografia criptografia;
-    private String claveSimetrica, modoEncriptacion, modo="txt";
+    private String claveSimetrica, modoEncriptacion, modo = "txt";
 
     public static int idx = 1;
 
@@ -85,7 +86,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         try {
             this.totem = recuperar();
             System.out.println("Totem recuperado con ID: " + totem.getId());
-            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); //HARDCODEADO, PERSISTIR
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
         } catch (RuntimeException e) {
             System.out.println("Error al recuperar el totem, se creará un nuevo totem: " + e.getMessage());
             this.totem = new Totem();
@@ -118,14 +119,15 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     // TODO: Revisar por si los cambios de los chicos cambian algo @Lolo (yo)
 
     private void persistir() {
-        LlamaMappersTotem.persistir(totem);
+        ConfigTotem config = new ConfigTotem(totem.getId(), this.modoEncriptacion);
+        LlamaMappersTotem.persistir(config);
     }
 
-    private Totem recuperar() throws RuntimeException {
+    private ConfigTotem recuperar() throws RuntimeException {
         return LlamaMappersTotem.recuperar();
     }
 
-    public void setClaveEncriptacion(String clave){
+    public void setClaveEncriptacion(String clave) {
         this.claveSimetrica = clave;
     }
 
@@ -133,18 +135,20 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         return modoEncriptacion;
     }
 
-    public void setModoEncriptacion(String modo){
+    public void setModoEncriptacion(String modo) {
         this.modoEncriptacion = modo;
-        if (modo.equals(AdminComunicaServerP.AES)){
+        if (modo.equals(AdminComunicaServerP.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        }else if (modo.equals(AdminComunicaServerP.CHACHA20)){
+        } else if (modo.equals(AdminComunicaServerP.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
         System.out.println("Encrip cambiada");
+        persistir();
     }
 
-    public void setModo(String modo){
+    public void setModo(String modo) {
         this.modo = modo;
+        persistir();
     }
 
     public String getModo() {
