@@ -55,8 +55,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                     if (turno != null) {
                         puesto.setTurno(turno);
                         vistaPuesto.setClienteActual(turno.getCliente().getDni());
-                    } else {
-                        // TODO: mostrar en pantalla que hay 0 en la fila
                     }
                     vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni()); // Esto antes estaba fuera de
                                                                                            // ejecutarNoBloqueante y se
@@ -119,7 +117,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     }
 
     @Override
-    public void setClaveEncriptacion(String clave){
+    public void setClaveEncriptacion(String clave) {
         this.claveEncriptacion = clave;
     }
 
@@ -174,8 +172,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void conexionExitosa() {
         vistaPuesto.mostrar();
         vistaConexion.cerrar();
-        // comunicaServer.solicitaID(); //TODO : Cambiar esto ya que necesita guardarla.
-        // new Thread(comunicaServer).start();
     }
 
     public String getId() {

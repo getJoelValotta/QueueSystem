@@ -6,7 +6,7 @@ import server.persistencia.*;
 
 import shared.turno.Turno;
 
-public class LlamaMappersServer {
+public class LlamaMappersServer { // TODO: Implementar criptografia
     public static void persistir(String modo, ConcurrentLinkedQueue<Turno> turnos, String cosaAPersistir) {
         // Si hay que persistir listas de turnos
         if (cosaAPersistir.startsWith("turnos")) {

@@ -48,9 +48,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
     private ManejaTotem nodoTotem;
-    // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
     private String modo = "txt";
-    private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el admin, y el totem lo tiene que pedir al server cada vez que se conecta.
+    private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el
+                                               // admin, y el totem lo tiene que pedir al server cada vez que se
+                                               // conecta.
     private ICriptografia criptografia;
 
     public ControllerServer(Server server) {
@@ -73,7 +74,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             out = new DataOutputStream(socket.getOutputStream());
             in = new DataInputStream(socket.getInputStream());
             conectado = in.readUTF();
-            if (conectado.equals(ComunicaServer.CLAVE)){
+            if (conectado.equals(ComunicaServer.CLAVE)) {
                 conectado = in.readUTF();
                 boolean validacion = validaClave(conectado);
                 out.writeUTF(String.valueOf(validacion));
@@ -181,7 +182,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
                                             // con el serverprincipal como atributo de state.
         }
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); //HARDCODEADO, PERSISTIR
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
         this.gestorID = server.getGestorID();
         this.gestorID.setListener(this);
         System.out.println("Gestor ID: " + this.gestorID.toString());
@@ -202,10 +203,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         nodoServer.comunicaListaTurnos(atendidos, IManejaServidores.TURNO_ATENDIDO);
     }
 
-    public boolean validaClave(String clave){
+    public boolean validaClave(String clave) {
         return clave.equals(claveEncriptacion);
     }
-
 
     @Override
     public void persisteYEnvia(GestorID gestorID) { // Esto no bloquea hilos de manejadores, porque se ejecuta desde el
@@ -456,30 +456,21 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void persistir(String modo, String cosaAPersistir) {
         ListaTurnos turnosEspera = this.server.getEnEspera();
         switch (cosaAPersistir) {
-            // TODO: Hardcoded mode para test
             case "turnosEspera":
                 System.out.println("Persistiendo turnos en espera...");
-                LlamaMappersServer.persistir("txt", turnosEspera.getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("json", turnosEspera.getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("xml", turnosEspera.getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, turnosEspera.getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAtencion":
                 System.out.println("Persistiendo turnos en atencion...");
-                LlamaMappersServer.persistir("txt", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("json", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("xml", server.getEnAtencion().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getEnAtencion().getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAbandonados":
                 System.out.println("Persistiendo turnos abandonados...");
-                LlamaMappersServer.persistir("txt", server.getAbandonados().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("json", server.getAbandonados().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("xml", server.getAbandonados().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getAbandonados().getListaTurnos(), cosaAPersistir);
                 break;
             case "turnosAtendidos":
                 System.out.println("Persistiendo turnos atendidos...");
-                LlamaMappersServer.persistir("txt", server.getAtendidos().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("json", server.getAtendidos().getListaTurnos(), cosaAPersistir);
-                LlamaMappersServer.persistir("xml", server.getAtendidos().getListaTurnos(), cosaAPersistir);
+                LlamaMappersServer.persistir(modo, server.getAtendidos().getListaTurnos(), cosaAPersistir);
                 break;
             case "gestorID":
                 persisteConfig(modo);
@@ -506,18 +497,18 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.modo = modo;
     }
 
-    public String getClave(){
+    public String getClave() {
         return "pepe";
-        //return this.claveEncriptacion;
+        // return this.claveEncriptacion;
     }
 
     @Override
-    public String encriptar(String mensaje){
+    public String encriptar(String mensaje) {
         return criptografia.encriptar(mensaje, claveEncriptacion);
     }
 
     @Override
-    public String desencriptar(String mensajeEncriptado){
+    public String desencriptar(String mensajeEncriptado) {
         return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
 

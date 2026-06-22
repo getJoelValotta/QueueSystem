@@ -2,7 +2,8 @@ package puesto;
 
 import puesto.persistencia.*;
 
-public class LlamaMappers {
+public class LlamaMappers { // TODO: PERSISTIR TAMBIEN TIPO ENCRIPTACION
+
     public static void persistir(String modo, Puesto puesto) {
         if (modo.equals("txt")) {
             PuestoTXTMapper.getInstance("puestos.txt").save(puesto);
