@@ -9,9 +9,9 @@ import shared.conexion_server.ComunicaServer;
 
 public class AdminComunicaServerP extends ComunicaServer implements Runnable {
     private AdminEventListener escuchadorDeEventos;
-    public static final String XML = "#XML#", JSON = "#JSON#", TXT = "#TXT#", MD5 = "#MD5#", SHA_2 = "#SHA_2#",
+    public static final String XML = "#XML#", JSON = "#JSON#", TXT = "#TXT#", AES = "#AES#", CHACHA20 = "#CHACHA20#",
             EVENTO_PRINCIPAL = "#EV_PRI#", BIEN_PRINCIPAL = "#BIEN_PRI#", MAL_PRINCIPAL = "#MAL_PRI#",
-            EVENTO_RESPALDO = "#EV_RES#";
+            EVENTO_RESPALDO = "#EV_RES#", PERSISTENCIA = "#PERSISTENCIA#", ENCRIPTACION = "#ENCRIPTACION#", CLAVE = "#CLAVE#";
 
     public AdminComunicaServerP(){
         super();
@@ -76,25 +76,28 @@ public class AdminComunicaServerP extends ComunicaServer implements Runnable {
         }
     }
 
-    public boolean enviaTipoPersistencia(String tipoPersistencia) {
-        boolean respuesta = false;
+    public void enviaTipoPersistencia(String tipoPersistencia) {
         try {
+            out.writeUTF(PERSISTENCIA);
             out.writeUTF(tipoPersistencia);
-            respuesta = Boolean.parseBoolean(in.readUTF());
         } catch (IOException e) {
         }
-
-        return respuesta;
     }
 
-    public boolean enviaTipoEncriptacion(String tipoEncriptacion) {
-        boolean respuesta = false;
+    public void enviaTipoEncriptacion(String tipoEncriptacion) {
         try {
+            out.writeUTF(ENCRIPTACION);
             out.writeUTF(tipoEncriptacion);
-            respuesta = Boolean.parseBoolean(in.readUTF());
         } catch (IOException e) {
         }
 
-        return respuesta;
     }
+
+    public void enviaNuevaClave(String clave){
+        try {
+            out.writeUTF(CLAVE);
+            out.writeUTF(clave);
+        } catch (IOException e) {
+        }
+    } 
 }

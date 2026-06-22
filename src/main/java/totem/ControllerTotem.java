@@ -3,6 +3,7 @@ package totem;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import admin.AdminComunicaServerP;
 import shared.VistasUtils;
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
@@ -19,7 +20,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     private Totem totem;
     private TotemComunicaServer comunicaServer;
     private ICriptografia criptografia;
-    private String claveSimetrica;
+    private String claveSimetrica, modoEncriptacion, modo="txt";
 
     public static int idx = 1;
 
@@ -100,6 +101,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     @Override
     public void conexionExitosa() {
+        new Thread(comunicaServer).start();
         vistaTotem.mostrar();
         vistaConexion.cerrar();
     }
@@ -125,6 +127,28 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void setClaveEncriptacion(String clave){
         this.claveSimetrica = clave;
+    }
+
+    public String getModoEncriptacion() {
+        return modoEncriptacion;
+    }
+
+    public void setModoEncriptacion(String modo){
+        this.modoEncriptacion = modo;
+        if (modo.equals(AdminComunicaServerP.AES)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        }else if (modo.equals(AdminComunicaServerP.CHACHA20)){
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+        System.out.println("Encrip cambiada");
+    }
+
+    public void setModo(String modo){
+        this.modo = modo;
+    }
+
+    public String getModo() {
+        return modo;
     }
 
 }

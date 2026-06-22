@@ -7,9 +7,10 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import admin.AdminComunicaServerP;
 import shared.conexion_server.ComunicaServer;
 
-public class TotemComunicaServer extends ComunicaServer {
+public class TotemComunicaServer extends ComunicaServer implements Runnable{
     private TotemEventListener escuchadorDeEventos;
     private Socket socketSimple;
     protected DataOutputStream outSimple;
@@ -33,6 +34,37 @@ public class TotemComunicaServer extends ComunicaServer {
                 e1.printStackTrace();
             }
         return validacion;
+    }
+
+    @Override
+    public void run() {
+        while (!socket.isClosed()) {
+            try {
+                String mensaje = in.readUTF();
+                System.out.println("Mensaje del servidor: " + mensaje);
+                switch(mensaje){
+                    case AdminComunicaServerP.PERSISTENCIA:
+                        mensaje = in.readUTF();
+                        escuchadorDeEventos.setModo(mensaje);
+                        break;
+                    case AdminComunicaServerP.ENCRIPTACION:
+                        mensaje = in.readUTF();
+                        System.out.print("Cambiando la encriptacion");
+                        escuchadorDeEventos.setModoEncriptacion(mensaje);
+                        break;
+                    case AdminComunicaServerP.CLAVE:
+                        mensaje = in.readUTF();
+                        escuchadorDeEventos.setClaveEncriptacion(mensaje);
+                        break;
+                }
+            } catch (SocketException e) {
+                System.out.println("Desconectado del servidor");
+                break;
+            } catch (IOException e) {
+                e.printStackTrace();
+                break;
+            }
+        }
     }
 
     public boolean reintentarConexion(String dni){
@@ -83,6 +115,8 @@ public class TotemComunicaServer extends ComunicaServer {
             e.printStackTrace();
         }
     }
+
+
 
     
 

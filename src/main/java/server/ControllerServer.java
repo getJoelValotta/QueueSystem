@@ -49,6 +49,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaAdmin nodoAdmin;
     private ManejaTotem nodoTotem;
     private String modo = "txt";
+    private String modoEncriptacion;
     private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el
                                                // admin, y el totem lo tiene que pedir al server cada vez que se
                                                // conecta.
@@ -176,16 +177,16 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             this.server.setTipoEncriptacion(null);
             setModo("txt");
         }
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
+        this.gestorID = server.getGestorID();
+        this.gestorID.setListener(this);
+        System.out.println("Gestor ID: " + this.gestorID.toString());
         if (server.esRespaldo()) { // Si no es principal, nunca abre conexion de ServerSocket (Solo la del admin)
             IManejaServidores nodoServer = new ManejaServerPrincipal(this, "unico");
             nodoServer.setSocket(server.getSocketEntreServers());
             new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
                                             // con el serverprincipal como atributo de state.
         }
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); // HARDCODEADO, PERSISTIR
-        this.gestorID = server.getGestorID();
-        this.gestorID.setListener(this);
-        System.out.println("Gestor ID: " + this.gestorID.toString());
         persisteConfig(modo);
     }
 
@@ -494,6 +495,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     public void setModo(String modo) {
+        System.out.println(modo);
         this.modo = modo;
     }
 
@@ -510,6 +512,45 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     @Override
     public String desencriptar(String mensajeEncriptado) {
         return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
+    }
+
+    public void setClaveEncriptacion(String clave) {
+        System.out.println(clave);
+        this.claveEncriptacion = clave;
+    }
+
+    public void setModoEncriptacion(String modoEncriptacion) {
+        System.out.println(modoEncriptacion);
+        this.modoEncriptacion = modoEncriptacion;
+
+        if (modoEncriptacion.equals(AdminComunicaServerP.AES)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        } else if (modoEncriptacion.equals(AdminComunicaServerP.CHACHA20)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+
+        // puestos
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext()) {
+            ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+            puestoActual.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        // totems
+        Iterator<IControllerObserver> nodosTotem = observadoresTotems.iterator();
+        while (nodosTotem.hasNext()) {
+            ManejaTotem totemActual = (ManejaTotem) nodosTotem.next();
+            totemActual.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        // servers de respaldo
+        Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
+        while (nodosDeServer.hasNext()) {
+            ManejaServerPrincipal nodoRespaldo = (ManejaServerPrincipal) nodosDeServer.next();
+            nodoRespaldo.enviaModoEncriptacion(modoEncriptacion);
+        }
+
+        // nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
     }
 
 }
