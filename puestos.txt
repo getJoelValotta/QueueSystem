@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-pue_002,(atencion;1;pue_002,11111111)
-=======
-pue_001,(atencion;1;pue_001,44444444)
->>>>>>> edf4e510482631cb16484eeb6a095b340a81cad0
+pue_001,(atencion;2;pue_001,22222222)

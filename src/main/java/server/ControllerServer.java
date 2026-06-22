@@ -42,9 +42,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                                // del server
     private CopyOnWriteArrayList<IControllerObserver> observadoresServers;
     private CopyOnWriteArrayList<IControllerObserver> observadoresPuestos;
+    private CopyOnWriteArrayList<IControllerObserver> observadoresTotems;
     private ManejaPuesto nodoPuesto;
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
+    private ManejaTotem nodoTotem;
     // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
     private String modo = "txt";
 
@@ -53,6 +55,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.gestorID = null;
         observadoresServers = new CopyOnWriteArrayList<>();
         observadoresPuestos = new CopyOnWriteArrayList<>();
+        observadoresTotems = new CopyOnWriteArrayList<>();
         nodoMonitor = null;
         nodoAdmin = null;
     }
@@ -69,18 +72,24 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             conectado = in.readUTF();
             switch (conectado) {
                 case ComunicaServer.TOTEM:
-                    solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que
-                                              // tiene el string ID es porque ya tiene una id.
-                    if (solicitud.equals(ComunicaServer.ID)) {
-                        id = gestorID.generarIdTotem();
-                        out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio
-                                          // y debe persistirse.
-                    } else
-                        id = solicitud;
-                    ManejaTotem nodoTotem = new ManejaTotem(this, id);
-                    nodoTotem.setSocket(socket);
-                    new Thread(nodoTotem).start();
-                    avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
+                    solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
+                    if (solicitud.equals(ComunicaServer.TOTEM_INIT)) {
+                        ManejaTotem nodoTotem = new ManejaTotem(this, "-1");
+                        totemObservaControlador(nodoTotem);
+                        nodoTotem.setSocket(socket);
+                    } else if (solicitud.equals(ComunicaServer.TOTEM_END)) {
+                        solicitud = in.readUTF();
+                        if (solicitud.equals(ComunicaServer.ID)) {
+                            id = gestorID.generarIdTotem();
+                            out.writeUTF(id); // ademas de generar la id unica, le avisa al controlador que el totem cambio y debe persistirse.
+                        } else
+                            id = solicitud;
+                        nodoTotem = devuelvePrimerManejadorTotem();
+                        nodoTotem.setId(id);
+                        nodoTotem.setSocketSimple(socket);
+                        new Thread(nodoTotem).start();
+                        avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
+                    }  
                     break;
 
                 case ComunicaServer.PUESTO:
@@ -123,14 +132,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     break;
 
                 case Server.SERVER:
-                    System.out.println("LLEGUE HASTA ACA\n");
                     ManejaServerRespaldo nodoServer = new ManejaServerRespaldo(this, "unico");
                     nodoServer.setSocket(socket);
                     serverObservaControlador(nodoServer);
-                    System.out.println("NO MORI??????\n");
                     sincronizacionDeEstado(nodoServer);
                     new Thread(nodoServer).start();
-                    System.out.println("THREAD INICIADO CORRECTAMENTE\n");
                     avisarAdmin("Nodo conectado: Server de Respaldo.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
             }
@@ -339,6 +345,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         observadoresPuestos.add(nodoPuesto);
     }
 
+    public void totemObservaControlador(IControllerObserver nodoPuesto) {
+        observadoresTotems.add(nodoPuesto);
+    }
+
     public void serverDejaDeObservar(IControllerObserver suscriptor) {
         observadoresServers.remove(suscriptor);
     }
@@ -380,6 +390,17 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
         while (nodosPuesto.hasNext() & !id.equals("-1")) {
             encontrado = (ManejaPuesto) nodosPuesto.next();
+            id = encontrado.getId();
+        }
+        return encontrado;
+    }
+
+    public ManejaTotem devuelvePrimerManejadorTotem() {
+        ManejaTotem encontrado = null;
+        String id = "algo";
+        Iterator<IControllerObserver> nodosTotems = observadoresTotems.iterator();
+        while (nodosTotems.hasNext() & !id.equals("-1")) {
+            encontrado = (ManejaTotem) nodosTotems.next();
             id = encontrado.getId();
         }
         return encontrado;
