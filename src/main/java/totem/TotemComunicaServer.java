@@ -10,7 +10,7 @@ import java.net.UnknownHostException;
 import admin.AdminComunicaServerP;
 import shared.conexion_server.ComunicaServer;
 
-public class TotemComunicaServer extends ComunicaServer implements Runnable{
+public class TotemComunicaServer extends ComunicaServer implements Runnable {
     private TotemEventListener escuchadorDeEventos;
     private Socket socketSimple;
     protected DataOutputStream outSimple;
@@ -19,7 +19,9 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
     public void setEscuchadorDeEventos(TotemEventListener escuchadorDeEventos) {
         this.escuchadorDeEventos = escuchadorDeEventos;
     }
-    // El totem envia el DNI al socket de comunicacion con el server que este conectado y si ya estaba en el sistema retorna false.
+
+    // El totem envia el DNI al socket de comunicacion con el server que este
+    // conectado y si ya estaba en el sistema retorna false.
     public boolean enviarDNI(String dni) {
         boolean validacion = false;
         try {
@@ -27,12 +29,12 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
             // TODO : Informar al ADMIN (server-side)
             validacion = Boolean.parseBoolean(inSimple.readUTF());
             return validacion;
-        } catch (SocketException e) {
+        } catch (SocketException | java.io.EOFException e) {
             System.out.println("EXCEPTION POR SOCKET");
             return reintentarConexion(dni);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         return validacion;
     }
 
@@ -42,7 +44,7 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
             try {
                 String mensaje = in.readUTF();
                 System.out.println("Mensaje del servidor: " + mensaje);
-                switch(mensaje){
+                switch (mensaje) {
                     case AdminComunicaServerP.PERSISTENCIA:
                         mensaje = in.readUTF();
                         escuchadorDeEventos.setModo(mensaje);
@@ -57,7 +59,7 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
                         escuchadorDeEventos.setClaveEncriptacion(mensaje);
                         break;
                 }
-            } catch (SocketException e) {
+            } catch (SocketException | java.io.EOFException e) {
                 System.out.println("Desconectado del servidor");
                 break;
             } catch (IOException e) {
@@ -67,14 +69,20 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
         }
     }
 
-    public boolean reintentarConexion(String dni){
-        conectaServidor(IP, puerto, ComunicaServer.TOTEM);
-        informaID(escuchadorDeNodoFisico.getId());
-        return enviarDNI(dni);
+    public boolean reintentarConexion(String dni) {
+        try {
+            conectaServidor(IP, puerto, ComunicaServer.TOTEM);
+            new Thread(this).start(); // ← relanzar el listener
+            outSimple.writeUTF(dni);
+            return Boolean.parseBoolean(inSimple.readUTF());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
-    public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
+    public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion) {
         this.IP = IP;
         this.puerto = puerto;
         escuchadorDeNodoFisico.setClaveEncriptacion(claveEncriptacion);
@@ -85,12 +93,11 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
             out.writeUTF(CLAVE);
             out.writeUTF(claveEncriptacion);
             boolean claveValida = Boolean.parseBoolean(in.readUTF());
-            if (!claveValida){
+            if (!claveValida) {
                 System.out.println("CLAVE DE ENCRIPTACION INVALIDA");
                 escuchadorDeNodoFisico.conexionErronea("Clave de encriptacion invalida");
                 socket.close();
-            }
-            else{
+            } else {
                 out.writeUTF(nodo);
                 out.writeUTF(TOTEM_INIT);
                 this.socketSimple = new Socket(IP, puerto);
@@ -116,10 +123,6 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
         }
     }
 
-
-
-    
-
     @Override
     public void conectaServidor(String IP, int puerto, String nodo) {
         try {
@@ -130,10 +133,12 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
             this.inSimple = new DataInputStream(socketSimple.getInputStream());
             outSimple.writeUTF(nodo);
             outSimple.writeUTF(TOTEM_END);
-        } catch (java.net.ConnectException e) { // Excepcion que discierne si el puerto es incorrecto o el host esta indispuesto.
+            outSimple.writeUTF(escuchadorDeNodoFisico.getId());// TODO: CHECK?
+        } catch (java.net.ConnectException e) { // Excepcion que discierne si el puerto es incorrecto o el host esta
+                                                // indispuesto.
             escuchadorDeNodoFisico.conexionErronea("Puerto incorrecto o host indispuesto");
             e.printStackTrace();
-        } catch (IOException e) { 
+        } catch (IOException e) {
             escuchadorDeNodoFisico.conexionErronea("Error de protocolo de conexion");
             e.printStackTrace();
         }
@@ -142,7 +147,7 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable{
     @Override
     public void informaID(String id) {
         try {
-            synchronized (mutex){
+            synchronized (mutex) {
                 outSimple.writeUTF(id);
             }
         } catch (IOException e) {

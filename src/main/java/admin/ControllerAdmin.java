@@ -1,10 +1,11 @@
 package admin;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import shared.VistasUtils;
 
-public class ControllerAdmin implements AdminEventListener, ActionListener{
+public class ControllerAdmin implements AdminEventListener, ActionListener {
     public static final String PRINCIPAL = "#PRINCIPAL#", RESPALDO = "#RESPALDO#", DESCONECTA = "#DESCONECTA#";
     AdminGUI vistaAdmin;
     Admin admin;
@@ -12,7 +13,8 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
     AdminComunicaServerR comunicaServerRespaldo;
     String claveSimetrica;
 
-    public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServerP comunicaServerPrincipal, AdminComunicaServerR comunicaServerRespaldo){
+    public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServerP comunicaServerPrincipal,
+            AdminComunicaServerR comunicaServerRespaldo) {
         this.vistaAdmin = vistaAdmin;
         this.comunicaServerPrincipal = comunicaServerPrincipal;
         this.comunicaServerRespaldo = comunicaServerRespaldo;
@@ -21,58 +23,68 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        switch (e.getActionCommand()){
+        switch (e.getActionCommand()) {
             case AdminGUI.XML:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.XML);
                 });
+                admin.setMetodoPersistencia("XML");
                 break;
-            
+
             case AdminGUI.JSON:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.JSON);
                 });
+                admin.setMetodoPersistencia("JSON");
                 break;
-            
+
             case AdminGUI.TXT:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.TXT);
                 });
+                admin.setMetodoPersistencia("TXT");
                 break;
-            
+
             case AdminGUI.AES:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     System.out.println("Estoy aes");
                     comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.AES);
                 });
+                admin.setMetodoEncriptacion("AES");
                 break;
 
             case AdminGUI.CHACHA20:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.CHACHA20);
                 });
+                admin.setMetodoEncriptacion("CHACHA20");
                 break;
 
             case AdminGUI.ENVIAR_CLAVE:
-                VistasUtils.ejecutarNoBloqueante(() ->{
+                VistasUtils.ejecutarNoBloqueante(() -> {
                     comunicaServerPrincipal.enviaNuevaClave(vistaAdmin.getClaveEncriptacion());
                 });
                 break;
-            }
+        }
+        persisteConfig();
     }
 
-    public void iniciaAdmin(){
-        // Carga el Admin por persistencia. Primera vez hardcodeado con un archivo con formato a definir. si cambia el formato
-        admin = new Admin("TXT","MD5");
-        //comunicaServer.conectaServidor("localhost", 1337, ComunicaServer.ADMIN);
+    public void iniciaAdmin() {
+
+        try {
+            this.admin = cargaConfig();
+        } catch (RuntimeException e) {
+            this.admin = new Admin("TXT", "MD5");
+        }
         vistaAdmin.mostrar();
         new Thread(comunicaServerPrincipal).start();
         new Thread(comunicaServerRespaldo).start();
+        persisteConfig();
+
     }
 
-
-    public void muestraLog (String msg, String tipoEvento){ 
-        switch(tipoEvento){
+    public void muestraLog(String msg, String tipoEvento) {
+        switch (tipoEvento) {
             case AdminComunicaServerP.EVENTO_PRINCIPAL:
                 vistaAdmin.logEventoPrincipal(msg);
                 break;
@@ -88,14 +100,20 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
         }
     }
 
-
-
-    public void cambiarEstado(String server, boolean estado){
-        if (server.equals(PRINCIPAL)){
+    public void cambiarEstado(String server, boolean estado) {
+        if (server.equals(PRINCIPAL)) {
             vistaAdmin.setEstadoPrincipal(estado);
-        } else if (server.equals(RESPALDO)){
+        } else if (server.equals(RESPALDO)) {
             vistaAdmin.setEstadoRespaldo(estado);
-        }    
+        }
+    }
+
+    private Admin cargaConfig() throws RuntimeException {
+        return LlamaMapperAdmin.recupera();
+    }
+
+    private void persisteConfig() {
+        LlamaMapperAdmin.persistir(admin);
     }
 
 }

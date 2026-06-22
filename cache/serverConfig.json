@@ -1,1 +1,1 @@
-{"modoPersistencia":"#JSON#","tipoEncriptacion":"#CHACHA20#","gestorIDString":"(0,0,0)","claveEncriptacion":"pepote"}
+{"modoPersistencia":"txt","tipoEncriptacion":"#AES#","gestorIDString":"(1,1,0)","claveEncriptacion":"pepe"}

@@ -86,9 +86,9 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         try {
             this.totem = recuperar();
             System.out.println("Totem recuperado con ID: " + totem.getId());
-            if (this.modoEncriptacion == "AES") {
+            if ("AES".equals(this.modoEncriptacion)) {
                 this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-            } else if (this.modoEncriptacion == "CHACHA20") {
+            } else if ("CHACHA20".equals(this.modoEncriptacion)) {
                 this.criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
             }
         } catch (RuntimeException e) {
@@ -141,6 +141,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void setClaveEncriptacion(String clave) {
         this.claveSimetrica = clave;
+        persistir();
     }
 
     public String getModoEncriptacion() {

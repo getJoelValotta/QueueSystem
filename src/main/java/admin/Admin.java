@@ -4,7 +4,7 @@ public class Admin {
     private String metodoPersistencia;
     private String metodoEncriptacion;
 
-    public Admin(String metodoPersistencia, String metodoEncriptacion){
+    public Admin(String metodoPersistencia, String metodoEncriptacion) {
         this.metodoEncriptacion = metodoEncriptacion;
         this.metodoPersistencia = metodoPersistencia;
     }
@@ -25,5 +25,4 @@ public class Admin {
         this.metodoEncriptacion = metodoEncriptacion;
     }
 
-    
 }
