@@ -42,13 +42,13 @@ public class LlamaMappersServer {
                 filePath += "_ServerBackup.";
             }
             if (modo.equals("txt")) {
-                filePath += "_ServerPrincipal.txt";
+                filePath += "txt"; // ← solo la extensión
                 return ListaTurnosTXTMapper.getInstance(filePath).load();
             } else if (modo.equals("xml")) {
-                filePath += "_ServerPrincipal.xml";
+                filePath += "xml"; // ← idem
                 return ListaTurnosXMLMapper.getInstance(filePath).load();
             } else if (modo.equals("json")) {
-                filePath += "_ServerPrincipal.json";
+                filePath += "json"; // ← idem
                 return ListaTurnosJSONMapper.getInstance(filePath).load();
             } else {
                 throw new IllegalArgumentException("Modo de persistencia no soportado: " + modo);

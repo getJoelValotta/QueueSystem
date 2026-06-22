@@ -160,19 +160,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     public void iniciaServer() {
-        try {
-
-            ConcurrentLinkedQueue<Turno> turnosEspera = cargarTurnos("turnosEspera");
-            ConcurrentLinkedQueue<Turno> turnosAtencion = cargarTurnos("turnosAtencion");
-            ConcurrentLinkedQueue<Turno> turnosAbandonados = cargarTurnos("turnosAbandonados");
-            ConcurrentLinkedQueue<Turno> turnosAtendidos = cargarTurnos("turnosAtendidos");
-            server.inicializaListas(new ListaTurnos(turnosEspera), new ListaTurnos(turnosAtencion),
-                    new ListaTurnos(turnosAbandonados), new ListaTurnos(turnosAtendidos));
-            System.out.println("Listas recuperadas");
-        } catch (RuntimeException e) {
-            System.out.println("No se pudieron cargar las listas de turnos, se inicia con listas vacias");
-            server.inicializaListas();
-        }
         server.abreConexion();
         try {
             ServerConfig config = cargaConfig(); // Cargo file config
@@ -188,6 +175,19 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             server.setGestorID(gestorID);
             this.modoEncriptacion = AdminComunicaServerP.AES;
             setModo("txt");
+        }
+        try {
+
+            ConcurrentLinkedQueue<Turno> turnosEspera = cargarTurnos("turnosEspera");
+            ConcurrentLinkedQueue<Turno> turnosAtencion = cargarTurnos("turnosAtencion");
+            ConcurrentLinkedQueue<Turno> turnosAbandonados = cargarTurnos("turnosAbandonados");
+            ConcurrentLinkedQueue<Turno> turnosAtendidos = cargarTurnos("turnosAtendidos");
+            server.inicializaListas(new ListaTurnos(turnosEspera), new ListaTurnos(),
+                    new ListaTurnos(turnosAbandonados), new ListaTurnos(turnosAtendidos));
+            System.out.println("Listas recuperadas");
+        } catch (RuntimeException e) {
+            System.out.println("No se pudieron cargar las listas de turnos, se inicia con listas vacias");
+            server.inicializaListas();
         }
         if (this.modoEncriptacion.equals(AdminComunicaServerP.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
@@ -314,7 +314,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
             while (enAtencion.hasNext()) {
                 Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
-                if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)) {
+                if (turnoEnAtencionEnPuestoActual.getIdPuesto() != null &&
+                        turnoEnAtencionEnPuestoActual.getIdPuesto().equals(id)) {
 
                     if (turnoEnAtencionEnPuestoActual.estaEnAtencion()) {
 
@@ -339,8 +340,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         Iterator<Turno> enAtencion = server.getEnAtencion().devuelveIterator();
         while (enAtencion.hasNext()) {
             Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
-            if (turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)) {
-                if (nodoMonitor != null & turnoEnAtencionEnPuestoActual.getCantLlamados() < 3) {
+            if (turnoEnAtencionEnPuestoActual.getIdPuesto() != null &&
+                    turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)) {
+                if (nodoMonitor != null && turnoEnAtencionEnPuestoActual.getCantLlamados() < 3) {
                     nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
