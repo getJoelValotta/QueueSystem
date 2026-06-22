@@ -8,6 +8,7 @@ import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
 public class ControllerMonitor implements ActionListener, ConexionListener, MonitorEventListener{
@@ -15,6 +16,8 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     private MonitorGUI vistaMonitor;
     private Monitor monitor;
     private MonitorEscuchaServer escuchaServer;
+    private String claveEncriptacion;
+    private ICriptografia criptografia;
     
     public ControllerMonitor(ConexionGUI vistaConexion, MonitorGUI vistaMonitor, MonitorEscuchaServer escuchaServer) {
         this.vistaConexion = vistaConexion;
@@ -65,6 +68,10 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
 
     public String getId(){
         return monitor.getId();
+    }
+
+    public void setClaveEncriptacion(String clave){
+        this.claveEncriptacion = clave;
     }
 
 }

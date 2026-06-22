@@ -3,8 +3,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import shared.VistasUtils;
-import shared.conexion_server.ComunicaServer;
-import shared.conexion_server.ConexionListener;
 
 public class ControllerAdmin implements AdminEventListener, ActionListener{
     public static final String PRINCIPAL = "#PRINCIPAL#", RESPALDO = "#RESPALDO#", DESCONECTA = "#DESCONECTA#";
@@ -18,6 +16,7 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
         this.vistaAdmin = vistaAdmin;
         this.comunicaServerPrincipal = comunicaServerPrincipal;
         this.comunicaServerRespaldo = comunicaServerRespaldo;
+        this.vistaAdmin.setActionListener(this);
     }
 
     @Override
@@ -25,6 +24,7 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
         switch (e.getActionCommand()){
             case AdminGUI.XML:
                 VistasUtils.ejecutarNoBloqueante(() ->{
+                    System.out.println("Estoy xml");
                     comunicaServerPrincipal.enviaTipoPersistencia(AdminComunicaServerP.XML);
                 });
                 break;
@@ -41,15 +41,23 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
                 });
                 break;
             
-            case AdminGUI.MD5:
+            case AdminGUI.AES:
                 VistasUtils.ejecutarNoBloqueante(() ->{
+                    System.out.println("Estoy aes");
                     comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.MD5);
                 });
                 break;
 
-            case AdminGUI.SHA_2:
+            case AdminGUI.CHACHA20:
                 VistasUtils.ejecutarNoBloqueante(() ->{
                     comunicaServerPrincipal.enviaTipoEncriptacion(AdminComunicaServerP.SHA_2);
+                });
+                break;
+
+            case AdminGUI.ENVIAR_CLAVE:
+                VistasUtils.ejecutarNoBloqueante(() ->{
+                    System.out.println("Estoy enviarclave");
+                    //enviar clave;
                 });
                 break;
             }

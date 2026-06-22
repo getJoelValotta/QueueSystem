@@ -3,10 +3,10 @@ package server.manejadores;
 import java.io.IOException;
 import java.util.Iterator;
 
+import admin.AdminComunicaServerP;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
-import admin.AdminComunicaServerP;
 public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaServidores, IControllerObserver{
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
 
@@ -71,7 +71,8 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
         synchronized (mutex){
             try { //TODO : Aca falta discriminar por tipo de turno para enviar o no el IDPUESTO.
                 out.writeUTF(tipoTurno);
-                out.writeUTF(dni);
+                String dniEncriptado = controllerServer.encriptar(dni);
+                out.writeUTF(dniEncriptado);
                 if (!tipoTurno.equals(IManejaServidores.TURNO_ESPERA)){
                     out.writeUTF(idPuesto);
                     if (tipoTurno.equals(IManejaServidores.TURNO_ATENCION)){

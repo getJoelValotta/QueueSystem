@@ -10,9 +10,8 @@ import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
-
-import totem.persistencia.TotemConfigTXTMapper;
 
 public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener {
     private ConexionGUI vistaConexion;
@@ -58,7 +57,9 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
                 try {
                     totem.setCliente(new Cliente(vistaTotem.getDNI()));
                     VistasUtils.ejecutarNoBloqueante(() -> {
-                        boolean validacion = comunicaServer.enviarDNI(totem.getCliente().getDni());
+                        String dni = String.valueOf(totem.getCliente().getDni());
+                        String dniEncriptado = criptografia.encriptar(dni, claveSimetrica);
+                        boolean validacion = comunicaServer.enviarDNI(dniEncriptado);
                         if (validacion) {
                             vistaTotem.setGuiaError("Usted ya se encuentra registrado.");
                         } else {
@@ -83,6 +84,7 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         try {
             this.totem = recuperar();
             System.out.println("Totem recuperado con ID: " + totem.getId());
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); //HARDCODEADO, PERSISTIR
         } catch (RuntimeException e) {
             System.out.println("Error al recuperar el totem, se creará un nuevo totem: " + e.getMessage());
             this.totem = new Totem();
@@ -117,6 +119,10 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     private Totem recuperar() throws RuntimeException {
         return LlamaMappersTotem.recuperar();
+    }
+
+    public void setClaveEncriptacion(String clave){
+        this.claveSimetrica = clave;
     }
 
 }

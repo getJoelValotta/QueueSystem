@@ -7,6 +7,8 @@ import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.criptografia.FactoryCriptografia;
+import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
 public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener {
@@ -15,6 +17,8 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     private Puesto puesto;
     private PuestoComunicaServer comunicaServer;
     private String modoPersistencia = "txt";
+    private ICriptografia criptografia;
+    private String claveEncriptacion;
 
     public ControllerPuesto(ConexionGUI vistaConexion, PuestoGUI vistaPuesto, PuestoComunicaServer comunicaServer) {
         this.vistaConexion = vistaConexion;
@@ -114,6 +118,11 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         }
     }
 
+    @Override
+    public void setClaveEncriptacion(String clave){
+        this.claveEncriptacion = clave;
+    }
+
     public void iniciaPuesto() {
         // Carga el puesto por persistencia. si no hay archivo entonces le pido al
         // server la id por primera vez: pue_001
@@ -148,7 +157,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
             vistaPuesto.inhabilitarBtn();
             vistaPuesto.inhabilitaRenotificar();
         }
-
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         vistaConexion.mostrar(); // temporal
     }
 
@@ -171,6 +180,12 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
     public String getId() {
         return puesto.getId();
+
+    }
+
+    @Override
+    public String desencriptar(String mensajeEncriptado) {
+        return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
 
 }

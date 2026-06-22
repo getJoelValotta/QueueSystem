@@ -13,5 +13,7 @@ public interface ManejadorEventListener {
     public void recibeTurnoEnRespaldo(Turno turno);
     public void avisarAdmin (String msg, String tipoEvento);
     public String getClave();
+    public String encriptar(String mensaje);
+    public String desencriptar(String mensajeEncriptado);
 
 }

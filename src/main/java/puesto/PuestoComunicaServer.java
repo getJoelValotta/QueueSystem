@@ -30,7 +30,9 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         synchronized (mutex) {
             try {
                 outSimple.writeUTF(ATIENDE);
-                String dniRecibido = inSimple.readUTF();
+                String dniEncriptado = inSimple.readUTF();
+                String dniRecibido = escuchadorDeEventos.desencriptar(dniEncriptado);
+                System.out.println("DNI RECIBIDO: " + dniRecibido);
                 cliente = new Cliente(dniRecibido); // TODO : desencriptar
                 turnoEnAtencion = new Turno();
                 turnoEnAtencion.setCliente(cliente);
@@ -114,6 +116,7 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
     public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
         this.IP = IP;
         this.puerto = puerto;
+        escuchadorDeNodoFisico.setClaveEncriptacion(claveEncriptacion);
         try {
             this.socket = new Socket(IP, puerto);
             this.out = new DataOutputStream(socket.getOutputStream());

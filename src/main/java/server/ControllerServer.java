@@ -23,6 +23,8 @@ import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
+import shared.criptografia.FactoryCriptografia;
+import shared.criptografia.ICriptografia;
 import shared.turno.Turno;
 
 public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener { // SocketListener es
@@ -49,6 +51,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
     private String modo = "txt";
     private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el admin, y el totem lo tiene que pedir al server cada vez que se conecta.
+    private ICriptografia criptografia;
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -178,6 +181,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             new Thread(nodoServer).start(); // Recordar que si el Server es respaldo tiene el socket para comunicarse
                                             // con el serverprincipal como atributo de state.
         }
+        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES); //HARDCODEADO, PERSISTIR
         this.gestorID = server.getGestorID();
         this.gestorID.setListener(this);
         System.out.println("Gestor ID: " + this.gestorID.toString());
@@ -230,9 +234,10 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     // @Override
-    public boolean recibeYPersisteTurno(String dni, String estado) {
+    public boolean recibeYPersisteTurno(String dniEncriptado, String estado) {
         boolean validacion = false;
         Cliente cliente;
+        String dni = criptografia.desencriptar(dniEncriptado, claveEncriptacion);
         try {
             cliente = new Cliente(dni);
             Turno turno = new Turno();
@@ -504,6 +509,16 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public String getClave(){
         return "pepe";
         //return this.claveEncriptacion;
+    }
+
+    @Override
+    public String encriptar(String mensaje){
+        return criptografia.encriptar(mensaje, claveEncriptacion);
+    }
+
+    @Override
+    public String desencriptar(String mensajeEncriptado){
+        return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
 
 }

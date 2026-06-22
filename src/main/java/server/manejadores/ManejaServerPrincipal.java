@@ -3,13 +3,16 @@ package server.manejadores;
 import java.io.IOException;
 import java.net.SocketException;
 
+import admin.AdminComunicaServerP;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
-import shared.turno.*;
-import admin.AdminComunicaServerP;
+import shared.turno.Turno;
+import shared.turno.TurnoAbandonado;
+import shared.turno.TurnoAtendido;
+import shared.turno.TurnoEnAtencion;
 
 public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaServidores, IControllerObserver {
     private int cantErrores;
@@ -23,6 +26,7 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
     @Override
     public void comunicacion() {
         String dni; 
+        String dniEncriptado;
         String idPuesto = "-1";
         int cantLlamados = -1;
         Turno turno;
@@ -47,7 +51,8 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     break;
 
                 case IManejaServidores.TURNO_ESPERA:
-                    dni = in.readUTF();
+                    dniEncriptado = in.readUTF();
+                    dni = controllerServer.desencriptar(dniEncriptado);
                     turno = new Turno();
                     try {
                         turno.setCliente(new Cliente(dni));
@@ -56,7 +61,8 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     break;
 
                 case IManejaServidores.TURNO_ATENCION:
-                    dni = in.readUTF();
+                    dniEncriptado = in.readUTF();
+                    dni = controllerServer.desencriptar(dniEncriptado);
                     idPuesto = in.readUTF();
                     cantLlamados = Integer.parseInt(in.readUTF());
                     turno = new Turno();
@@ -68,7 +74,8 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     break;
 
                 case IManejaServidores.TURNO_ATENDIDO:
-                    dni = in.readUTF();
+                    dniEncriptado = in.readUTF();
+                    dni = controllerServer.desencriptar(dniEncriptado);
                     idPuesto = in.readUTF();
                     turno = new Turno();
                     turno.setEstado(new TurnoAtendido(turno, idPuesto));
@@ -79,7 +86,8 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     break;
 
                 case IManejaServidores.TURNO_ABANDONADO:
-                    dni = in.readUTF();
+                    dniEncriptado = in.readUTF();
+                    dni = controllerServer.desencriptar(dniEncriptado);
                     idPuesto = in.readUTF();
                     turno = new Turno();
                     turno.setEstado(new TurnoAbandonado(turno, idPuesto));

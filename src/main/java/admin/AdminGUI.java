@@ -8,10 +8,9 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.text.Style;
-import javax.swing.text.BadLocationException;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -21,12 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
@@ -35,7 +35,8 @@ import com.formdev.flatlaf.FlatLightLaf;
 import shared.VistasUtils;
 
 public class AdminGUI extends JFrame {
-    public static final String XML = "#XML#", JSON = "#JSON#", TXT = "#TXT#", SHA_2 = "SHA_2", MD5 = "MD5";
+    public static final String XML = "#XML#", JSON = "#JSON#", TXT = "#TXT#",
+            CHACHA20 = "CHACHA20", AES = "AES", ENVIAR_CLAVE = "#ENVIAR_CLAVE#";
 
     // Componentes de Estado de Servidores
     private JLabel lblServerPrincipal;
@@ -48,12 +49,13 @@ public class AdminGUI extends JFrame {
     private ButtonGroup groupPersistencia;
 
     // Componentes de Encriptación
-    private JRadioButton rbSha2;
-    private JRadioButton rbMd5;
+    private JRadioButton rbchacha20;
+    private JRadioButton rbaes;
     private ButtonGroup groupEncriptacion;
 
-    // Campo para ingresar la clave de encriptación
+    // Campo y botón de clave de encriptación — atributos de clase para acceso desde setActionListener
     private JTextField campoClaveEncriptacion;
+    private JButton btnEnviarClave;
 
     // Consola de eventos
     private JTextPane txtConsola;
@@ -66,7 +68,6 @@ public class AdminGUI extends JFrame {
     private ActionListener controlador;
 
     public AdminGUI() {
-        // Inicializar el Look and Feel de FlatLaf de manera segura
         try {
             UIManager.setLookAndFeel(new FlatLightLaf());
         } catch (Exception e) {
@@ -75,14 +76,13 @@ public class AdminGUI extends JFrame {
 
         setTitle("Panel de Administración - Sistema de Filas");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(500, 680)); // Altura ajustada para el campo de clave
+        setMinimumSize(new Dimension(500, 680));
         setLocationRelativeTo(null);
 
         inicializarComponentes();
     }
 
     private void inicializarComponentes() {
-        // Panel principal con un margen limpio
         JPanel panelPrincipal = new JPanel(new GridBagLayout());
         panelPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -110,7 +110,6 @@ public class AdminGUI extends JFrame {
         lblServerRespaldo.setForeground(Color.RED);
         panelPrincipal.add(lblServerRespaldo, gbc);
 
-        // Separador visual
         gbc.gridx = 0; gbc.gridy = fila++; gbc.gridwidth = 2; gbc.weightx = 1.0;
         panelPrincipal.add(new JSeparator(), gbc);
 
@@ -129,16 +128,12 @@ public class AdminGUI extends JFrame {
         groupPersistencia.add(rbTextoPlano);
 
         rbXml.setSelected(true);
-        rbPersistenciaActivo = rbXml; // Guardamos estado confirmado inicial
+        rbPersistenciaActivo = rbXml;
 
-        gbc.gridy = fila++;
-        panelPrincipal.add(rbXml, gbc);
-        gbc.gridy = fila++;
-        panelPrincipal.add(rbJson, gbc);
-        gbc.gridy = fila++;
-        panelPrincipal.add(rbTextoPlano, gbc);
+        gbc.gridy = fila++; panelPrincipal.add(rbXml, gbc);
+        gbc.gridy = fila++; panelPrincipal.add(rbJson, gbc);
+        gbc.gridy = fila++; panelPrincipal.add(rbTextoPlano, gbc);
 
-        // Separador visual
         gbc.gridy = fila++;
         panelPrincipal.add(new JSeparator(), gbc);
 
@@ -148,35 +143,41 @@ public class AdminGUI extends JFrame {
         lblTituloEncriptacion.setFont(new Font("Segoe UI", Font.BOLD, 14));
         panelPrincipal.add(lblTituloEncriptacion, gbc);
 
-        rbSha2 = new JRadioButton("SHA_2");
-        rbMd5 = new JRadioButton("MD5");
+        rbchacha20 = new JRadioButton("CHACHA20");
+        rbaes = new JRadioButton("AES");
         groupEncriptacion = new ButtonGroup();
-        groupEncriptacion.add(rbSha2);
-        groupEncriptacion.add(rbMd5);
+        groupEncriptacion.add(rbchacha20);
+        groupEncriptacion.add(rbaes);
 
-        rbSha2.setSelected(true);
-        rbEncriptacionActivo = rbSha2; // Guardamos estado confirmado inicial
+        rbchacha20.setSelected(true);
+        rbEncriptacionActivo = rbchacha20;
 
-        gbc.gridy = fila++;
-        panelPrincipal.add(rbSha2, gbc);
-        gbc.gridy = fila++;
-        panelPrincipal.add(rbMd5, gbc);
+        gbc.gridy = fila++; panelPrincipal.add(rbchacha20, gbc);
+        gbc.gridy = fila++; panelPrincipal.add(rbaes, gbc);
 
-        // ── Clave de Encriptación (debajo de la selección, alineado a la izquierda) ──
+        // ── Clave de Encriptación ──
         gbc.gridy = fila++;
-        gbc.insets = new Insets(10, 5, 2, 5); // Un poco más de aire superior para separar
+        gbc.insets = new Insets(10, 5, 2, 5);
         JLabel lblClave = new JLabel("Clave de Encriptación:");
         lblClave.setFont(new Font("Segoe UI", Font.BOLD, 12));
         panelPrincipal.add(lblClave, gbc);
 
+        JPanel panelClave = new JPanel(new BorderLayout(5, 0));
         campoClaveEncriptacion = new JTextField();
         campoClaveEncriptacion.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         campoClaveEncriptacion.setPreferredSize(new Dimension(0, 32));
-        gbc.gridy = fila++;
-        gbc.insets = new Insets(2, 5, 6, 5); // Insets estándar
-        panelPrincipal.add(campoClaveEncriptacion, gbc);
 
-        // Separador visual
+        // btnEnviarClave ahora es atributo de clase — setActionListener puede referenciarlo
+        btnEnviarClave = new JButton("Enviar");
+        btnEnviarClave.setPreferredSize(new Dimension(80, 32));
+        btnEnviarClave.setActionCommand(ENVIAR_CLAVE);
+
+        panelClave.add(campoClaveEncriptacion, BorderLayout.CENTER);
+        panelClave.add(btnEnviarClave, BorderLayout.EAST);
+        gbc.gridy = fila++;
+        gbc.insets = new Insets(2, 5, 6, 5);
+        panelPrincipal.add(panelClave, gbc);
+
         gbc.gridy = fila++;
         panelPrincipal.add(new JSeparator(), gbc);
 
@@ -192,74 +193,78 @@ public class AdminGUI extends JFrame {
         JScrollPane scrollConsola = new JScrollPane(txtConsola);
         scrollConsola.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // Esta sección absorbe el estiramiento vertical al redimensionar la ventana
         gbc.gridy = fila++;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         panelPrincipal.add(scrollConsola, gbc);
 
-        // Configurar acciones interactivas controladas
         configurarAccionesDeCambio();
 
         add(panelPrincipal);
     }
 
     /**
-     * Intercepta el click del usuario para mostrar el diálogo de confirmación.
-     * Si cancela, deshace la selección visual regresando al último estado confirmado.
+     * Listeners internos de vista: muestran diálogo de confirmación y hacen rollback visual.
+     * Cuando el usuario confirma, delegan al controlador vía su ActionCommand.
      */
     private void configurarAccionesDeCambio() {
-        // Listener para Persistencia
         ActionListener persistenciaListener = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
-
-            // Si hace click sobre el método que ya está activo, no hacemos nada
-            if (source == rbPersistenciaActivo) {
-                return;
-            }
+            if (source == rbPersistenciaActivo) return;
 
             boolean confirmar = mostrarDialogoConfirmacion("Usted está por cambiar el método de persistencia, ¿está seguro?");
 
             if (confirmar) {
-                rbPersistenciaActivo = source; // Confirmado: actualizamos el estado activo
+                rbPersistenciaActivo = source;
                 agregarLogConColor("[ADMIN] Persistencia cambiada a: " + source.getText(), Color.GRAY);
-                // Aquí se informará al controlador real en el futuro
+                if (controlador != null)
+                    controlador.actionPerformed(
+                        new ActionEvent(source, ActionEvent.ACTION_PERFORMED, source.getActionCommand()));
             } else {
-                rbPersistenciaActivo.setSelected(true); // Rollback
+                rbPersistenciaActivo.setSelected(true);
             }
         };
 
+        rbXml.setActionCommand(XML);
+        rbJson.setActionCommand(JSON);
+        rbTextoPlano.setActionCommand(TXT);
         rbXml.addActionListener(persistenciaListener);
         rbJson.addActionListener(persistenciaListener);
         rbTextoPlano.addActionListener(persistenciaListener);
 
-        // Listener para Encriptación
         ActionListener encriptacionListener = e -> {
             JRadioButton source = (JRadioButton) e.getSource();
-
-            // Si hace click sobre el método que ya está activo, no hacemos nada
-            if (source == rbEncriptacionActivo) {
-                return;
-            }
+            if (source == rbEncriptacionActivo) return;
 
             boolean confirmar = mostrarDialogoConfirmacion("Usted está por cambiar el método de encriptación, ¿está seguro?");
 
             if (confirmar) {
-                rbEncriptacionActivo = source; // Confirmado: actualizamos el estado activo
+                rbEncriptacionActivo = source;
                 agregarLogConColor("[ADMIN] Encriptación cambiada a: " + source.getText(), Color.GRAY);
-                // Aquí se informará al controlador real en el futuro
+                if (controlador != null)
+                    controlador.actionPerformed(
+                        new ActionEvent(source, ActionEvent.ACTION_PERFORMED, source.getActionCommand()));
             } else {
-                rbEncriptacionActivo.setSelected(true); // Rollback
+                rbEncriptacionActivo.setSelected(true);
             }
         };
 
-        rbSha2.addActionListener(encriptacionListener);
-        rbMd5.addActionListener(encriptacionListener);
+        rbchacha20.setActionCommand(CHACHA20);
+        rbaes.setActionCommand(AES);
+        rbchacha20.addActionListener(encriptacionListener);
+        rbaes.addActionListener(encriptacionListener);
     }
 
     /**
-     * Ventana emergente modal de decisión con las especificaciones solicitadas.
+     * Inyecta el controlador y conecta el botón Enviar.
+     * Los radio buttons ya tienen sus ActionCommands seteados en configurarAccionesDeCambio(),
+     * y delegan al controlador desde ahí cuando el usuario confirma el diálogo.
      */
+    public void setActionListener(ActionListener controlador) {
+        this.controlador = controlador;
+        btnEnviarClave.addActionListener(controlador);
+    }
+
     private boolean mostrarDialogoConfirmacion(String mensaje) {
         JDialog dialog = new JDialog(this, "Confirmar Acción", true);
         dialog.setLayout(new BorderLayout(10, 10));
@@ -275,15 +280,8 @@ public class AdminGUI extends JFrame {
 
         final boolean[] resultado = {false};
 
-        btnCambiar.addActionListener(e -> {
-            resultado[0] = true;
-            dialog.dispose();
-        });
-
-        btnCancelar.addActionListener(e -> {
-            resultado[0] = false;
-            dialog.dispose();
-        });
+        btnCambiar.addActionListener(e -> { resultado[0] = true; dialog.dispose(); });
+        btnCancelar.addActionListener(e -> { resultado[0] = false; dialog.dispose(); });
 
         panelBotones.add(btnCambiar);
         panelBotones.add(btnCancelar);
@@ -296,32 +294,16 @@ public class AdminGUI extends JFrame {
         return resultado[0];
     }
 
-    // --- MÉTODOS PÚBLICOS DE API (Hilos Seguros y Lectura) ---
+    // --- MÉTODOS PÚBLICOS DE API ---
 
-    /**
-     * Permite al controlador leer el valor de la clave de encriptación ingresada.
-     */
     public String getClaveEncriptacion() {
         return campoClaveEncriptacion.getText().trim();
     }
 
     public void setEstadoServidores(boolean principalConectado, boolean respaldoConectado) {
         VistasUtils.enEDT(() -> {
-            if (principalConectado) {
-                lblServerPrincipal.setText("Conectado");
-                lblServerPrincipal.setForeground(new Color(46, 139, 87)); // Verde marino
-            } else {
-                lblServerPrincipal.setText("Desconectado");
-                lblServerPrincipal.setForeground(Color.RED);
-            }
-
-            if (respaldoConectado) {
-                lblServerRespaldo.setText("Conectado");
-                lblServerRespaldo.setForeground(new Color(46, 139, 87));
-            } else {
-                lblServerRespaldo.setText("Desconectado");
-                lblServerRespaldo.setForeground(Color.RED);
-            }
+            setEstadoPrincipal(principalConectado);
+            setEstadoRespaldo(respaldoConectado);
         });
     }
 
@@ -329,7 +311,7 @@ public class AdminGUI extends JFrame {
         VistasUtils.enEDT(() -> {
             if (estado) {
                 lblServerPrincipal.setText("Conectado");
-                lblServerPrincipal.setForeground(new Color(46, 139, 87)); // Verde marino
+                lblServerPrincipal.setForeground(new Color(46, 139, 87));
             } else {
                 lblServerPrincipal.setText("Desconectado");
                 lblServerPrincipal.setForeground(Color.RED);
@@ -350,27 +332,26 @@ public class AdminGUI extends JFrame {
     }
 
     private void agregarLogConColor(String mensaje, Color color) {
-    VistasUtils.enEDT(() -> {
-        StyledDocument doc = txtConsola.getStyledDocument();
-        Style style = txtConsola.addStyle("colorStyle", null);
-        StyleConstants.setForeground(style, color);
-
-        String linea = "[" + java.time.LocalTime.now().toString().substring(0, 8) + "] " + mensaje + "\n";
-        try {
-            doc.insertString(doc.getLength(), linea, style);
-        } catch (BadLocationException e) {
-            e.printStackTrace();
-        }
-        txtConsola.setCaretPosition(doc.getLength()); // auto-scroll
-    });
-}
+        VistasUtils.enEDT(() -> {
+            StyledDocument doc = txtConsola.getStyledDocument();
+            Style style = txtConsola.addStyle("colorStyle", null);
+            StyleConstants.setForeground(style, color);
+            String linea = "[" + java.time.LocalTime.now().toString().substring(0, 8) + "] " + mensaje + "\n";
+            try {
+                doc.insertString(doc.getLength(), linea, style);
+            } catch (BadLocationException e) {
+                e.printStackTrace();
+            }
+            txtConsola.setCaretPosition(doc.getLength());
+        });
+    }
 
     public void logEventoPrincipal(String msg) {
         agregarLogConColor("[PRINCIPAL] " + msg, Color.BLUE);
     }
 
     public void logBienPrincipal(String msg) {
-        agregarLogConColor("[PRINCIPAL] " + msg, new Color(46, 139, 87)); // verde
+        agregarLogConColor("[PRINCIPAL] " + msg, new Color(46, 139, 87));
     }
 
     public void logMalPrincipal(String msg) {
@@ -379,10 +360,6 @@ public class AdminGUI extends JFrame {
 
     public void logEventoRespaldo(String msg) {
         agregarLogConColor("[RESPALDO] " + msg, Color.GRAY);
-    }
-
-    public void setControlador(ActionListener controlador) {
-        this.controlador = controlador;
     }
 
     public void mostrar() {

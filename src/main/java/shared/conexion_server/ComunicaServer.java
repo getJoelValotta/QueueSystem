@@ -29,6 +29,7 @@ public abstract class ComunicaServer {
     public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
         this.IP = IP;
         this.puerto = puerto;
+        escuchadorDeNodoFisico.setClaveEncriptacion(claveEncriptacion);
         try {
             this.socket = new Socket(IP, puerto);
             this.out = new DataOutputStream(socket.getOutputStream());

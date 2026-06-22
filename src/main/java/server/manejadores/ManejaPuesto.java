@@ -5,9 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
+import admin.AdminComunicaServerP;
 import puesto.PuestoComunicaServer;
 import shared.turno.Turno;
-import admin.AdminComunicaServerP;
 
 public class ManejaPuesto extends ManejadorDeNodos implements IControllerObserver {
     private Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
@@ -39,7 +39,9 @@ public class ManejaPuesto extends ManejadorDeNodos implements IControllerObserve
             switch (respuesta) {
                 case PuestoComunicaServer.ATIENDE:
                     Turno turno = controllerServer.llamaSiguienteTurno(this.id);
-                    outSimple.writeUTF(String.valueOf(turno.getCliente().getDni())); // turno nunca deberia ser nulo porque siempre llama cuando el boton no esata bloqueado.
+                    String dni = String.valueOf(turno.getCliente().getDni());
+                    String dniEncriptado = controllerServer.encriptar(dni);
+                    outSimple.writeUTF(dniEncriptado); // turno nunca deberia ser nulo porque siempre llama cuando el boton no esata bloqueado.
                     controllerServer.avisarAdmin("Llamando siguiente desde Puesto " + id, AdminComunicaServerP.BIEN_PRINCIPAL);
                     break;
                 case PuestoComunicaServer.RENOTIFICA:

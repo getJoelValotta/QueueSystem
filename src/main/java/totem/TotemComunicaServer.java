@@ -19,10 +19,10 @@ public class TotemComunicaServer extends ComunicaServer {
         this.escuchadorDeEventos = escuchadorDeEventos;
     }
     // El totem envia el DNI al socket de comunicacion con el server que este conectado y si ya estaba en el sistema retorna false.
-    public boolean enviarDNI(long dni) {
+    public boolean enviarDNI(String dni) {
         boolean validacion = false;
         try {
-            outSimple.writeUTF(String.valueOf(dni)); // TODO : encriptar
+            outSimple.writeUTF(dni); // TODO : encriptar
             // TODO : Informar al ADMIN (server-side)
             validacion = Boolean.parseBoolean(inSimple.readUTF());
             return validacion;
@@ -35,7 +35,7 @@ public class TotemComunicaServer extends ComunicaServer {
         return validacion;
     }
 
-    public boolean reintentarConexion(long dni){
+    public boolean reintentarConexion(String dni){
         conectaServidor(IP, puerto, ComunicaServer.TOTEM);
         informaID(escuchadorDeNodoFisico.getId());
         return enviarDNI(dni);
@@ -45,6 +45,7 @@ public class TotemComunicaServer extends ComunicaServer {
     public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
         this.IP = IP;
         this.puerto = puerto;
+        escuchadorDeNodoFisico.setClaveEncriptacion(claveEncriptacion);
         try {
             this.socket = new Socket(IP, puerto);
             this.out = new DataOutputStream(socket.getOutputStream());
