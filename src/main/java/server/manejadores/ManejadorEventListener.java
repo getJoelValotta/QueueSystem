@@ -12,5 +12,6 @@ public interface ManejadorEventListener {
     public boolean actualizaTurnoRenotificado(String idPuesto);
     public void recibeTurnoEnRespaldo(Turno turno);
     public void avisarAdmin (String msg, String tipoEvento);
+    public String getClave();
 
 }

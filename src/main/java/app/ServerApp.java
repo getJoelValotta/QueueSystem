@@ -2,10 +2,6 @@ package app;
 
 import server.ControllerServer;
 import server.Server;
-import server.manejadores.ManejaAdmin;
-import server.manejadores.ManejaMonitor;
-import server.manejadores.ManejaPuesto;
-import server.manejadores.ManejaTotem;
 
 public class ServerApp {
     

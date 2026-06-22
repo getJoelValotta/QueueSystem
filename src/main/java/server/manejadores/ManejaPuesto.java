@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import puesto.Puesto;
 import puesto.PuestoComunicaServer;
 import shared.turno.Turno;
 import admin.AdminComunicaServerP;

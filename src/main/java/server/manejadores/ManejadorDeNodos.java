@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import admin.AdminComunicaServerP;
 
 public abstract class ManejadorDeNodos implements Runnable{ //Aplica template method
     protected ManejadorEventListener controllerServer;
@@ -34,6 +35,7 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
             comunicacion();
         }
     }
+
     
     public String getId(){
         return this.id;

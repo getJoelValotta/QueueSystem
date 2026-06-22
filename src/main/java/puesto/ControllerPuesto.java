@@ -34,6 +34,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                             vistaConexion.getClaveEncriptacion());
                     // vistaPuesto.inhabilitaRenotificar();
                     if (puesto.getId() == null) {
+                        System.out.println("Solicito id");
                         String id = comunicaServer.solicitaID();
                         puesto.setId(id);
                     } else {
