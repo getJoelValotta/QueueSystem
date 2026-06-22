@@ -10,12 +10,15 @@ import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
+import shared.criptografia.ICriptografia;
 
 public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener{
     private ConexionGUI vistaConexion;
     private TotemGUI vistaTotem;
     private Totem totem;
     private TotemComunicaServer comunicaServer;
+    private ICriptografia criptografia;
+    private String claveSimetrica;
 
     public static int idx = 1;
 
@@ -33,7 +36,8 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         switch (e.getActionCommand()){
             case ConexionGUI.CONECTAR:
                 VistasUtils.ejecutarNoBloqueante(() -> {
-                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM);
+                    comunicaServer.conectaServidorPrimeraVez(vistaConexion.getIP(), Integer.parseInt(vistaConexion.getPuerto()), ComunicaServer.TOTEM, vistaConexion.getClaveEncriptacion());
+                    
                     if (totem.getId() == null){
                         System.out.println("PIDO ID");
                         String id = comunicaServer.solicitaID();

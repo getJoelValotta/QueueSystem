@@ -10,12 +10,13 @@ public abstract class ComunicaServer {
     protected Socket socket;
     protected ConexionListener escuchadorDeNodoFisico;
     public static final String PUESTO = "#PUESTO#", TOTEM = "#TOTEM#", MONITOR = "#MONITOR#", ADMIN = "#ADMIN#", PUESTO_COLA = "#COLA#", PUESTO_LLAMADOS = "#LLAMADOS#", TOTEM_INIT = "#TOTEM_INIT#", TOTEM_END = "#TOTEM_END#",
-            ID = "#IDX#";
+            ID = "#IDX#", CLAVE = "#CLAVE#";
     protected DataOutputStream out;
     protected DataInputStream in;
     protected Object mutex = new Object(); // Auxiliar para el manejo de zonas criticas de los in/out de los sockets.
     protected String IP;
     protected int puerto;
+    protected String claveEncriptacion = null;
 
     public ComunicaServer(){
         socket = null;
@@ -25,10 +26,30 @@ public abstract class ComunicaServer {
         this.escuchadorDeNodoFisico = escuchadorDeNodoFisico; // Similar a un observer, aunque de instancia unica y mas particular.
     }
 
-    public void conectaServidorPrimeraVez(String IP, int puerto, String nodo){
+    public void conectaServidorPrimeraVez(String IP, int puerto, String nodo, String claveEncriptacion){
         this.IP = IP;
         this.puerto = puerto;
+        this.claveEncriptacion = claveEncriptacion;
         conectaServidor(IP, puerto, nodo);
+        try {
+            out.writeUTF(CLAVE);
+            out.writeUTF(claveEncriptacion);
+            boolean conexion = Boolean.parseBoolean(in.readUTF());
+            if (!conexion){
+                System.out.println("CLAVE DE ENCRIPTACION INCORRECTA");
+                escuchadorDeNodoFisico.conexionErronea("Clave de encriptacion incorrecta");
+                socket.close();
+            }
+            else
+                escuchadorDeNodoFisico.conexionExitosa();
+        } catch (IOException e) {
+            try {
+                socket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            e.printStackTrace();
+        }
     }
 
     // Asumimos que la infra de la conexion de las ips es con ayuda de un DNS con un
@@ -45,7 +66,7 @@ public abstract class ComunicaServer {
             this.in = new DataInputStream(socket.getInputStream());
             System.out.println("ACABO DE INSTANCIAR UN SOCKET");
             out.writeUTF(nodo);
-            escuchadorDeNodoFisico.conexionExitosa();
+            //escuchadorDeNodoFisico.conexionExitosa();
         } catch (UnknownHostException e) { // Excepcion que discierne si el formato de la IP es invalido
             System.out.println("IP ERRONEA ");
             escuchadorDeNodoFisico.conexionErronea("Formato de IP Invalido");

@@ -49,6 +49,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaTotem nodoTotem;
     // TODO cambiar? Puede ir en modelo, o no se como lo van a implementar
     private String modo = "txt";
+    private String claveEncriptacion = "pepe"; // TODO: esto no puede ir hardcodeado, tiene que ser seteable desde el admin, y el totem lo tiene que pedir al server cada vez que se conecta.
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -62,7 +63,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
 
     @Override
     public void atiendeSockets(Socket socket) {
-        String conectado, solicitud;
+        String conectado, solicitud, claveNodo;
         DataOutputStream out;
         DataInputStream in;
         String id;
@@ -71,6 +72,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             in = new DataInputStream(socket.getInputStream());
             conectado = in.readUTF();
             switch (conectado) {
+                case ComunicaServer.CLAVE:
+                    solicitud = in.readUTF(); 
+                    boolean respuesta = validacionClave(in.readUTF());
+                    out.writeUTF(String.valueOf(respuesta));
+                    break;
+
                 case ComunicaServer.TOTEM:
                     solicitud = in.readUTF(); // Solo los que solicitan ID piden solicitud, si solicitud no es lo que tiene el string ID es porque ya tiene una id.
                     if (solicitud.equals(ComunicaServer.TOTEM_INIT)) {
@@ -171,6 +178,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         nodoServer.comunicaListaTurnos(enAtencion, IManejaServidores.TURNO_ATENCION);
         nodoServer.comunicaListaTurnos(abandonados, IManejaServidores.TURNO_ABANDONADO);
         nodoServer.comunicaListaTurnos(atendidos, IManejaServidores.TURNO_ATENDIDO);
+    }
+
+
+    public boolean validacionClave(String clave){
+        return clave.equals(claveEncriptacion);
     }
 
     @Override

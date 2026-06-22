@@ -48,6 +48,17 @@ public class TotemComunicaServer extends ComunicaServer {
             this.socketSimple = new Socket(IP, puerto);
             this.outSimple = new DataOutputStream(socketSimple.getOutputStream());
             this.inSimple = new DataInputStream(socketSimple.getInputStream());
+            //out.writeUTF(claveEncriptacion);
+            //boolean conexion = Boolean.parseBoolean(in.readUTF());
+            //if (!conexion){
+            //    System.out.println("CLAVE DE ENCRIPTACION INCORRECTA");
+            //    escuchadorDeNodoFisico.conexionErronea("Clave de encriptacion incorrecta");
+            //    socket.close();
+            //}
+            //else{
+            //    out.writeUTF(nodo);
+            //    escuchadorDeNodoFisico.conexionExitosa();
+            //}
             outSimple.writeUTF(nodo);
             outSimple.writeUTF(TOTEM_END);
         } catch (java.net.ConnectException e) { // Excepcion que discierne si el puerto es incorrecto o el host esta indispuesto.

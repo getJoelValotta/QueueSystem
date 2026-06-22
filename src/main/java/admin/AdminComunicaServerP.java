@@ -68,6 +68,7 @@ public class AdminComunicaServerP extends ComunicaServer implements Runnable {
             this.out = new DataOutputStream(socket.getOutputStream());
             this.in = new DataInputStream(socket.getInputStream());
             System.out.println("ACABO DE INSTANCIAR UN SOCKET");
+            out.writeUTF(claveEncriptacion);
             out.writeUTF(nodo);
             escuchadorDeEventos.cambiarEstado(ControllerAdmin.PRINCIPAL, true);
         } catch (IOException e) { 

@@ -12,6 +12,7 @@ public class ControllerAdmin implements AdminEventListener, ActionListener{
     Admin admin;
     AdminComunicaServerP comunicaServerPrincipal;
     AdminComunicaServerR comunicaServerRespaldo;
+    String claveSimetrica;
 
     public ControllerAdmin(AdminGUI vistaAdmin, AdminComunicaServerP comunicaServerPrincipal, AdminComunicaServerR comunicaServerRespaldo){
         this.vistaAdmin = vistaAdmin;
