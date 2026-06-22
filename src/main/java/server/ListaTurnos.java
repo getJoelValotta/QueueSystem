@@ -8,6 +8,13 @@ import shared.turno.Turno;
 public class ListaTurnos {
     private ConcurrentLinkedQueue<Turno> listaTurnos = new ConcurrentLinkedQueue<>();
 
+    public ListaTurnos() {
+    }
+
+    public ListaTurnos(ConcurrentLinkedQueue<Turno> turnos) {
+        this.listaTurnos = turnos;
+    }
+
     public void agregaTurno(Turno turno) {
         listaTurnos.offer(turno);
     }

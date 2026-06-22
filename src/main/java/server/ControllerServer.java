@@ -5,7 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import admin.AdminComunicaServerP;
 import server.id.GestorID;
@@ -158,8 +160,19 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     }
 
     public void iniciaServer() {
-        // TODO : PERSISTIR LISTAS ESPERA Y ATENCION y volcar al metodo inicializaListas
-        server.inicializaListas();
+        try {
+
+            ConcurrentLinkedQueue<Turno> turnosEspera = cargarTurnos("turnosEspera");
+            ConcurrentLinkedQueue<Turno> turnosAtencion = cargarTurnos("turnosAtencion");
+            ConcurrentLinkedQueue<Turno> turnosAbandonados = cargarTurnos("turnosAbandonados");
+            ConcurrentLinkedQueue<Turno> turnosAtendidos = cargarTurnos("turnosAtendidos");
+            server.inicializaListas(new ListaTurnos(turnosEspera), new ListaTurnos(turnosAtencion),
+                    new ListaTurnos(turnosAbandonados), new ListaTurnos(turnosAtendidos));
+            System.out.println("Listas recuperadas");
+        } catch (RuntimeException e) {
+            System.out.println("No se pudieron cargar las listas de turnos, se inicia con listas vacias");
+            server.inicializaListas();
+        }
         server.abreConexion();
         try {
             ServerConfig config = cargaConfig(); // Cargo file config
@@ -486,6 +499,27 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             default:
                 System.out.println("No implementaste la persistencia de " + cosaAPersistir);
         }
+    }
+
+    public ConcurrentLinkedQueue<Turno> cargarTurnos(String estado) throws RuntimeException {
+        ConcurrentLinkedQueue<Turno> turnos = null;
+        switch (estado) {
+            case "turnosEspera":
+                turnos = LlamaMappersServer.cargar(modo, "turnosEspera", this.server.esPrincipal());
+                break;
+            case "turnosAtencion":
+                turnos = LlamaMappersServer.cargar(modo, "turnosAtencion", this.server.esPrincipal());
+                break;
+            case "turnosAbandonados":
+                turnos = LlamaMappersServer.cargar(modo, "turnosAbandonados", this.server.esPrincipal());
+                break;
+            case "turnosAtendidos":
+                turnos = LlamaMappersServer.cargar(modo, "turnosAtendidos", this.server.esPrincipal());
+                break;
+            default:
+                System.out.println("No implementaste la carga de " + estado);
+        }
+        return turnos;
     }
 
     private void persisteConfig(String modo) {

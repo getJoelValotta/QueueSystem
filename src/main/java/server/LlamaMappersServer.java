@@ -32,6 +32,31 @@ public class LlamaMappersServer {
         }
     }
 
+    public static ConcurrentLinkedQueue<Turno> cargar(String modo, String cosaACargar, boolean esPrincipal)
+            throws RuntimeException {
+        if (cosaACargar.startsWith("turnos")) {
+            String filePath = cosaACargar;
+            if (esPrincipal) {
+                filePath += "_ServerPrincipal.";
+            } else {
+                filePath += "_ServerBackup.";
+            }
+            if (modo.equals("txt")) {
+                filePath += "_ServerPrincipal.txt";
+                return ListaTurnosTXTMapper.getInstance(filePath).load();
+            } else if (modo.equals("xml")) {
+                filePath += "_ServerPrincipal.xml";
+                return ListaTurnosXMLMapper.getInstance(filePath).load();
+            } else if (modo.equals("json")) {
+                filePath += "_ServerPrincipal.json";
+                return ListaTurnosJSONMapper.getInstance(filePath).load();
+            } else {
+                throw new IllegalArgumentException("Modo de persistencia no soportado: " + modo);
+            }
+        }
+        throw new IllegalArgumentException("Cosa a cargar no soportada: " + cosaACargar);
+    }
+
     public static void persistirConfig(ServerConfig config, boolean esPrincipal) {
         String filePath = null;
         if (esPrincipal) {

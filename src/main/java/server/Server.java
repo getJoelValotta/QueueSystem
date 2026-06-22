@@ -123,6 +123,14 @@ public class Server implements Runnable {
         this.atendidos = new ListaTurnos();
     }
 
+    public void inicializaListas(ListaTurnos enEspera, ListaTurnos enAtencion, ListaTurnos abandonados,
+            ListaTurnos atendidos) {
+        this.enEspera = enEspera;
+        this.enAtencion = enAtencion;
+        this.abandonados = abandonados;
+        this.atendidos = atendidos;
+    }
+
     public ListaTurnos getEnEspera() {
         return enEspera;
     }
