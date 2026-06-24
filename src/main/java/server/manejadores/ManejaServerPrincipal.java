@@ -52,7 +52,9 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
 
                 case IManejaServidores.TURNO_ESPERA:
                     dniEncriptado = in.readUTF();
+                    System.out.println("\n\nHASTA ACA LLEGUE\n\n");
                     dni = controllerServer.desencriptar(dniEncriptado);
+                    System.out.println("\n\nHASTA ACA LLEGUE\n\n");
                     turno = new Turno();
                     try {
                         turno.setCliente(new Cliente(dni));

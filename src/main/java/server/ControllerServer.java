@@ -198,7 +198,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         atendidos = server.getAtendidos();
         nodoServer.comunicaClaveEncriptacion(claveEncriptacion);
         nodoServer.comunicaMetodoEncriptacion(metodoEncriptacion);
-        //nodoServer.enviaMetodoEncriptacion(metodoEncriptacion);
         nodoServer.comunicaGestor(gestorID);
         nodoServer.comunicaListaTurnos(enEspera, IManejaServidores.TURNO_ESPERA);
         nodoServer.comunicaListaTurnos(enAtencion, IManejaServidores.TURNO_ATENCION);
@@ -465,7 +464,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setMetodoEncriptacion(String modoEncriptacion) {
         System.out.println(modoEncriptacion);
         this.metodoEncriptacion = modoEncriptacion;
-
+        System.out.println("\n\nLA CRIPTOGRAFIA ES = " + modoEncriptacion);
         if (modoEncriptacion.equals(PuestoAjustesGUI.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         } else if (modoEncriptacion.equals(PuestoAjustesGUI.CHACHA20)) {

@@ -33,6 +33,9 @@ public class AES implements ICriptografia {
     @Override
     public String desencriptar(String cadena, String clave) {
         try {
+            System.out.println("\n\ncadena = " + cadena);
+            System.out.println("clave = "+ clave);
+            System.out.println("\n");
             SecretKeySpec claveSecreta = generarClave(clave);
 
             Cipher cipher = Cipher.getInstance(TRANSFORMACION);

@@ -116,7 +116,6 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
     @Override
     public void comunicaMetodoEncriptacion(String metodoEncriptacion) {
         try {
-            out.writeUTF(PuestoAjustesGUI.ENVIAR_CLAVE);
             out.writeUTF(metodoEncriptacion);
         } catch (IOException e) {
         }
@@ -126,6 +125,7 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
     @Override
     public void comunicaClaveEncriptacion(String claveEncriptacion) {
         try {
+            out.writeUTF(PuestoAjustesGUI.ENVIAR_CLAVE);
             out.writeUTF(claveEncriptacion);
         } catch (IOException e) {
         }
