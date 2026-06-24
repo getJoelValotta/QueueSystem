@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import admin.AdminComunicaServerP;
+import server.ControllerServer;
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
 import shared.cliente.ClienteDniVacioException;
@@ -91,19 +92,24 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
             try {
                 mensaje = in.readUTF();
                 switch(mensaje){
-                    case AdminComunicaServerP.PERSISTENCIA:
-                        mensaje = in.readUTF();
-                        escuchadorDeEventos.setModoPersistencia(mensaje);
+                    case PuestoAjustesGUI.AES:
+                    case PuestoAjustesGUI.CHACHA20:
+                        System.out.println("Cambiando a " + mensaje);
+                        escuchadorDeEventos.setMetodoEncriptacion(mensaje);
                         break;
-                    case AdminComunicaServerP.ENCRIPTACION:
-                        mensaje = in.readUTF();
-                        System.out.print("Cambiando la encriptacion");
-                        escuchadorDeEventos.setModoEncriptacion(mensaje);
+                    case PuestoAjustesGUI.JSON:
+                    case PuestoAjustesGUI.XML:
+                    case PuestoAjustesGUI.TXT:
+                        System.out.println("Cambiando a " + mensaje);
+                        escuchadorDeEventos.setMetodoPersistencia(mensaje);
                         break;
-                    case AdminComunicaServerP.CLAVE:
-                        mensaje = in.readUTF();
-                        escuchadorDeEventos.setClaveEncriptacion(mensaje);
+                    case ControllerServer.DESCONEXION:
+                        System.out.println("Desconectando.");
+                        escuchadorDeEventos.desconexionForzada();
+                        socket.close();
+                        socketSimple.close();
                         break;
+    
                     default:
                         escuchadorDeEventos.eventoCantidadEnEspera(Integer.parseInt(mensaje));
                         break;
@@ -221,4 +227,37 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
         return nuevaID;
     }
 
+    public void enviaClave(String claveNueva){
+        try {
+            synchronized (mutex){
+                outSimple.writeUTF(PuestoAjustesGUI.ENVIAR_CLAVE);
+                outSimple.writeUTF(claveNueva);
+            }
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+    }
+
+    public void enviaMetodoEncriptacion(String metodo){
+        try {
+            synchronized (mutex){
+                outSimple.writeUTF(metodo);
+            }
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+    }
+
+    public void enviaMetodoPersistencia(String metodo){
+        try {
+            synchronized (mutex){
+                outSimple.writeUTF(metodo);
+            }
+        } catch (IOException e) {
+            // TODO Informar al ADMIN (Server-Side) y manejar retry.
+            e.printStackTrace();
+        }
+    }
 }

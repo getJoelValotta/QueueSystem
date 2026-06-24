@@ -66,20 +66,13 @@ public class ControllerAdmin implements AdminEventListener, ActionListener {
                 });
                 break;
         }
-        persisteConfig();
     }
 
     public void iniciaAdmin() {
-
-        try {
-            this.admin = cargaConfig();
-        } catch (RuntimeException e) {
-            this.admin = new Admin("TXT", "MD5");
-        }
+        this.admin = new Admin("txt", "aes");
         vistaAdmin.mostrar();
         new Thread(comunicaServerPrincipal).start();
         new Thread(comunicaServerRespaldo).start();
-        persisteConfig();
 
     }
 
@@ -107,13 +100,4 @@ public class ControllerAdmin implements AdminEventListener, ActionListener {
             vistaAdmin.setEstadoRespaldo(estado);
         }
     }
-
-    private Admin cargaConfig() throws RuntimeException {
-        return LlamaMapperAdmin.recupera();
-    }
-
-    private void persisteConfig() {
-        LlamaMapperAdmin.persistir(admin);
-    }
-
 }

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import puesto.PuestoAjustesGUI;
 import shared.VistasUtils;
 import shared.conexion_server.ComunicaServer;
 import shared.conexion_server.ConexionGUI;
@@ -19,9 +20,10 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
     private MonitorGUI vistaMonitor;
     private Monitor monitor;
     private MonitorEscuchaServer escuchaServer;
-    private String modo = "txt";
+    private String metodoPersistencia = "txt";
+    private String metodoEncriptacion;
     private ICriptografia criptografia;
-    private String claveEncriptacion;
+    private String claveEncriptacion, modoEncriptacion;
 
     public ControllerMonitor(ConexionGUI vistaConexion, MonitorGUI vistaMonitor, MonitorEscuchaServer escuchaServer) {
         this.vistaConexion = vistaConexion;
@@ -101,6 +103,27 @@ public class ControllerMonitor implements ActionListener, ConexionListener, Moni
 
     public void setClaveEncriptacion(String clave) {
         this.claveEncriptacion = clave;
+    }
+
+    @Override
+    public void desconexionForzada() {
+        vistaMonitor.cerrar();
+        vistaConexion.mostrar();
+        System.out.println("llame a las vistas");
+    }
+
+
+    public void setMetodoEncriptacion(String modo) {
+        this.modoEncriptacion = modo;
+        if (modo.equals(PuestoAjustesGUI.AES)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        } else if (modo.equals(PuestoAjustesGUI.CHACHA20)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+    }
+
+    public void setMetodoPersistencia(String modo) {
+        this.metodoPersistencia = modo;
     }
 
 }

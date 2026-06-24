@@ -8,6 +8,8 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
+import server.ControllerServer;
 import shared.conexion_server.ComunicaServer;
 
 public class TotemComunicaServer extends ComunicaServer implements Runnable {
@@ -44,18 +46,25 @@ public class TotemComunicaServer extends ComunicaServer implements Runnable {
                 String mensaje = in.readUTF();
                 System.out.println("Mensaje del servidor: " + mensaje);
                 switch (mensaje) {
-                    case AdminComunicaServerP.PERSISTENCIA:
-                        mensaje = in.readUTF();
-                        escuchadorDeEventos.setModo(mensaje);
+                    case PuestoAjustesGUI.AES:
+                    case PuestoAjustesGUI.CHACHA20:
+                        escuchadorDeEventos.setMetodoEncriptacion(mensaje);
                         break;
-                    case AdminComunicaServerP.ENCRIPTACION:
-                        mensaje = in.readUTF();
-                        System.out.print("Cambiando la encriptacion");
-                        escuchadorDeEventos.setModoEncriptacion(mensaje);
+                    case PuestoAjustesGUI.JSON:
+                    case PuestoAjustesGUI.XML:
+                    case PuestoAjustesGUI.TXT:
+                        System.out.println("Cambiando a " + mensaje);
+                        escuchadorDeEventos.setMetodoPersistencia(mensaje);
                         break;
                     case AdminComunicaServerP.CLAVE:
+                        System.out.println("Cambiando la clave.");
                         mensaje = in.readUTF();
                         escuchadorDeEventos.setClaveEncriptacion(mensaje);
+                        break;
+                    case ControllerServer.DESCONEXION:
+                        escuchadorDeEventos.desconexionForzada();
+                        socket.close();
+                        socketSimple.close();
                         break;
                 }
             } catch (SocketException | java.io.EOFException e) {

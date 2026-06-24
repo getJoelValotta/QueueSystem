@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
 import puesto.PuestoComunicaServer;
 import shared.turno.Turno;
 
@@ -49,6 +50,22 @@ public class ManejaPuesto extends ManejadorDeNodos implements IControllerObserve
                     outSimple.writeUTF(String.valueOf(valido));
                     controllerServer.avisarAdmin("Renotificando cliente desde Puesto " + id, AdminComunicaServerP.BIEN_PRINCIPAL);
                     break;
+                case PuestoAjustesGUI.ENVIAR_CLAVE:
+                    System.out.println("LLego solicitud de nueva clave");
+                    respuesta = inSimple.readUTF();
+                    controllerServer.setClaveEncriptacion(respuesta);
+                    controllerServer.desconexionForzada();
+                    break;
+                case PuestoAjustesGUI.AES:
+                case PuestoAjustesGUI.CHACHA20:
+                    controllerServer.setMetodoEncriptacion(respuesta);
+                    break;
+                case PuestoAjustesGUI.JSON:
+                case PuestoAjustesGUI.TXT:
+                case PuestoAjustesGUI.XML:
+                    controllerServer.setMetodoPersistencia(respuesta);
+                    break;
+
             }
         } catch (IOException e) {
             try{

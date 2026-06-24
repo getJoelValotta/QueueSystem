@@ -141,6 +141,25 @@ public class PuestoAjustesGUI extends JDialog {
         add(panelPrincipal, BorderLayout.CENTER);
         
         configurarListenersCambios();
+        configurarBotonEnviar();
+    }
+
+    private void configurarBotonEnviar() {
+        btnEnviarClave.addActionListener(e -> {
+            String clave = getClaveEncriptacion();
+            
+            if (clave.isEmpty()) {
+                mostrarMensajeError("La clave no puede estar vacía");
+                return;
+            }
+
+            boolean confirmar = mostrarDialogoConfirmacion("¿Enviar clave de encriptación?");
+
+            if (confirmar && controlador != null) {
+                controlador.actionPerformed(
+                    new ActionEvent(btnEnviarClave, ActionEvent.ACTION_PERFORMED, btnEnviarClave.getActionCommand()));
+            }
+        });
     }
 
     private void configurarListenersCambios() {
@@ -221,9 +240,31 @@ public class PuestoAjustesGUI extends JDialog {
         return resultado[0];
     }
 
+    private void mostrarMensajeError(String mensaje) {
+        JDialog dialog = new JDialog(this, "Error", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setResizable(false);
+
+        JLabel lblMensaje = new JLabel(mensaje, SwingConstants.CENTER);
+        lblMensaje.setBorder(new EmptyBorder(15, 15, 10, 15));
+        lblMensaje.setForeground(java.awt.Color.RED);
+        dialog.add(lblMensaje, BorderLayout.CENTER);
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JButton btnOk = new JButton("OK");
+        btnOk.addActionListener(e -> dialog.dispose());
+        panelBotones.add(btnOk);
+        dialog.add(panelBotones, BorderLayout.SOUTH);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
     public String getClaveEncriptacion() {
         return campoClaveEncriptacion.getText().trim();
     }
+
 
     public void setClaveEncriptacion(String clave) {
         campoClaveEncriptacion.setText(clave);
@@ -264,6 +305,5 @@ public class PuestoAjustesGUI extends JDialog {
 
     public void setActionListener(ActionListener controlador) {
         this.controlador = controlador;
-        btnEnviarClave.addActionListener(controlador);
     }
 }

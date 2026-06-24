@@ -97,12 +97,36 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                     });
                 }
                 break;
-        }
-        try {
-            // TREMENDO HARDCODEO PERO FUNCIONA
-            Thread.sleep(250);
-        } catch (InterruptedException es) {
-            System.out.println("Error al hacer sleep despues de accion realizada");
+            case PuestoAjustesGUI.ENVIAR_CLAVE:
+                System.out.println(vistaPuesto.getClaveEncriptacion());
+                comunicaServer.enviaClave(vistaPuesto.getClaveEncriptacion());
+                //vistaPuesto.cerrar();
+                break;
+            case PuestoAjustesGUI.AES:
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.enviaMetodoEncriptacion(PuestoAjustesGUI.AES);
+                });
+                break;
+            case PuestoAjustesGUI.CHACHA20:
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.enviaMetodoEncriptacion(PuestoAjustesGUI.CHACHA20);
+                });
+                break;
+            case PuestoAjustesGUI.TXT:
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.enviaMetodoPersistencia(PuestoAjustesGUI.TXT);
+                });
+                break;
+            case PuestoAjustesGUI.XML:
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.enviaMetodoPersistencia(PuestoAjustesGUI.XML);
+                });
+                break;
+            case PuestoAjustesGUI.JSON:
+                VistasUtils.ejecutarNoBloqueante(() -> {
+                    comunicaServer.enviaMetodoPersistencia(PuestoAjustesGUI.JSON);
+                });
+                break;
         }
     }
 
@@ -148,17 +172,26 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
         return criptografia.desencriptar(mensajeEncriptado, claveEncriptacion);
     }
 
-    public void setModoEncriptacion(String modo) {
+    public void setMetodoEncriptacion(String modo) {
         this.modoEncriptacion = modo;
-        if (modo.equals(AdminComunicaServerP.AES)) {
+        System.out.println("MODO = " + modo);
+        if (modo.equals(PuestoAjustesGUI.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        } else if (modo.equals(AdminComunicaServerP.CHACHA20)) {
+        } else if (modo.equals(PuestoAjustesGUI.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
+        System.out.println("Metodo de encriptacion cambiado a " + modo);
     }
 
-    public void setModoPersistencia(String modo) {
+    public void setMetodoPersistencia(String modo) {
         this.modoPersistencia = modo;
+        System.out.println("Metodo de persistencia cambiado a " + modo);
+    }
+
+   @Override
+    public void desconexionForzada() {
+        vistaPuesto.cerrar();
+        vistaConexion.mostrar();
     }
 
 }

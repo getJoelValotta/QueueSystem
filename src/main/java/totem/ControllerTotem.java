@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
 import shared.VistasUtils;
 import shared.cliente.Cliente;
 import shared.cliente.ClienteDniInvalidoException;
@@ -20,7 +21,9 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     private Totem totem;
     private TotemComunicaServer comunicaServer;
     private ICriptografia criptografia;
-    private String claveSimetrica, modoEncriptacion, modo = "txt";
+    private String claveSimetrica;
+    private String metodoPersistencia = "txt";
+    private String metodoEncriptacion;
 
     public static int idx = 1;
 
@@ -71,12 +74,6 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
                 }
                 break;
         }
-        try {
-            Thread.sleep(100);
-        } catch (Exception e1) {
-            System.out.println("Error sleep: " + e1.getMessage());
-        }
-        //persistir();
     }
 
     public void iniciaTotem() {
@@ -113,28 +110,34 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
         //persistir();
     }
 
-    public String getModoEncriptacion() {
-        return modoEncriptacion;
+    public String getMetodoEncriptacion() {
+        return metodoEncriptacion;
     }
 
-    public void setModoEncriptacion(String modo) {
-        this.modoEncriptacion = modo;
-        if (modo.equals(AdminComunicaServerP.AES)) {
+    public void setMetodoEncriptacion(String modo) {
+        this.metodoEncriptacion = modo;
+        if (modo.equals(PuestoAjustesGUI.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        } else if (modo.equals(AdminComunicaServerP.CHACHA20)) {
+        } else if (modo.equals(PuestoAjustesGUI.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
         System.out.println("Encrip cambiada");
         //persistir();
     }
 
-    public void setModo(String modo) {
-        this.modo = modo;
+    public void setMetodoPersistencia(String modo) {
+        this.metodoPersistencia = modo;
         //persistir();
     }
 
-    public String getModo() {
-        return modo;
+    public String getMetodoPersistencia() {
+        return metodoPersistencia;
+    }
+
+    @Override
+    public void desconexionForzada() {
+        vistaTotem.cerrar();
+        vistaConexion.mostrar();
     }
 
 }

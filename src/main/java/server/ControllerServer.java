@@ -10,6 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
 import server.id.GestorID;
 import server.id.GestorIDListener;
 import server.manejadores.IControllerObserver;
@@ -50,10 +51,11 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
     private ManejaTotem nodoTotem;
-    private String modo = "txt";
-    private String modoEncriptacion;
+    private String metodoPersistencia = "txt";
+    private String metodoEncriptacion;
     private String claveEncriptacion = "";
     private ICriptografia criptografia;
+    public static final String DESCONEXION = "#DESCONEXION#";
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -108,6 +110,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     break;
 
                 case ComunicaServer.PUESTO:
+                    System.out.println("Conectando un Puesto...");
                     solicitud = in.readUTF();
                     if (solicitud.equals(ComunicaServer.PUESTO_COLA)) {
                         nodoPuesto = new ManejaPuesto(this, "-1");
@@ -115,7 +118,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.setSocket(socket);
                     } else if (solicitud.equals(ComunicaServer.PUESTO_LLAMADOS)) {
                         solicitud = in.readUTF();
-                        System.out.println("REcibi la solicitud de id:" + solicitud);
+                        System.out.println("Recibi la solicitud de id:" + solicitud);
                         if (solicitud.equals(ComunicaServer.ID)) {
                             id = gestorID.generarIdPuesto();
                             out.writeUTF(id);
@@ -167,6 +170,8 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         server.inicializaListas();
         server.abreConexion();       
         criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        this.metodoEncriptacion = PuestoAjustesGUI.AES;
+        this.claveEncriptacion = "";
         System.out.println("Conexion realizada.");
         // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
@@ -191,6 +196,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         enAtencion = server.getEnAtencion();
         abandonados = server.getAbandonados();
         atendidos = server.getAtendidos();
+        nodoServer.comunicaClaveEncriptacion(claveEncriptacion);
+        nodoServer.comunicaMetodoEncriptacion(metodoEncriptacion);
+        //nodoServer.enviaMetodoEncriptacion(metodoEncriptacion);
         nodoServer.comunicaGestor(gestorID);
         nodoServer.comunicaListaTurnos(enEspera, IManejaServidores.TURNO_ESPERA);
         nodoServer.comunicaListaTurnos(enAtencion, IManejaServidores.TURNO_ATENCION);
@@ -434,12 +442,6 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
     }
 
-
-    public void setModo(String modo) {
-        System.out.println(modo);
-        this.modo = modo;
-    }
-
     public String getClave() {
         return "pepe";
         // return this.claveEncriptacion;
@@ -460,13 +462,13 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.claveEncriptacion = clave;
     }
 
-    public void setModoEncriptacion(String modoEncriptacion) {
+    public void setMetodoEncriptacion(String modoEncriptacion) {
         System.out.println(modoEncriptacion);
-        this.modoEncriptacion = modoEncriptacion;
+        this.metodoEncriptacion = modoEncriptacion;
 
-        if (modoEncriptacion.equals(AdminComunicaServerP.AES)) {
+        if (modoEncriptacion.equals(PuestoAjustesGUI.AES)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
-        } else if (modoEncriptacion.equals(AdminComunicaServerP.CHACHA20)) {
+        } else if (modoEncriptacion.equals(PuestoAjustesGUI.CHACHA20)) {
             criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
         }
 
@@ -474,22 +476,83 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
         while (nodosPuesto.hasNext()) {
             ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
-            puestoActual.enviaModoEncriptacion(modoEncriptacion);
+            puestoActual.enviaMetodoEncriptacion(modoEncriptacion);
         }
 
         // totems
         Iterator<IControllerObserver> nodosTotem = observadoresTotems.iterator();
         while (nodosTotem.hasNext()) {
             ManejaTotem totemActual = (ManejaTotem) nodosTotem.next();
-            totemActual.enviaModoEncriptacion(modoEncriptacion);
+            totemActual.enviaMetodoEncriptacion(modoEncriptacion);
         }
 
         // servers de respaldo
         Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
         while (nodosDeServer.hasNext()) {
-            ManejaServerPrincipal nodoRespaldo = (ManejaServerPrincipal) nodosDeServer.next();
-            nodoRespaldo.enviaModoEncriptacion(modoEncriptacion);
+            ManejaServerRespaldo nodoRespaldo = (ManejaServerRespaldo) nodosDeServer.next();
+            nodoRespaldo.enviaMetodoEncriptacion(modoEncriptacion);
         }
-        // nodoMonitor.enviaModoEncriptacion(modoEncriptacion);
+        if (nodoMonitor != null)
+            nodoMonitor.enviaMetodoEncriptacion(modoEncriptacion);
     }
+
+    @Override
+    public void desconexionForzada() {
+        // puestos
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext()) {
+            ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+            puestoActual.avisaDesconexion();
+        }
+
+        // totems
+        Iterator<IControllerObserver> nodosTotem = observadoresTotems.iterator();
+        while (nodosTotem.hasNext()) {
+            ManejaTotem totemActual = (ManejaTotem) nodosTotem.next();
+            totemActual.avisaDesconexion();
+        }
+
+        // servers de respaldo
+        Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
+        while (nodosDeServer.hasNext()) {
+            ManejaServerRespaldo nodoRespaldo = (ManejaServerRespaldo) nodosDeServer.next();
+            nodoRespaldo.enviaClaveEncriptacion(claveEncriptacion);
+        }
+
+        if (nodoMonitor != null)
+            nodoMonitor.avisaDesconexion();
+    }
+
+    @Override
+    public void setMetodoPersistencia(String metodoPersistencia) {
+        System.out.println(metodoPersistencia);
+        this.metodoPersistencia = metodoPersistencia;
+
+        //TODO: CAMBIAR PERSISTENCIA
+
+        // puestos
+        Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();
+        while (nodosPuesto.hasNext()) {
+            ManejaPuesto puestoActual = (ManejaPuesto) nodosPuesto.next();
+            puestoActual.enviaMetodoPersistencia(metodoPersistencia);
+        }
+
+        // totems
+        Iterator<IControllerObserver> nodosTotem = observadoresTotems.iterator();
+        while (nodosTotem.hasNext()) {
+            ManejaTotem totemActual = (ManejaTotem) nodosTotem.next();
+            totemActual.enviaMetodoPersistencia(metodoPersistencia);
+        }
+
+        // servers de respaldo
+        Iterator<IControllerObserver> nodosDeServer = observadoresServers.iterator();
+        while (nodosDeServer.hasNext()) {
+            ManejaServerRespaldo nodoRespaldo = (ManejaServerRespaldo) nodosDeServer.next();
+            nodoRespaldo.enviaMetodoPersistencia(metodoPersistencia);
+        }
+        if (nodoMonitor != null)
+            nodoMonitor.enviaMetodoPersistencia(metodoPersistencia);
+    }
+
+
 }

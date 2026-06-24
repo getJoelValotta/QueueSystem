@@ -4,10 +4,11 @@ package totem;
 public interface TotemEventListener {
     public void mensajeError(String msg);
     public void setClaveEncriptacion(String clave);
-    public String getModoEncriptacion();
-    public void setModoEncriptacion(String modo);
+    public String getMetodoEncriptacion();
+    public void setMetodoEncriptacion(String modo);
 
-    public void setModo(String modo);
+    public void setMetodoPersistencia(String modo);
 
-    public String getModo();
+    public String getMetodoPersistencia();
+    public void desconexionForzada();
 }

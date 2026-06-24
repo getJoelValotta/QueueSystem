@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.SocketException;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.cliente.Cliente;
@@ -36,7 +37,6 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
             String respuesta = in.readUTF();
             System.out.println("RESPUESTA = " + respuesta);
             switch (respuesta) {
-
                 case IManejaServidores.GESTOR:
                     String totem, puesto, monitor;
                     totem = in.readUTF();
@@ -97,6 +97,21 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
                     
                     controllerServer.recibeTurnoEnRespaldo(turno);
                     break;
+
+                case PuestoAjustesGUI.ENVIAR_CLAVE:
+                    String clave = in.readUTF();
+                    controllerServer.setClaveEncriptacion(clave);
+                    break;
+                case PuestoAjustesGUI.AES:
+                case PuestoAjustesGUI.CHACHA20:
+                    controllerServer.setMetodoEncriptacion(respuesta);
+                    break;
+                case PuestoAjustesGUI.JSON:
+                case PuestoAjustesGUI.XML:
+                case PuestoAjustesGUI.TXT:
+                    System.out.println("Cambiando a " + respuesta);
+                    controllerServer.setMetodoPersistencia(respuesta);
+                    break;
                 case IManejaServidores.HBOUT:
                     out.writeUTF(IManejaServidores.HBIN);
                     // TODO : Informarle al admin 
@@ -146,6 +161,17 @@ public class ManejaServerPrincipal extends ManejadorDeNodos implements IManejaSe
 
     @Override
     public void actualizar() {
+    }
+
+    @Override
+    public void comunicaMetodoEncriptacion(String metodoEncriptacion) {
+
+    }
+
+    @Override
+    public void comunicaClaveEncriptacion(String claveEncriptacion) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'comunicaClaveEncriptacion'");
     }
 
 }

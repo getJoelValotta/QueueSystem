@@ -21,7 +21,7 @@ public class FactoryCriptografia {
         }
     }
     public static void main(String[] args){
-        String clave = "pepe";
+        String clave = "";
         String dni = "45031040";
         ICriptografia aes = getCifrador(ICriptografia.AES);
         ICriptografia chacha = getCifrador(ICriptografia.CHACHA20);

@@ -19,4 +19,8 @@ public interface IManejaServidores extends Runnable {
 
     public void comunicaListaTurnos(ListaTurnos turnos, String idTipo);
 
+    public void comunicaMetodoEncriptacion(String metodoEncriptacion);
+
+    public void comunicaClaveEncriptacion(String claveEncriptacion);
+
 }

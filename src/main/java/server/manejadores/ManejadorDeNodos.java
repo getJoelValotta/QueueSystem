@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
+import server.ControllerServer;
 
 public abstract class ManejadorDeNodos implements Runnable{ //Aplica template method
     protected ManejadorEventListener controllerServer;
@@ -52,10 +54,24 @@ public abstract class ManejadorDeNodos implements Runnable{ //Aplica template me
         return socket;
     }
 
-    public void enviaModoEncriptacion(String modo){
+    public void enviaMetodoEncriptacion(String modo){
         try {
-            out.writeUTF(AdminComunicaServerP.ENCRIPTACION);
             out.writeUTF(modo);
+        } catch (IOException e) {
+        }
+    }
+
+    public void enviaMetodoPersistencia(String modo){
+        try {
+            out.writeUTF(modo);
+        } catch (IOException e) {
+        }
+    }
+
+    public void avisaDesconexion(){
+        try {
+            out.writeUTF(ControllerServer.DESCONEXION);
+            socket.close();
         } catch (IOException e) {
         }
     }

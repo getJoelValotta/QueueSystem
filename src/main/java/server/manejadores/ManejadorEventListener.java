@@ -15,8 +15,9 @@ public interface ManejadorEventListener {
     public String getClave();
     public String encriptar(String mensaje);
     public String desencriptar(String mensajeEncriptado);
-    public void setModo(String modo);
     public void setClaveEncriptacion(String clave);
-    public void setModoEncriptacion(String modoEncriptacion);
-
+    public void setMetodoEncriptacion(String metodoEncriptacion);
+    public void setMetodoPersistencia(String metodoPersistencia);
+    public void desconexionForzada();
+    
 }

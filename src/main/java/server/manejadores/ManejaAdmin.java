@@ -17,11 +17,11 @@ public class ManejaAdmin extends ManejadorDeNodos {
             switch (solicitud) {
                 case AdminComunicaServerP.PERSISTENCIA:
                     solicitud = in.readUTF();
-                    controllerServer.setModo(solicitud);
+                    //controllerServer.setModo(solicitud);
                     break;
                 case AdminComunicaServerP.ENCRIPTACION:
                     solicitud = in.readUTF();
-                    controllerServer.setModoEncriptacion(solicitud);
+                    controllerServer.setMetodoEncriptacion(solicitud);
                     break;
                 case AdminComunicaServerP.CLAVE:
                     solicitud = in.readUTF();

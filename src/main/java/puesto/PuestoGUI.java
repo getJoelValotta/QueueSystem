@@ -196,4 +196,8 @@ public class PuestoGUI extends JFrame {
     public static void main(String[] args) {
         (new PuestoGUI()).setVisible(true);
     }
+
+    public String getClaveEncriptacion(){
+        return ventanaAjustes.getClaveEncriptacion();
+    }
 }

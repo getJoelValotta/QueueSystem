@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import admin.AdminComunicaServerP;
+import puesto.PuestoAjustesGUI;
 import server.ListaTurnos;
 import server.id.GestorID;
 import shared.turno.Turno;
@@ -97,11 +98,37 @@ public class ManejaServerRespaldo extends ManejadorDeNodos implements IManejaSer
             comunicaTurno(turno, tipoTurno);
         }
     }
+
+    public void enviaClaveEncriptacion(String claveEncriptacion){
+        try {
+            out.writeUTF(PuestoAjustesGUI.ENVIAR_CLAVE);
+            out.writeUTF(claveEncriptacion);
+        } catch (IOException e) {
+        }
+    }
     
     @Override
     public void actualizar() {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public void comunicaMetodoEncriptacion(String metodoEncriptacion) {
+        try {
+            out.writeUTF(PuestoAjustesGUI.ENVIAR_CLAVE);
+            out.writeUTF(metodoEncriptacion);
+        } catch (IOException e) {
+        }
+    }
+
+
+    @Override
+    public void comunicaClaveEncriptacion(String claveEncriptacion) {
+        try {
+            out.writeUTF(claveEncriptacion);
+        } catch (IOException e) {
+        }
     }
 
     // Aca tengo un problema: El controller inicia un hilo cuando se conecta el de respaldo a un principal en ambos servidores para que empiecen a mandarse hearthbeats, que es
