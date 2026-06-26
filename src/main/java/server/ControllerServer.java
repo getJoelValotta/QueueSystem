@@ -106,6 +106,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         System.out.println("Totem conectado con id "+ id);
                         new Thread(nodoTotem).start();
                         nodoTotem.enviaMetodoEncriptacion(metodoEncriptacion);
+                        nodoTotem.enviaMetodoPersistencia(metodoPersistencia);
                         avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
                     break;
@@ -131,6 +132,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                         new Thread(nodoPuesto).start();
                         nodoPuesto.enviaMetodoEncriptacion(metodoEncriptacion);
+                        nodoPuesto.enviaMetodoPersistencia(metodoPersistencia);
                         avisarAdmin("Nodo conectado: Puesto con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
                     break;
@@ -140,6 +142,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                                                                     // haya 1 solo.
                     nodoMonitor.setSocket(socket);
                     nodoMonitor.enviaMetodoEncriptacion(metodoEncriptacion);
+                    nodoMonitor.enviaMetodoPersistencia(metodoPersistencia);
                     // new Thread(nodoMonitor).start();
                     avisarAdmin("Nodo conectado: Monitor.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
@@ -158,6 +161,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoServer.setSocket(socket);
                     serverObservaControlador(nodoServer);
                     sincronizacionDeEstado(nodoServer);
+                    nodoServer.enviaMetodoPersistencia(metodoPersistencia);
                     new Thread(nodoServer).start();
                     avisarAdmin("Nodo conectado: Server de Respaldo.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;
