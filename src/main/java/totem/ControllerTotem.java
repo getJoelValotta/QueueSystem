@@ -78,7 +78,6 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void iniciaTotem() {
         totem = new Totem();
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         vistaConexion.mostrar(); // temporal
         //persistir();
     }

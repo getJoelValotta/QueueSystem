@@ -273,16 +273,16 @@ public class PuestoAjustesGUI extends JDialog {
     public void setPersistencia(String modo) {
         if (modo == null) return;
         switch (modo.toLowerCase()) {
-            case "xml":
+            case XML:
                 rbXml.setSelected(true);
                 rbPersistenciaActivo = rbXml;
                 break;
-            case "json":
+            case JSON:
                 rbJson.setSelected(true);
                 rbPersistenciaActivo = rbJson;
                 break;
             case "txt":
-            case "texto plano":
+            case TXT:
                 rbTextoPlano.setSelected(true);
                 rbPersistenciaActivo = rbTextoPlano;
                 break;
@@ -305,5 +305,28 @@ public class PuestoAjustesGUI extends JDialog {
 
     public void setActionListener(ActionListener controlador) {
         this.controlador = controlador;
+    }
+
+
+    public void setConfiguracionActual(String metodoEncriptacion, String metodoPersistencia) {
+        System.out.println("estoy configurando el metodo de encrip/persist");
+        if (PuestoAjustesGUI.AES.equals(metodoEncriptacion)) {
+            rbaes.setSelected(true);
+            setEncriptacion(metodoEncriptacion);
+        } else if (PuestoAjustesGUI.CHACHA20.equals(metodoEncriptacion)) {
+            rbchacha20.setSelected(true);
+            setEncriptacion(metodoEncriptacion);
+        }
+
+        if (PuestoAjustesGUI.TXT.equals(metodoPersistencia)) {
+            rbTextoPlano.setSelected(true);
+            setPersistencia(metodoPersistencia);
+        } else if (PuestoAjustesGUI.XML.equals(metodoPersistencia)) {
+            rbXml.setSelected(true);
+            setPersistencia(metodoPersistencia);
+        } else if (PuestoAjustesGUI.JSON.equals(metodoPersistencia)) {
+            rbJson.setSelected(true);
+            setPersistencia(metodoPersistencia);
+        }
     }
 }

@@ -105,6 +105,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoTotem.setSocketSimple(socket);
                         System.out.println("Totem conectado con id "+ id);
                         new Thread(nodoTotem).start();
+                        nodoTotem.enviaMetodoEncriptacion(metodoEncriptacion);
                         avisarAdmin("Nodo conectado: Totem con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
                     break;
@@ -129,6 +130,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                         nodoPuesto.setSocketSimple(socket);
                         nodoPuesto.enviaCantidadEnEspera(server.getEnEspera().getCantidadTurnos());
                         new Thread(nodoPuesto).start();
+                        nodoPuesto.enviaMetodoEncriptacion(metodoEncriptacion);
                         avisarAdmin("Nodo conectado: Puesto con ID " + id, AdminComunicaServerP.EVENTO_PRINCIPAL);
                     }
                     break;
@@ -137,6 +139,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     nodoMonitor = new ManejaMonitor(this, "unico"); // podria ser observer, pero el requerimiento es que
                                                                     // haya 1 solo.
                     nodoMonitor.setSocket(socket);
+                    nodoMonitor.enviaMetodoEncriptacion(metodoEncriptacion);
                     // new Thread(nodoMonitor).start();
                     avisarAdmin("Nodo conectado: Monitor.", AdminComunicaServerP.EVENTO_PRINCIPAL);
                     break;

@@ -97,6 +97,13 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                     });
                 }
                 break;
+            case PuestoGUI.AJUSTES:
+                System.out.println("ENTRE A AJUSTES!!!");
+                System.out.println("modoEncriptacion = " + modoEncriptacion);
+                System.out.println("AES = " + PuestoAjustesGUI.AES);
+                System.out.println("CHACHA = " + PuestoAjustesGUI.CHACHA20);
+                vistaPuesto.hookAjustes(modoEncriptacion, modoPersistencia);
+                break;
             case PuestoAjustesGUI.ENVIAR_CLAVE:
                 System.out.println(vistaPuesto.getClaveEncriptacion());
                 comunicaServer.enviaClave(vistaPuesto.getClaveEncriptacion());
@@ -109,6 +116,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 break;
             case PuestoAjustesGUI.CHACHA20:
                 VistasUtils.ejecutarNoBloqueante(() -> {
+                    System.out.println("ENTRE ACA!!!");
                     comunicaServer.enviaMetodoEncriptacion(PuestoAjustesGUI.CHACHA20);
                 });
                 break;
@@ -147,7 +155,6 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
     public void iniciaPuesto() {
         puesto = new Puesto();
-        criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         vistaConexion.mostrar(); //temporal
     }
 
@@ -192,6 +199,10 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     public void desconexionForzada() {
         vistaPuesto.cerrar();
         vistaConexion.mostrar();
+    }
+
+    public String getModoEncriptacion() {
+        return modoEncriptacion;
     }
 
 }

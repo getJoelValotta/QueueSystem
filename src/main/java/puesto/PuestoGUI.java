@@ -143,15 +143,21 @@ public class PuestoGUI extends JFrame {
     public void setActionListener(ActionListener controlador) {
         btnLlamar.addActionListener(controlador);
         btnRenotificar.addActionListener(controlador);
-        btnAjustes.addActionListener(e -> {
-            if (ventanaAjustes == null || !ventanaAjustes.isVisible()) {
-                ventanaAjustes = new PuestoAjustesGUI(this);
-                ventanaAjustes.setActionListener(controlador);
-                ventanaAjustes.setVisible(true);
-            } else {
-                ventanaAjustes.toFront();
-            }
-        });
+        btnAjustes.addActionListener(controlador);
+        if (ventanaAjustes == null || !ventanaAjustes.isVisible()) {
+            ventanaAjustes = new PuestoAjustesGUI(this);
+            ventanaAjustes.setActionListener(controlador);
+        }
+    }
+
+    public void hookAjustes(String metodoEncriptacion, String metodoPersistencia){
+        if (!ventanaAjustes.isVisible()) {
+            ventanaAjustes.setConfiguracionActual(metodoEncriptacion, metodoPersistencia);
+            ventanaAjustes.setVisible(true);
+        } else {
+            ventanaAjustes.setConfiguracionActual(metodoEncriptacion, metodoPersistencia);
+            ventanaAjustes.toFront();
+        }
     }
 
     public void setClienteActual(long dni) {
