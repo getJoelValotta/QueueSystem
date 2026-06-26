@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 import shared.VistasUtils;
 
@@ -28,6 +29,7 @@ public class PuestoGUI extends JFrame {
     private JButton btnAjustes;
     private JLabel lblNumPuesto;
     private JLabel lblMensaje;
+    private Timer timerRenotificar;
     
     private PuestoAjustesGUI ventanaAjustes;
 
@@ -138,6 +140,50 @@ public class PuestoGUI extends JFrame {
 
     public void habilitaRenotificar() {
         this.btnRenotificar.setEnabled(true);
+    }
+
+    public void bloquearRenotificarTimer(int intentos) {
+        if (timerRenotificar != null && timerRenotificar.isRunning()) {
+            timerRenotificar.stop();
+        }
+
+        btnRenotificar.setEnabled(false);
+
+        final int[] segundos = {5};
+        if (intentos < 2)
+            btnRenotificar.setText("Re-notificar (" + segundos[0] + ")");
+        else if (intentos == 2)
+            btnRenotificar.setText("Turno Abandonado (" + segundos[0] + ")");
+        timerRenotificar = new Timer(1000, null);
+
+        timerRenotificar.addActionListener(e -> {
+            segundos[0]--;
+
+            if (segundos[0] > 0) {
+                if (intentos < 2)
+                    btnRenotificar.setText("Re-notificar (" + segundos[0] + ")");
+                else if (intentos == 2)
+                    btnRenotificar.setText("Turno Abandonado (" + segundos[0] + ")");
+            } else {
+                timerRenotificar.stop();
+                if (intentos < 2)
+                    btnRenotificar.setText("Re-notificar");
+                else if (intentos == 2)
+                    btnRenotificar.setText("Turno Abandonado");
+                btnRenotificar.setEnabled(true);
+            }
+        });
+
+        timerRenotificar.start();
+    }
+
+    public void cancelarTimerRenotificar() {
+        if (timerRenotificar != null && timerRenotificar.isRunning()) {
+            timerRenotificar.stop();
+        }
+
+        btnRenotificar.setText("Re-notificar");
+        btnRenotificar.setEnabled(true);
     }
 
     public void setActionListener(ActionListener controlador) {

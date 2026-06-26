@@ -62,7 +62,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                                                                                            // rompia porque se ejecutaba
                                                                                            // antes de esperar a la
                                                                                            // comunicacion.
-                    vistaPuesto.habilitaRenotificar();
+                    vistaPuesto.bloquearRenotificarTimer(1);
                 });
                 break;
             case PuestoGUI.RENOTIFICAR: // Tomo el turno y consulto si su estado esta en atencion para poder hacer otro
@@ -77,6 +77,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                             System.out.println("====Renotificacion exitosa====");
                             turnoActual.llamar();
                             vistaPuesto.setMensajeExito();
+                            vistaPuesto.bloquearRenotificarTimer(auxCantLlamados);
                             if (auxCantLlamados + 1 == 3)
                                 vistaPuesto.cambiaTextRenotificarAabandonado();
                         } else {
