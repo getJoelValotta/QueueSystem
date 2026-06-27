@@ -52,6 +52,7 @@ public class PuestoComunicaServer extends ComunicaServer implements Runnable {
 
     public boolean reNotifica() {
         boolean notifica = false;
+        System.out.println("Renotificando en comunica server");
         try {
             synchronized (mutex) {
                 outSimple.writeUTF(RENOTIFICA);

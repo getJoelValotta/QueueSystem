@@ -1,22 +1,38 @@
 package puesto.mapper.xml;
 
-import puesto.mapper.PuestoMapper;
 import puesto.mapper.PuestoDTO;
-import puesto.Puesto;
+import puesto.mapper.PuestoMapper;
+import shared.persistencia.util.MapperJackson;
+import shared.turno.mapper.xml.TurnoXMLMapper;
 
+public class PuestoXMLMapper extends PuestoMapper {
 
-public class PuestoXMLMapper extends PuestoMapper{
+    public PuestoXMLMapper() {
+        this.turnoMapper = new TurnoXMLMapper();
+    }
+
+    @Override
+    protected String extension() {
+        return "xml";
+    }
 
     @Override
     public String serializar(PuestoDTO obj) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'serializar'");
+        try {
+            return MapperJackson.xml().writeValueAsString(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
     public PuestoDTO deserializar(String data) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deserializar'");
+        try {
+            return MapperJackson.xml().readValue(data, PuestoDTO.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
-
 }

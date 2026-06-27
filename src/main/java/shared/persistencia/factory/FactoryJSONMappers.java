@@ -1,48 +1,47 @@
 package shared.persistencia.factory;
 
 import monitor.mapper.MonitorMapper;
+import monitor.mapper.json.MonitorJSONMapper;
 import puesto.mapper.PuestoMapper;
+import puesto.mapper.json.PuestoJSONMapper;
 import server.mapper.ConfigMapper;
 import server.mapper.ServerMapper;
+import server.mapper.json.ConfigJSONMapper;
+import server.mapper.json.ServerJSONMapper;
 import shared.turno.mapper.TurnoMapper;
+import shared.turno.mapper.json.TurnoJSONMapper;
 import totem.mapper.TotemMapper;
+import totem.mapper.json.TotemJSONMapper;
 
-public class FactoryJSONMappers implements IFactoryPersistenciaArchivos{
+public class FactoryJSONMappers implements IFactoryPersistenciaArchivos {
 
     @Override
     public TotemMapper fabricaTotemMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaTotemMapper'");
+        return new TotemJSONMapper();
     }
 
     @Override
     public PuestoMapper fabricaPuestoMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaPuestoMapper'");
+        return new PuestoJSONMapper();
     }
 
     @Override
     public MonitorMapper fabricaMonitorMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaMonitorMapper'");
+        return new MonitorJSONMapper();
     }
 
     @Override
     public TurnoMapper fabricaTurnoMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaTurnoMapper'");
+        return new TurnoJSONMapper();
     }
 
     @Override
     public ConfigMapper fabricaConfigMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaConfigMapper'");
+        return new ConfigJSONMapper();
     }
 
     @Override
     public ServerMapper fabricaServerMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaServerMapper'");
+        return new ServerJSONMapper();
     }
-
 }

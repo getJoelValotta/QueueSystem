@@ -10,7 +10,11 @@ import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
+import shared.persistencia.factory.FabricaPersistencia;
+import shared.persistencia.factory.IFactoryPersistenciaArchivos;
 import shared.turno.Turno;
+import puesto.mapper.PuestoDTO;
+import puesto.mapper.PuestoMapper;
 
 public class ControllerPuesto implements ActionListener, ConexionListener, PuestoEventListener {
     private ConexionGUI vistaConexion;
@@ -20,6 +24,8 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
     private String modoPersistencia = "txt";
     private ICriptografia criptografia;
     private String claveEncriptacion, modoEncriptacion;
+    private IFactoryPersistenciaArchivos factoryPersistencia;
+    private PuestoMapper puestoMapper;
 
     public ControllerPuesto(ConexionGUI vistaConexion, PuestoGUI vistaPuesto, PuestoComunicaServer comunicaServer) {
         this.vistaConexion = vistaConexion;
@@ -46,6 +52,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                         comunicaServer.informaID(puesto.getId());
                     }
                     vistaPuesto.setNumPuesto(puesto.getId());
+                    persistirPuesto(); // persiste el id asignado
                     new Thread(comunicaServer).start();
                 });
                 break;
@@ -56,6 +63,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                     if (turno != null) {
                         puesto.setTurno(turno);
                         vistaPuesto.setClienteActual(turno.getCliente().getDni());
+                        persistirPuesto(); // nuevo turno en atencion
                     }
                     vistaPuesto.setClienteActual(puesto.getTurno().getCliente().getDni()); // Esto antes estaba fuera de
                                                                                            // ejecutarNoBloqueante y se
@@ -76,6 +84,7 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                         if (comunicaServer.reNotifica()) {
                             System.out.println("====Renotificacion exitosa====");
                             turnoActual.llamar();
+                            persistirPuesto(); // cambio el estado del turno (renotificacion)
                             vistaPuesto.setMensajeExito();
                             vistaPuesto.bloquearRenotificarTimer(auxCantLlamados);
                             if (auxCantLlamados + 1 == 3)
@@ -87,8 +96,10 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
                 else { // En el caso de que este en el ultimo llamado (3), se cambia el boton de
                        // renotificar para marcarlo como abandono.
                     VistasUtils.ejecutarNoBloqueante(() -> {
+                        System.out.println("Supere la cantidad de llamados voy a avisarle al renotifica.");
                         if (comunicaServer.reNotifica()) {
                             turnoActual.llamar();
+                            persistirPuesto(); // el turno paso a abandonado
                             vistaPuesto.setMensajeExito();
                             vistaPuesto.cambiaTextAbandonadoARenotificar();
                             vistaPuesto.inhabilitaRenotificar();
@@ -156,7 +167,47 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
     public void iniciaPuesto() {
         puesto = new Puesto();
+        cargarPuesto(); // restaura el estado persistido (id/turno) si existe
+        if (puesto.getId() != null) {
+            vistaPuesto.setNumPuesto(puesto.getId());
+        }
+        Turno turnoRestaurado = puesto.getTurno();
+        if (turnoRestaurado != null && turnoRestaurado.estaEnAtencion() && turnoRestaurado.getCliente() != null) {
+            vistaPuesto.setClienteActual(turnoRestaurado.getCliente().getDni());
+        } else {
+            vistaPuesto.inhabilitaRenotificar();
+        }
         vistaConexion.mostrar(); //temporal
+    }
+
+    /** Autodetecta el formato persistido y restaura el Puesto si habia datos previos. */
+    private void cargarPuesto() {
+        factoryPersistencia = FabricaPersistencia.detectarOPara("puesto", modoPersistencia);
+        puestoMapper = factoryPersistencia.fabricaPuestoMapper();
+        try {
+            PuestoDTO dto = puestoMapper.templateLeer();
+            if (dto != null) {
+                Puesto restaurado = puestoMapper.toDominio(dto);
+                if (restaurado != null) {
+                    puesto.setId(restaurado.getId());
+                    puesto.setTurno(restaurado.getTurno());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Graba el estado actual del Puesto en el formato vigente. */
+    private void persistirPuesto() {
+        if (puestoMapper == null) {
+            return;
+        }
+        try {
+            puestoMapper.templateGrabar(puestoMapper.toDto(puesto));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -193,6 +244,11 @@ public class ControllerPuesto implements ActionListener, ConexionListener, Puest
 
     public void setMetodoPersistencia(String modo) {
         this.modoPersistencia = modo;
+        // Cambio de formato: se reconstruye el mapper (Abstract Factory) y se persiste
+        // el estado completo en el nuevo formato (los archivos previos no se borran).
+        this.factoryPersistencia = FabricaPersistencia.para(modo);
+        this.puestoMapper = factoryPersistencia.fabricaPuestoMapper();
+        persistirPuesto();
         System.out.println("Metodo de persistencia cambiado a " + modo);
     }
 

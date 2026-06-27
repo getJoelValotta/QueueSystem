@@ -28,7 +28,13 @@ import shared.cliente.ClienteDniVacioException;
 import shared.conexion_server.ComunicaServer;
 import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
+import shared.persistencia.factory.FabricaPersistencia;
+import shared.persistencia.factory.IFactoryPersistenciaArchivos;
 import shared.turno.Turno;
+import server.mapper.ConfigDTO;
+import server.mapper.ConfigMapper;
+import server.mapper.ServerDTO;
+import server.mapper.ServerMapper;
 
 public class ControllerServer implements GestorIDListener, SocketListener, ManejadorEventListener { // SocketListener es
                                                                                                     // para escuchar al
@@ -51,11 +57,15 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     private ManejaMonitor nodoMonitor;
     private ManejaAdmin nodoAdmin;
     private ManejaTotem nodoTotem;
-    private String metodoPersistencia = "txt";
+    private String metodoPersistencia = PuestoAjustesGUI.TXT;
     private String metodoEncriptacion;
     private String claveEncriptacion = "";
     private ICriptografia criptografia;
     public static final String DESCONEXION = "#DESCONEXION#";
+    private IFactoryPersistenciaArchivos factoryPersistencia;
+    private ConfigMapper configMapper;
+    private ServerMapper serverMapper;
+    private final Object lockPersistencia = new Object();
 
     public ControllerServer(Server server) {
         this.server = server;
@@ -179,10 +189,14 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
         this.metodoEncriptacion = PuestoAjustesGUI.AES;
         this.claveEncriptacion = "";
+        // Restaura la Config persistida (metodo de persistencia/encriptacion/clave) si existe.
+        cargarConfig();
         System.out.println("Conexion realizada.");
-        // TODO : leer (persistir) GESTORID
         gestorID = new GestorID(0, 0, 0, this);
         server.setGestorID(gestorID);
+        // Restaura el estado del server (listas de turnos + contadores) si existe, y consolida el archivo.
+        cargarServer();
+        persistirServer();
         System.out.println("Fin parte principal.");
         if (server.esRespaldo()) { //Si no es principal, nunca abre conexion de ServerSocket
             System.out.println("LLEGUYE HASTA ESRESPALDO");
@@ -192,6 +206,103 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             System.out.println("SETIE EL SOCKET");
             new Thread(nodoServer).start(); //Recordar que si el Server es respaldo tiene el socket para comunicarse con el serverprincipal como atributo de state.
             System.out.println("PUDE INICIAR EL THREAD");
+        }
+    }
+
+    // ===================== PERSISTENCIA (Data Mapper / Abstract Factory) =====================
+
+    /**
+     * Restaura la {@link Config} persistida (metodo de persistencia/encriptacion/clave) si existe,
+     * y construye la fabrica + mappers de persistencia segun el metodo resultante.
+     */
+    private void cargarConfig() {
+        // Autodetecta el formato ya persistido de la config (o usa el metodo actual por defecto).
+        IFactoryPersistenciaArchivos factoryConfig = FabricaPersistencia.detectarOPara("config", metodoPersistencia);
+        ConfigDTO configDto = factoryConfig.fabricaConfigMapper().templateLeer();
+        if (configDto != null) {
+            if (configDto.getMetodoPersistencia() != null) {
+                this.metodoPersistencia = configDto.getMetodoPersistencia();
+            }
+            if (configDto.getMetodoEncriptacion() != null) {
+                this.metodoEncriptacion = configDto.getMetodoEncriptacion();
+                reconstruyeCriptografia(this.metodoEncriptacion);
+            }
+            if (configDto.getClaveEncriptacion() != null) {
+                this.claveEncriptacion = configDto.getClaveEncriptacion();
+            }
+        }
+        // Abstract Factory: elige la familia de mappers segun el metodo (restaurado o por defecto).
+        this.factoryPersistencia = FabricaPersistencia.para(metodoPersistencia);
+        this.configMapper = factoryPersistencia.fabricaConfigMapper();
+        this.serverMapper = factoryPersistencia.fabricaServerMapper();
+        persistirConfig();
+    }
+
+    private void reconstruyeCriptografia(String metodo) {
+        if (PuestoAjustesGUI.AES.equals(metodo)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.AES);
+        } else if (PuestoAjustesGUI.CHACHA20.equals(metodo)) {
+            criptografia = FactoryCriptografia.getCifrador(ICriptografia.CHACHA20);
+        }
+    }
+
+    /** Graba la configuracion actual del server. */
+    private void persistirConfig() {
+        if (configMapper == null) {
+            return;
+        }
+        synchronized (lockPersistencia) {
+            try {
+                Config config = new Config(metodoPersistencia, metodoEncriptacion, claveEncriptacion);
+                configMapper.templateGrabar(configMapper.toDto(config));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /** Lee el estado persistido del server (listas + contadores) y lo vuelca al dominio. */
+    private void cargarServer() {
+        if (serverMapper == null) {
+            return;
+        }
+        synchronized (lockPersistencia) {
+            try {
+                ServerDTO dto = serverMapper.templateLeer();
+                if (dto != null) {
+                    serverMapper.cargarEnServer(dto, server, gestorID);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /** Graba el snapshot completo del server (las 4 listas + contadores del gestor). */
+    private void persistirServer() {
+        if (serverMapper == null) {
+            return;
+        }
+        synchronized (lockPersistencia) {
+            try {
+                serverMapper.templateGrabar(serverMapper.toDto(server, gestorID));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /** Persiste un turno nuevo en espera con la optimizacion de append (o snapshot si no aplica). */
+    private void agregaTurnoEnEsperaPersistido(Turno turno) {
+        if (serverMapper == null) {
+            return;
+        }
+        synchronized (lockPersistencia) {
+            try {
+                serverMapper.agregaTurnoEnEspera(server, gestorID, turno);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -224,6 +335,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             nodoServer = (ManejaServerRespaldo) obs;
             nodoServer.comunicaGestor(gestorID);
         }
+        persistirServer(); // cambiaron los contadores del gestor
     }
 
     // @Override
@@ -238,6 +350,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         this.gestorID.setContadorPuesto(cantPuesto);
         this.gestorID.setContadorMonitor(cantMonitor);
         System.out.println("Todo seteado");
+        persistirServer(); // cambiaron los contadores del gestor
     }
 
     // @Override
@@ -257,6 +370,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                     System.out.println(server.getEnAtencion());
                     notificaPuestos();
                     notificaTurnosAServers(turno);
+                    agregaTurnoEnEsperaPersistido(turno); // append eficiente del turno nuevo
                 }
             }
         } catch (ClienteDniVacioException | ClienteDniInvalidoException e) {
@@ -282,6 +396,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 server.getEnAtencion().eliminaTurno(turno);
             server.getAtendidos().agregaTurno(turno);
         }
+        persistirServer(); // el turno cambio de lista: reescribe el snapshot
     }
 
     public Turno llamaSiguienteTurno(String id) { // TODO: Tiene la id porque se la tiene que pasar al monitor...
@@ -309,6 +424,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 }
             }
             server.getEnAtencion().agregaTurno(turno);
+            persistirServer(); // hubo movimientos de turnos: reescribe el snapshot
         }
         return turno;
     }
@@ -321,11 +437,12 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
             Turno turnoEnAtencionEnPuestoActual = enAtencion.next();
             if (turnoEnAtencionEnPuestoActual.getIdPuesto() != null &&
                     turnoEnAtencionEnPuestoActual.getIdPuesto().equals(idPuesto)) {
-                if (nodoMonitor != null && turnoEnAtencionEnPuestoActual.getCantLlamados() < 3) {
-                    nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
+                if (turnoEnAtencionEnPuestoActual.getCantLlamados() < 3) {
+                    if (nodoMonitor!= null)
+                        nodoMonitor.renotificaMonitor(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
                     notificaTurnosAServers(turnoEnAtencionEnPuestoActual);
-                } else if (nodoMonitor != null) {
+                } else {
                     System.out.println("ABANDONADOOOOOOOO\n\n");
                     server.getEnAtencion().eliminaTurno(turnoEnAtencionEnPuestoActual);
                     turnoEnAtencionEnPuestoActual.llamar();
@@ -334,6 +451,9 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
                 }
                 valido = true;
             }
+        }
+        if (valido) {
+            persistirServer(); // hubo renotificacion/abandono: reescribe el snapshot
         }
         return valido;
     }
@@ -408,6 +528,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
         while (nodosDeServer.hasNext()) {
             ManejaServerRespaldo serverRespaldo = (ManejaServerRespaldo) nodosDeServer.next();
+            System.out.println("Estado enviado al server:" + estadoTurno);
             serverRespaldo.comunicaTurno(turno, estadoTurno);
         }
     }
@@ -466,6 +587,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
     public void setClaveEncriptacion(String clave) {
         System.out.println(clave);
         this.claveEncriptacion = clave;
+        persistirConfig();
     }
 
     public void setMetodoEncriptacion(String modoEncriptacion) {
@@ -500,6 +622,7 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         }
         if (nodoMonitor != null)
             nodoMonitor.enviaMetodoEncriptacion(modoEncriptacion);
+        persistirConfig(); // cambio el metodo de encriptacion
     }
 
     @Override
@@ -534,7 +657,13 @@ public class ControllerServer implements GestorIDListener, SocketListener, Manej
         System.out.println(metodoPersistencia);
         this.metodoPersistencia = metodoPersistencia;
 
-        //TODO: CAMBIAR PERSISTENCIA
+        // Cambio de formato: se reconstruye la familia de mappers (Abstract Factory) y se
+        // persiste el estado completo en el nuevo formato. Los archivos previos NO se borran.
+        this.factoryPersistencia = FabricaPersistencia.para(metodoPersistencia);
+        this.configMapper = factoryPersistencia.fabricaConfigMapper();
+        this.serverMapper = factoryPersistencia.fabricaServerMapper();
+        persistirConfig();
+        persistirServer();
 
         // puestos
         Iterator<IControllerObserver> nodosPuesto = observadoresPuestos.iterator();

@@ -14,6 +14,10 @@ import shared.conexion_server.ConexionGUI;
 import shared.conexion_server.ConexionListener;
 import shared.criptografia.FactoryCriptografia;
 import shared.criptografia.ICriptografia;
+import shared.persistencia.factory.FabricaPersistencia;
+import shared.persistencia.factory.IFactoryPersistenciaArchivos;
+import totem.mapper.TotemDTO;
+import totem.mapper.TotemMapper;
 
 public class ControllerTotem implements ActionListener, ConexionListener, TotemEventListener {
     private ConexionGUI vistaConexion;
@@ -24,6 +28,8 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
     private String claveSimetrica;
     private String metodoPersistencia = "txt";
     private String metodoEncriptacion;
+    private IFactoryPersistenciaArchivos factoryPersistencia;
+    private TotemMapper totemMapper;
 
     public static int idx = 1;
 
@@ -52,12 +58,14 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
                     } else {
                         comunicaServer.informaID(totem.getId());
                     }
+                    persistirTotem(); // persiste el id asignado
                 });
                 // iniciaTotem();
                 break;
             case TotemGUI.REGISTRAR:
                 try {
                     totem.setCliente(new Cliente(vistaTotem.getDNI()));
+                    persistirTotem(); // persiste el ultimo cliente cargado
                     VistasUtils.ejecutarNoBloqueante(() -> {
                         String dni = String.valueOf(totem.getCliente().getDni());
                         String dniEncriptado = criptografia.encriptar(dni, claveSimetrica);
@@ -78,8 +86,38 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void iniciaTotem() {
         totem = new Totem();
+        cargarTotem(); // restaura el estado persistido (id/cliente) si existe
         vistaConexion.mostrar(); // temporal
-        //persistir();
+    }
+
+    /** Autodetecta el formato persistido y restaura el Totem si habia datos previos. */
+    private void cargarTotem() {
+        factoryPersistencia = FabricaPersistencia.detectarOPara("totem", metodoPersistencia);
+        totemMapper = factoryPersistencia.fabricaTotemMapper();
+        try {
+            TotemDTO dto = totemMapper.templateLeer();
+            if (dto != null) {
+                Totem restaurado = totemMapper.toDominio(dto);
+                if (restaurado != null) {
+                    totem.setId(restaurado.getId());
+                    totem.setCliente(restaurado.getCliente());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Graba el estado actual del Totem en el formato vigente. */
+    private void persistirTotem() {
+        if (totemMapper == null) {
+            return;
+        }
+        try {
+            totemMapper.templateGrabar(totemMapper.toDto(totem));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -126,7 +164,11 @@ public class ControllerTotem implements ActionListener, ConexionListener, TotemE
 
     public void setMetodoPersistencia(String modo) {
         this.metodoPersistencia = modo;
-        //persistir();
+        // Cambio de formato: se reconstruye el mapper (Abstract Factory) y se persiste
+        // el estado completo en el nuevo formato (los archivos previos no se borran).
+        this.factoryPersistencia = FabricaPersistencia.para(modo);
+        this.totemMapper = factoryPersistencia.fabricaTotemMapper();
+        persistirTotem();
     }
 
     public String getMetodoPersistencia() {

@@ -1,48 +1,47 @@
 package shared.persistencia.factory;
 
 import monitor.mapper.MonitorMapper;
+import monitor.mapper.txt.MonitorTXTMapper;
 import puesto.mapper.PuestoMapper;
+import puesto.mapper.txt.PuestoTXTMapper;
 import server.mapper.ConfigMapper;
 import server.mapper.ServerMapper;
+import server.mapper.txt.ConfigTXTMapper;
+import server.mapper.txt.ServerTXTMapper;
 import shared.turno.mapper.TurnoMapper;
+import shared.turno.mapper.txt.TurnoTXTMapper;
 import totem.mapper.TotemMapper;
+import totem.mapper.txt.TotemTXTMapper;
 
-public class FactoryTXTMappers implements IFactoryPersistenciaArchivos{
+public class FactoryTXTMappers implements IFactoryPersistenciaArchivos {
 
     @Override
     public TotemMapper fabricaTotemMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaTotemMapper'");
+        return new TotemTXTMapper();
     }
 
     @Override
     public PuestoMapper fabricaPuestoMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaPuestoMapper'");
+        return new PuestoTXTMapper();
     }
 
     @Override
     public MonitorMapper fabricaMonitorMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaMonitorMapper'");
+        return new MonitorTXTMapper();
     }
 
     @Override
     public TurnoMapper fabricaTurnoMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaTurnoMapper'");
+        return new TurnoTXTMapper();
     }
 
     @Override
     public ConfigMapper fabricaConfigMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaConfigMapper'");
+        return new ConfigTXTMapper();
     }
 
     @Override
     public ServerMapper fabricaServerMapper() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'fabricaServerMapper'");
+        return new ServerTXTMapper();
     }
-
 }
