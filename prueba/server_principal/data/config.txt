@@ -1,0 +1,3 @@
+metodoPersistencia=#TXT#
+metodoEncriptacion=AES
+claveEncriptacion=

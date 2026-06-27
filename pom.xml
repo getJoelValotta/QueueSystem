@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -62,5 +64,103 @@
     </dependency>
 
     </dependencies>
+
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.6.0</version>
+            <executions>
+
+                <execution>
+                    <id>server</id>
+                    <phase>package</phase>
+                    <goals><goal>single</goal></goals>
+                    <configuration>
+                        <finalName>ServerApp</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>app.ServerApp</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                </execution>
+
+                <execution>
+                    <id>totem</id>
+                    <phase>package</phase>
+                    <goals><goal>single</goal></goals>
+                    <configuration>
+                        <finalName>TotemApp</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>app.TotemApp</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                </execution>
+
+                <execution>
+                    <id>puesto</id>
+                    <phase>package</phase>
+                    <goals><goal>single</goal></goals>
+                    <configuration>
+                        <finalName>PuestoApp</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>app.PuestoApp</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                </execution>
+
+                <execution>
+                    <id>monitor</id>
+                    <phase>package</phase>
+                    <goals><goal>single</goal></goals>
+                    <configuration>
+                        <finalName>MonitorApp</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>app.MonitorApp</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                </execution>
+
+                <execution>
+                    <id>admin</id>
+                    <phase>package</phase>
+                    <goals><goal>single</goal></goals>
+                    <configuration>
+                        <finalName>AdminApp</finalName>
+                        <archive>
+                            <manifest>
+                                <mainClass>app.AdminApp</mainClass>
+                            </manifest>
+                        </archive>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                    </configuration>
+                </execution>
+
+            </executions>
+        </plugin>
+    </plugins>
+</build>
 
 </project>
